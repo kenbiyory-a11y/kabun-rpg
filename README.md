@@ -37,7 +37,7 @@ JS は `<script defer>` で **index.html に書いてある順番**に読み込�
 Service Worker は `file://` では動かないので、ローカルサーバーで開く。
 
 ```
-cd kaboon
+cd kabun-rpg
 python -m http.server 8000
 ```
 
@@ -54,7 +54,7 @@ python -m http.server 8000
 2. このフォルダを push する。
 
 ```
-cd kaboon
+cd kabun-rpg
 git init
 git add .
 git commit -m "カブーン PWA 版"
