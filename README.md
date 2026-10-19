@@ -45,7 +45,12 @@ python -m http.server 8000
 
 ## GitHub Pages で公開する
 
-1. GitHub で新しいリポジトリを作る（例：`kaboon`、Public）。
+公開済み：**https://kenbiyory-a11y.github.io/kabun-rpg/**
+リポジトリ：https://github.com/kenbiyory-a11y/kabun-rpg（`main` ブランチの root から配信）
+
+別のアカウント・リポジトリで公開し直す場合の手順：
+
+1. GitHub で新しい公開リポジトリを作る（例：`kabun-rpg`）。
 2. このフォルダを push する。
 
 ```
@@ -54,16 +59,16 @@ git init
 git add .
 git commit -m "カブーン PWA 版"
 git branch -M main
-git remote add origin https://github.com/<ユーザー名>/kaboon.git
+git remote add origin https://github.com/<ユーザー名>/kabun-rpg.git
 git push -u origin main
 ```
 
 3. リポジトリの **Settings → Pages → Build and deployment** で
    Source: **Deploy from a branch**、Branch: **main** / **/ (root)** を選んで Save。
-4. 1〜2 分後に `https://<ユーザー名>.github.io/kaboon/` で開ける。
+4. 1〜2 分後に `https://<ユーザー名>.github.io/kabun-rpg/` で開ける。
 5. iPhone は Safari で開いて「共有 → ホーム画面に追加」。Android は Chrome のメニューから「アプリをインストール」。
 
-パスはすべて相対（`./`）で書いてあるので、サブパス（`/kaboon/`）でもそのまま動く。
+パスはすべて相対（`./`）で書いてあるので、サブパス（`/kabun-rpg/`）でもそのまま動く。
 
 ## 更新のしかた
 
