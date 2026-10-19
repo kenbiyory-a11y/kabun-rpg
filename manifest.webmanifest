@@ -1,0 +1,18 @@
+{
+  "id": "./",
+  "name": "カブーンのせいちょう物語",
+  "short_name": "カブーン",
+  "description": "ペットのカブトムシ「カブーン」をクイズで育てるレトロRPG風の知育ゲーム",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#1b1f1a",
+  "theme_color": "#1b1f1a",
+  "categories": ["education", "games", "kids"],
+  "icons": [
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

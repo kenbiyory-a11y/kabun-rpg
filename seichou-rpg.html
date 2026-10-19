@@ -1,0 +1,755 @@
+<title>カブーンのせいちょう物語</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap">
+<style>
+/* Layout: a handheld-console "screen" — field/battle area on top, a bordered message window below, command menu inside it. Four tabs under the screen. A full-screen "theater" overlay plays memories. Single retro look. */
+:root{
+  --bg:#1b1f1a; --screen:#f4f1dc; --fg:#1f2418; --muted:#6b7055; --frame:#2d3326; --win:#ffffff; --winline:#1f2418;
+  --hpok:#3fbf5f; --hpmid:#e6b800; --hpbad:#e0442f; --hpbg:#d8d4bd; --accent:#1f2418; --accent-ink:#f4f1dc; --sky:#cfe7f7; --ground:#9fd27a;
+  --c-str:#e0442f; --c-wise:#3a7bd5; --c-world:#2aa37a; --c-heart:#e8608a; --gold:#ffe066;
+  --font:'DotGothic16','Hiragino Maru Gothic ProN','Yu Gothic',monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:17px;line-height:1.6;
+  padding-block:16px 24px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.console{max-width:520px;margin:0 auto;background:var(--frame);border-radius:18px;padding:12px;display:grid;gap:10px;box-shadow:0 10px 0 #0d100c}
+.screen{background:var(--screen);border-radius:8px;overflow:hidden;border:4px solid #0d100c;display:grid;grid-template-rows:auto auto;min-height:420px}
+.field{position:relative;height:250px;background:linear-gradient(var(--sky) 0 62%,var(--ground) 62% 100%);overflow:hidden}
+.field.night{background:linear-gradient(#2d3a5a 0 62%,#3b5a3a 62% 100%)}
+.field.cave{background:linear-gradient(#5a4a3a 0 62%,#7a5a3a 62% 100%)}
+.field.snow{background:linear-gradient(#dfeefb 0 62%,#f6fbff 62% 100%)}
+.field.diary{background:linear-gradient(#ffe9c7 0 62%,#f7c98a 62% 100%)}
+.field.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;padding:8px;overflow-y:auto;align-content:start;background:#2b2f23}
+.field.grid .tm{position:relative;aspect-ratio:1;max-width:100%;border:2px solid #fff;border-radius:6px;overflow:hidden;cursor:pointer;background:#000}
+.field.grid .tm img{width:100%;height:100%;object-fit:cover;display:block}
+.field.grid .tm .pl{position:absolute;inset:0;display:grid;place-items:center;font-size:1.6rem;color:#fff;text-shadow:0 0 6px #000}
+.field.grid .empty2{grid-column:1/-1;color:#ddd;text-align:center;padding-top:90px;font-size:.95rem}
+.sprite{position:absolute;font-size:4.2rem;line-height:1;filter:drop-shadow(0 4px 0 rgba(0,0,0,.25))}
+.sprite.me{left:10%;bottom:12px}
+.sprite.foe{right:10%;top:52px;font-size:4.6rem}
+.sprite.hit{animation:shake .35s}
+.sprite.attack{animation:lunge .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@keyframes lunge{0%,100%{transform:translate(0,0)}50%{transform:translate(24px,-18px)}}
+.hud{position:absolute;background:var(--win);border:3px solid var(--winline);border-radius:6px;padding:4px 10px;min-width:150px;font-size:.85rem;box-shadow:3px 3px 0 var(--winline)}
+.hud.me{right:10px;bottom:14px}.hud.foe{left:10px;top:10px}
+.hud .nm{display:flex;justify-content:space-between;gap:8px;font-weight:700}
+.hud .lv{color:var(--muted)}
+.hp{height:8px;background:var(--hpbg);border:2px solid var(--winline);border-radius:4px;overflow:hidden;margin-top:3px}
+.hp i{display:block;height:100%;background:var(--hpok);transition:width .4s}
+.hp i.mid{background:var(--hpmid)}.hp i.bad{background:var(--hpbad)}
+.hud .num{font-size:.75rem;text-align:right;font-variant-numeric:tabular-nums}
+.msgbox{background:var(--win);border-top:4px solid var(--winline);padding:12px 14px 10px;min-height:170px;display:grid;gap:8px;align-content:start}
+.msg{margin:0;font-size:1.1rem;min-height:3.2em;white-space:pre-wrap;line-height:1.55}
+.msg .big{font-size:2.6rem;line-height:1.2;display:block;text-align:center}
+.cur{display:inline-block;animation:blink 1s steps(2) infinite;margin-left:4px}
+@keyframes blink{to{visibility:hidden}}
+.menu{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.menu.one{grid-template-columns:1fr}
+button,label.filebtn{font-family:var(--font);font-size:1.05rem;text-align:left;border:3px solid var(--winline);background:var(--win);color:var(--fg);border-radius:6px;padding:8px 10px 8px 26px;cursor:pointer;position:relative;line-height:1.4;display:block}
+button::before,label.filebtn::before{content:"▶";position:absolute;left:8px;opacity:0}
+button:hover::before,button:focus-visible::before,label.filebtn:hover::before,label.filebtn:focus-within::before{opacity:1}
+button:focus-visible,label.filebtn:focus-within{outline:3px solid var(--hpmid);outline-offset:2px}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.wide{text-align:center;padding-left:10px}
+button.wide::before{display:none}
+button.danger{border-color:var(--hpbad);color:var(--hpbad)}
+button.sel{background:#fff6cc}
+button small,label.filebtn small{display:block;font-size:.72rem;color:var(--muted)}
+label.filebtn input{position:absolute;width:1px;height:1px;opacity:0;left:0;top:0}
+.tap{width:100%;text-align:right;border:0;background:none;padding:0;color:var(--muted);font-size:.85rem}
+.tap::before{display:none}
+input,textarea{font:inherit;padding:8px 12px;border:3px solid var(--winline);border-radius:6px;background:var(--win);color:var(--fg);width:100%}
+input:focus-visible,textarea:focus-visible{outline:3px solid var(--hpmid)}
+textarea{min-height:90px;font-size:.72rem;resize:vertical;line-height:1.4}
+.label{color:var(--accent-ink);text-align:center;font-size:.9rem;letter-spacing:.1em}
+.foot{text-align:center;font-size:.78rem;color:#9aa08a;margin:12px 0 0}
+.nav{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px}
+.nav .nb{text-align:center;padding:8px 2px;font-size:.85rem;background:var(--screen);border-color:#0d100c;border-radius:8px}
+.nav .nb.gear{padding:8px 10px;font-size:1.1rem}
+.nav .nb::before{display:none}
+.nav .nb.on{background:var(--hpmid)}
+/* 成長画面 */
+.sprite.center{left:50%;top:38%;transform:translate(-50%,-50%);font-size:6rem;animation:float 2.4s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translate(-50%,-50%)}50%{transform:translate(-50%,calc(-50% - 10px))}}
+.sprite.evolve{animation:evolve 1.6s ease-in-out}
+@keyframes evolve{0%{filter:brightness(1)}30%{filter:brightness(4) drop-shadow(0 0 20px #fff)}60%{filter:brightness(4) drop-shadow(0 0 30px #ffe066)}100%{filter:brightness(1)}}
+.glow{position:absolute;left:50%;top:38%;width:170px;height:170px;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(rgba(255,240,150,.8),rgba(255,240,150,0) 70%)}
+.path{position:absolute;left:0;right:0;bottom:10px;display:flex;justify-content:center;gap:6px;font-size:1.5rem;align-items:center}
+.path span{opacity:.35}.path span.done{opacity:1}.path span.now{opacity:1;background:var(--win);border:3px solid var(--winline);border-radius:8px;padding:0 4px}
+.path i{font-style:normal;font-size:.9rem;opacity:.6}
+.grow{display:grid;gap:4px;font-size:.92rem}
+.grow .row{display:grid;grid-template-columns:4.2em 1fr 2.5em;align-items:center;gap:8px}
+.grow .bar{height:12px;background:var(--hpbg);border:2px solid var(--winline);border-radius:4px;overflow:hidden}
+.grow .bar i{display:block;height:100%;transition:width .4s}
+.grow .n{text-align:right;font-variant-numeric:tabular-nums}
+.gh{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.gh small{color:var(--muted);font-size:.8rem}
+/* 成長記録（ものがたり） */
+.d{font-size:.75rem;color:var(--muted)}
+.note{font-size:.82rem;color:var(--muted)}
+.diary{display:grid;gap:4px;max-height:150px;overflow-y:auto;font-size:.95rem}
+.diary>div{display:flex;gap:8px;border-bottom:1px dashed var(--hpbg);padding:3px 0;align-items:flex-start}
+.diary>div.has{cursor:pointer}
+.diary>div.has:hover{background:#fff6cc}
+.diary .d{display:block}
+.diary .ico{font-size:1.4rem;line-height:1.2;flex:none}
+.diary .th{position:relative;width:44px;height:44px;flex:none}
+.diary .th img{width:44px;height:44px;object-fit:cover;border:2px solid var(--winline);border-radius:4px;display:block}
+.diary .th .pl{position:absolute;inset:0;display:grid;place-items:center;color:#fff;text-shadow:0 0 4px #000;font-size:1rem}
+.diary .cnt{font-size:.72rem;color:var(--muted);white-space:nowrap}
+.emo{display:flex;gap:4px;flex-wrap:wrap}
+.emo button{padding:4px 8px;font-size:1.3rem;line-height:1}
+.emo button::before{display:none}
+.emo button.on{background:var(--hpmid)}
+.row2{display:grid;grid-template-columns:auto 1fr;gap:6px;align-items:center}
+.pend{display:flex;gap:6px;flex-wrap:wrap}
+.pend .pm{position:relative;width:56px;height:56px;border:2px solid var(--winline);border-radius:4px;overflow:hidden;background:#000}
+.pend .pm img{width:100%;height:100%;object-fit:cover;display:block}
+.pend .pm .pl{position:absolute;inset:0;display:grid;place-items:center;color:#fff;text-shadow:0 0 4px #000;font-size:1.2rem}
+.pend .pm button{position:absolute;right:0;top:0;padding:0 5px;font-size:.8rem;line-height:1.3;border-width:2px;border-radius:0 0 0 4px}
+.pend .pm button::before{display:none}
+.empty{color:var(--muted);font-size:.9rem}
+/* おもいでシアター */
+#theater{position:fixed;inset:0;background:#000;z-index:50;display:grid;grid-template-rows:auto 1fr auto;color:#fff;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+#theater[hidden]{display:none}
+.stage{position:relative;overflow:hidden;background:#000;cursor:pointer;min-height:0}
+.bgblur{position:absolute;inset:-10%;width:120%;height:120%;object-fit:cover;filter:blur(24px) brightness(.45);opacity:0;transition:opacity .8s}
+.bgblur.on{opacity:1}
+.slide{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .8s}
+.slide.on{opacity:1}
+img.slide.kb{animation:kb 4.5s linear forwards}
+@keyframes kb{from{transform:scale(1)}to{transform:scale(1.1)}}
+.tcard{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;opacity:0;transition:opacity .6s;background:radial-gradient(#2a3020,#000 75%);pointer-events:none}
+.tcard.on{opacity:1;pointer-events:auto}
+.tcard .em{font-size:4rem;line-height:1.2}
+.tcard .dt{font-size:1rem;color:var(--gold);letter-spacing:.1em;margin-top:8px}
+.tcard .tx{font-size:1.5rem;margin-top:8px;text-wrap:balance}
+.tbtns{display:flex;gap:10px;justify-content:center;margin-top:20px}
+.tcap{position:absolute;left:0;right:0;bottom:0;padding:12px 16px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-size:1rem;opacity:0;transition:opacity .5s;pointer-events:none}
+.tcap.on{opacity:1}
+.d2{color:var(--gold);font-size:.85rem}
+.tbar{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 12px;min-height:44px}
+#theater button{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.55);padding:6px 12px;font-size:.95rem;text-align:center}
+#theater button::before{display:none}
+#theater button:focus-visible{outline-color:var(--gold)}
+.tcount{font-size:.85rem;color:#ccc;font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){.sprite.hit,.sprite.attack,.sprite.center,.sprite.evolve{animation:none}.cur{animation:none}img.slide.kb{animation:none}}
+</style>
+
+<div class="console">
+  <div class="label">カブーンの せいちょう物語</div>
+  <div class="screen">
+    <div class="field" id="field"></div>
+    <div class="msgbox" id="msgbox"></div>
+  </div>
+  <div class="nav" id="nav">
+    <button class="nb" data-tab="growth">📈 せいちょう</button>
+    <button class="nb" data-tab="battle">⚔️ バトル</button>
+    <button class="nb" data-tab="diary">📖 ものがたり</button>
+    <button class="nb gear" data-tab="settings" aria-label="おうちのひと むけ せってい">⚙️</button>
+  </div>
+</div>
+<p class="foot">データ・写真・動画はこの端末に保存されます。⚙️ からバックアップの保存・読み込みとBGMの設定ができます</p>
+
+<div id="theater" hidden>
+  <div class="tbar"><span class="tcount" id="tCount"></span><button id="tClose" aria-label="とじる">✕ とじる</button></div>
+  <div class="stage" id="stage">
+    <img class="bgblur" id="slBg" alt="">
+    <img class="slide" id="slA" alt=""><img class="slide" id="slB" alt="">
+    <video class="slide" id="slV" playsinline preload="auto"></video>
+    <div class="tcap" id="tCap"></div>
+    <div class="tcard" id="tCard"></div>
+  </div>
+  <div class="tbar"><button id="tBgm">♪ BGM</button><button id="tSound" hidden>🔊 どうがの おとを だす</button><span class="tcount" id="tHint">タップで つぎへ</span></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+// ---------- とっくん（クイズ）で あがる ちから と、おぼえる わざ ----------
+const STATS=["str","wise","world","heart"];
+const STAT_OF={num:"str",eng:"wise",flag:"world",animal:"heart"};
+const STAT_NAME={str:"ちから",wise:"ちえ",world:"ひろさ",heart:"こころ"};
+const CAT={num:{n:"すうじ",ico:"🔢"},eng:{n:"えいご",ico:"🔤"},flag:{n:"こっき",ico:"🚩"},animal:{n:"いきもの",ico:"🐾"}};
+const MOVES={
+ str:[{at:0,n:"つのアタック",base:8},{at:10,n:"かぶとタックル",base:14},{at:24,n:"ひゃくれつつの",base:22}],
+ wise:[{at:0,n:"かんがえパンチ",base:8},{at:10,n:"ひらめきビーム",base:14},{at:24,n:"だいはっけん",base:22}],
+ world:[{at:0,n:"はばたき",base:8},{at:10,n:"せかいのかぜ",base:14},{at:24,n:"ちきゅうスピン",base:22}],
+ heart:[{at:0,n:"やさしいこえ",base:8},{at:10,n:"なかまのちから",base:14},{at:24,n:"もりのうた",base:22}]
+};
+function moveOf(k){let m=MOVES[k][0];for(const x of MOVES[k])if(S[k]>=x.at)m=x;return m}
+function power(k){return moveOf(k).base+S[k]}
+
+const QUIZ={
+ num:[["🍎🍎🍎",["3","2","4"],"りんごは いくつ？"],["🐛🐛",["2","1","3"],"ようちゅうは なんびき？"],["⭐⭐⭐⭐⭐",["5","4","6"],"ほしは いくつ？"],["🪲",["1","2","0"],"カブトムシは なんびき？"],
+      ["🍓🍓🍓🍓",["4","3","5"],"いちごは いくつ？"],["🐶🐶🐶🐶🐶🐶",["6","5","7"],"いぬは なんびき？"],["🍌🍌🍌🍌🍌🍌🍌",["7","6","8"],"バナナは なんぼん？"],["🎈🎈🎈🎈🎈🎈🎈🎈",["8","7","9"],"ふうせんは いくつ？"],
+      ["🍎🍎 と 🍎🍎🍎",["🍎🍎🍎 のほう","🍎🍎 のほう","おなじ"],"どっちが おおい？"],["🍎 ＋ 🍎",["2","1","3"],"りんごを あわせると いくつ？"],["🍬🍬🍬 ＋ 🍬",["4","3","5"],"あめを あわせると いくつ？"],
+      ["🍪🍪🍪🍪🍪 から 🍪 たべた",["4","5","3"],"クッキーは なんまい のこる？"],["1 → 2 → ？ → 4",["3","5","1"],"？に はいる すうじは？"],["7 → 8 → 9 → ？",["10","6","11"],"？に はいる すうじは？"],
+      ["🐘 と 🐜",["🐘 ぞう","🐜 あり","おなじ"],"どっちが おおきい？"]],
+ eng:[["「りんご」は えいごで？",["apple","orange","grape"]],["「いぬ」は えいごで？",["dog","cat","bird"]],["「あか」は えいごで？",["red","blue","green"]],
+      ["「ねこ」は えいごで？",["cat","dog","fish"]],["「みず」は えいごで？",["water","milk","juice"]],["「ありがとう」は えいごで？",["Thank you","Hello","Sorry"]],
+      ["「3（さん）」は えいごで？",["three","two","four"]],["「おはよう」は えいごで？",["Good morning","Good night","Goodbye"]],["「がっこう」は えいごで？",["school","house","park"]],
+      ["「カブトムシ」は えいごで？",["beetle","butterfly","bee"]],["「あお」は えいごで？",["blue","yellow","black"]],["「ほん」は えいごで？",["book","desk","pen"]],
+      ["「10（じゅう）」は えいごで？",["ten","eight","nine"]],["「はな（花）」は えいごで？",["flower","tree","leaf"]],["「ともだち」は えいごで？",["friend","family","teacher"]]],
+ flag:[["🇯🇵",["にほん","かんこく","ちゅうごく"]],["🇺🇸",["アメリカ","イギリス","オーストラリア"]],["🇫🇷",["フランス","イタリア","オランダ"]],["🇧🇷",["ブラジル","アルゼンチン","メキシコ"]],
+       ["🇮🇹",["イタリア","アイルランド","ハンガリー"]],["🇨🇦",["カナダ","スイス","デンマーク"]],["🇰🇷",["かんこく","にほん","ベトナム"]],["🇬🇧",["イギリス","アメリカ","ノルウェー"]],
+       ["🇦🇺",["オーストラリア","ニュージーランド","イギリス"]],["🇩🇪",["ドイツ","ベルギー","スペイン"]],["🇮🇳",["インド","アイルランド","ナイジェリア"]],["🇨🇳",["ちゅうごく","ベトナム","トルコ"]],
+       ["🇪🇸",["スペイン","ポルトガル","ドイツ"]],["🇪🇬",["エジプト","イエメン","シリア"]],["🇲🇽",["メキシコ","イタリア","アイルランド"]]],
+ animal:[["🐘",["ぞう","さい","かば"],"これは なに？"],["🦒",["きりん","しまうま","うま"],"これは なに？"],["🐼",["パンダ","くま","こあら"],"これは なに？"],["🐧",["ペンギン","あひる","はくちょう"],"これは なに？"],
+       ["🦋",["ちょうちょ","とんぼ","はち"],"これは なに？"],["🐞",["てんとうむし","かぶとむし","くわがた"],"これは なに？"],["🐝",["はち","はえ","あり"],"これは なに？"],["🐌",["かたつむり","だんごむし","みみず"],"これは なに？"],
+       ["🪲",["6ほん","4ほん","8ほん"],"カブトムシの あしは なんぼん？"],["🦋",["いもむし","たまご から すぐ","おたまじゃくし"],"ちょうちょは なにから そだつ？"],["🐸",["おたまじゃくし","いもむし","さなぎ"],"かえるの こどもは？"],
+       ["🐘🐭🐈",["🐘 ぞう","🐭 ねずみ","🐈 ねこ"],"いちばん おおきいのは？"],["🐬",["うみ","もり","さばく"],"いるかは どこに すんでいる？"],["🐔",["たまご","あかちゃん","たね"],"にわとりは なにを うむ？"],["🪲",["よる","ひる","あさ"],"カブトムシが げんきに うごくのは いつ？"]]
+};
+
+// ---------- バトル：かべ（しょう） ----------
+const STAGES=[{ico:"🥚",name:"たまご"},{ico:"🐛",name:"ようちゅう"},{ico:"🫘",name:"さなぎ"},{ico:"🪲",name:"せいちゅう"},{ico:"👑",name:"キング カブーン"}];
+const CHAPTERS=[
+ {bg:"cave",title:"だい1わ　からを やぶれ",foe:{ico:"🪨",name:"たまごのから",hp:30,dmg:5},win:"バリッ！からが われた！",evolve:1},
+ {bg:"cave",title:"だい2わ　つちを ほりすすめ",foe:{ico:"🧱",name:"かたいつち",hp:50,dmg:6},win:"ほれた！おちばを もりもり たべた！"},
+ {bg:"snow",title:"だい3わ　さむい ふゆを こえろ",foe:{ico:"❄️",name:"こおりのかぜ",hp:60,dmg:7},win:"はるが きた！カブーンは がんばった！"},
+ {bg:"cave",title:"だい4わ　さなぎの へやを つくれ",foe:{ico:"🌀",name:"くずれるつち",hp:70,dmg:8},win:"りっぱな へやが できた！",evolve:2},
+ {bg:"cave",title:"だい5わ　さなぎから はいだせ",foe:{ico:"🥥",name:"さなぎのかわ",hp:90,dmg:9},win:"バリバリッ！つのが でてきた！",evolve:3},
+ {bg:"day",title:"だい6わ　ガキーンと しょうぶ",foe:{ico:"🦗",name:"ガキーン",hp:120,dmg:10},win:"ガキーン「つよいな……じゅえきを わけてやる」"},
+ {bg:"night",title:"だい7わ　よるの もりを こえて",foe:{ico:"🦉",name:"ホウリン",hp:140,dmg:11},win:"ホウリンは おどろいて とんでいった！"},
+ {bg:"day",title:"さいしゅうわ　もりの おうさまへ",foe:{ico:"🐉",name:"ちょうろう クガーン",hp:200,dmg:12},win:"クガーン「みごとじゃ……」",evolve:4}
+];
+const GAIN=2, MAXHP=50, DIARY_EMO=["🌟","🚲","🏊","✏️","🍚","🦷","🎹","⚽","🎉","🌱"];
+const VIDEO_MAX_MB=60, VIDEO_MAX_SEC=60, AUDIO_MAX_MB=15, MEDIA_MAX=20, PHOTO_MS=3800, CARD_MS=2400, BGM_VOL=0.55;
+
+// ---------- 状態（localStorage） ----------
+const FRESH=()=>({name:"",ch:0,str:0,wise:0,world:0,heart:0,view:"growth",sub:"menu",line:0,hp:MAXHP,foehp:null,quiz:null,ans:null,used:{},msg:null,diary:[],memories:[],emo:"🌟",memo:"📸",part:"daily",pidx:-1,bgm:"gen1",bgmOn:true});
+function valid(o){return !!(o&&typeof o==="object"&&typeof o.ch==="number"&&typeof o.view==="string"&&typeof o.str==="number"&&typeof o.name==="string"&&Array.isArray(o.diary))}
+function migrate(){if(!Array.isArray(S.memories))S.memories=[];for(const d of S.memories)if(!Array.isArray(d.media))d.media=[];
+  S.diary=S.diary.filter(d=>{if(d.p){d.media=[{id:d.p,type:"photo"},...(d.media||[])];delete d.p}if(Array.isArray(d.media)&&d.media.length){S.memories.push({date:d.date,e:d.e,t:d.t,media:d.media});return false}delete d.media;return true});
+  if(typeof S.memo!=="string")S.memo="📸";if(S.part!=="memory")S.part="daily";if(typeof S.bgm!=="string")S.bgm="gen1";if(typeof S.bgmOn!=="boolean")S.bgmOn=true}
+let S=FRESH();
+const UI={busy:false,busyText:"",exportText:null,pendingImport:null,pending:[],confirm:false,draft:"",mdraft:"",date:"",quota:""};
+function load(){try{const v=localStorage.getItem("kabun4");if(v){const o=JSON.parse(v);if(valid(o))S=Object.assign(FRESH(),o)}}catch(e){}}
+function save(){try{localStorage.setItem("kabun4",JSON.stringify(S))}catch(e){}}
+function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function stageIdx(){let s=0;for(let i=0;i<S.ch&&i<CHAPTERS.length;i++)if(CHAPTERS[i].evolve!=null)s=CHAPTERS[i].evolve;return Math.min(s,STAGES.length-1)}
+function level(){return 1+Math.floor(STATS.reduce((a,k)=>a+S[k],0)/8)}
+function pickQuiz(cat){
+  const used=S.used[cat]||[];let idx=QUIZ[cat].map((_,i)=>i).filter(i=>!used.includes(i));
+  if(!idx.length){S.used[cat]=[];idx=QUIZ[cat].map((_,i)=>i)}
+  const i=idx[Math.floor(Math.random()*idx.length)];(S.used[cat]=S.used[cat]||[]).push(i);
+  const [q,opts,sub]=QUIZ[cat][i];return {cat,q,opts:opts.slice().sort(()=>Math.random()-.5),correct:opts[0],sub:sub||null};
+}
+function hpClass(r){return r<.25?"bad":r<.5?"mid":""}
+function mb(n){return (n/1048576).toFixed(1)+" MB"}
+function uid(p){return p+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function ymd(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+function parseDate(s){const [y,m,d]=String(s).split("/").map(Number);return new Date(y||2000,(m||1)-1,d||1).getTime()}
+function todayJ(){const d=new Date();return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`}
+function isoToJ(iso){const [y,m,d]=String(iso).split("-").map(Number);return y&&m&&d?`${y}/${m}/${d}`:todayJ()}
+
+// ---------- メディア（この端末の IndexedDB に保存：写真は縮小、動画・音楽はそのまま） ----------
+const PH=new Map(),VM=new Map(),AU=new Map();let DB_OK=true;
+const STORES=["photos","videos","vmeta","audio"];
+function idb(){return new Promise((res,rej)=>{let r;try{r=indexedDB.open("kabun-photos",2)}catch(e){return rej(e)}
+  r.onupgradeneeded=()=>{const db=r.result;for(const s of STORES)if(!db.objectStoreNames.contains(s))db.createObjectStore(s,{keyPath:"id"})};
+  r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);r.onblocked=()=>rej(new Error("blocked"))})}
+function ptx(store,mode,fn){return idb().then(db=>new Promise((res,rej)=>{const t=db.transaction(store,mode);const req=fn(t.objectStore(store));let out;if(req)req.onsuccess=()=>{out=req.result};
+  t.oncomplete=()=>{db.close();res(out)};t.onerror=()=>{db.close();rej(t.error)};t.onabort=()=>{db.close();rej(t.error)}}))}
+const sPut=(s,o)=>ptx(s,"readwrite",st=>st.put(o)),sDel=(s,id)=>ptx(s,"readwrite",st=>st.delete(id)),sGet=(s,id)=>ptx(s,"readonly",st=>st.get(id)),sAll=s=>ptx(s,"readonly",st=>st.getAll()),sClear=s=>ptx(s,"readwrite",st=>st.clear());
+async function loadMedia(){try{
+  const ph=await sAll("photos");PH.clear();for(const p of ph||[])if(p&&p.id&&p.data)PH.set(p.id,p.data);
+  const vm=await sAll("vmeta");VM.clear();for(const m of vm||[])if(m&&m.id)VM.set(m.id,m);
+  const au=await sAll("audio");for(const [,a] of AU)try{URL.revokeObjectURL(a.url)}catch(e){}AU.clear();for(const a of au||[])if(a&&a.id&&a.blob)AU.set(a.id,{name:a.name,size:a.size,mime:a.mime,url:URL.createObjectURL(a.blob)});
+  DB_OK=true}catch(e){DB_OK=false}}
+function shrinkImage(file,max=800,q=0.75){return new Promise((res,rej)=>{const url=URL.createObjectURL(file);const img=new Image();
+  img.onload=()=>{URL.revokeObjectURL(url);const s=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));const w=Math.max(1,Math.round(img.naturalWidth*s)),h=Math.max(1,Math.round(img.naturalHeight*s));
+    const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);res({data:c.toDataURL("image/jpeg",q),w,h})};
+  img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error("image"))};img.src=url})}
+function videoMeta(file){return new Promise((res,rej)=>{const url=URL.createObjectURL(file);const v=document.createElement("video");v.preload="auto";v.muted=true;v.playsInline=true;let done=false;
+  const fail=()=>{if(done)return;done=true;URL.revokeObjectURL(url);rej(new Error("video"))};v.onerror=fail;
+  const finish=()=>{if(done)return;done=true;let poster=null;try{if(v.videoWidth){const s=Math.min(1,240/Math.max(v.videoWidth,v.videoHeight));const c=document.createElement("canvas");c.width=Math.max(1,Math.round(v.videoWidth*s));c.height=Math.max(1,Math.round(v.videoHeight*s));c.getContext("2d").drawImage(v,0,0,c.width,c.height);poster=c.toDataURL("image/jpeg",0.7)}}catch(e){}
+    const dur=isFinite(v.duration)?v.duration:0;URL.revokeObjectURL(url);res({dur,poster})};
+  v.onloadedmetadata=()=>{try{v.currentTime=Math.min(0.5,(v.duration||1)/2)}catch(e){}setTimeout(finish,3000)};
+  v.onseeked=finish;v.src=url;setTimeout(fail,15000)})}
+function photoBytes(){let n=0;for(const d of PH.values())n+=Math.round(d.length*0.75);return n}
+function videoBytes(){let n=0;for(const m of VM.values())n+=m.size||0;return n}
+async function ingestFiles(files){const out=[],errs=[];
+  for(const f of files){
+    if(f.type.startsWith("image/")){try{const p=await shrinkImage(f);out.push({type:"photo",data:p.data,w:p.w,h:p.h})}catch(e){errs.push(`${f.name}：読めませんでした`)}}
+    else if(f.type.startsWith("video/")){
+      if(f.size>VIDEO_MAX_MB*1048576){errs.push(`${f.name}：${VIDEO_MAX_MB}MBをこえています`);continue}
+      try{const m=await videoMeta(f);if(m.dur>VIDEO_MAX_SEC+1){errs.push(`${f.name}：${VIDEO_MAX_SEC}秒より長い動画です`);continue}out.push({type:"video",blob:f,mime:f.type,size:f.size,dur:m.dur,poster:m.poster})}
+      catch(e){errs.push(`${f.name}：この端末では再生できない動画です`)}}
+    else errs.push(`${f.name}：写真か動画を選んでください`)}
+  return {out,errs}}
+async function persistMedia(items){const refs=[];let warn="";
+  for(const it of items){const id=uid(it.type==="photo"?"p":"v");
+    try{if(it.type==="photo"){await sPut("photos",{id,data:it.data,w:it.w,h:it.h,ts:Date.now()});PH.set(id,it.data)}
+      else{await sPut("videos",{id,blob:it.blob});const meta={id,mime:it.mime,size:it.size,dur:it.dur,poster:it.poster,ts:Date.now()};await sPut("vmeta",meta);VM.set(id,meta)}
+      refs.push({id,type:it.type})}
+    catch(e){warn="一部の写真・動画を保存できませんでした（容量不足かもしれません）。"}}
+  try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+  return {refs,warn}}
+async function deleteMedia(refs){for(const m of refs||[]){try{if(m.type==="photo"){PH.delete(m.id);await sDel("photos",m.id)}else{VM.delete(m.id);await sDel("vmeta",m.id);await sDel("videos",m.id)}}catch(e){}}}
+function thumbOf(m){return m.type==="photo"?PH.get(m.id):(VM.get(m.id)||{}).poster}
+
+// ---------- バックアップの 書き出し・読み込み（json = 記録だけ / zip = ぜんぶ） ----------
+const DLP=(window.claude&&typeof window.claude.use==="function")?window.claude.use("downloads").catch(()=>null):Promise.resolve(null);
+async function deliver(fname,data,size){
+  const dl=await DLP;
+  if(dl){await dl.save({filename:fname,data});return `保存しました（${fname}、${size}）`}
+  if(!window.claude){const a=document.createElement("a");a.href=URL.createObjectURL(data instanceof Blob?data:new Blob([data]));a.download=fname;document.body.append(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);return `保存しました（${fname}、${size}）`}
+  return null}
+function dlErrMsg(e){const c=e&&e.code;if(c==="declined")return "保存をやめました。";if(c==="too_large")return "大きすぎて保存できません。";return null}
+async function exportJson(){
+  UI.busy=true;UI.busyText="つくっています…";S.msg=null;render();
+  const text=JSON.stringify({app:"kabun",ver:2,exported:new Date().toISOString(),save:S});const fname=`kabun-save-${ymd()}.json`;
+  try{const r=await deliver(fname,text,mb(new Blob([text]).size));if(r)S.msg=r;else{UI.exportText=text;S.sub="export"}}
+  catch(e){S.msg=dlErrMsg(e);if(!S.msg){UI.exportText=text;S.sub="export"}}
+  UI.busy=false;save();render()}
+const extOf=m=>({"video/mp4":"mp4","video/quicktime":"mov","video/webm":"webm","audio/mpeg":"mp3","audio/mp4":"m4a","audio/x-m4a":"m4a","audio/wav":"wav","audio/x-wav":"wav","audio/ogg":"ogg","audio/aac":"aac"}[m]||"bin");
+async function exportZip(){
+  if(typeof JSZip==="undefined"){S.msg="zip機能を読み込めませんでした。通信できる状態で開き直してください。";render();return}
+  UI.busy=true;UI.busyText="zipを つくっています…（動画が多いと時間がかかります）";S.msg=null;render();
+  try{const zip=new JSZip();const idx={app:"kabun",ver:2,exported:new Date().toISOString(),save:S,photos:[],videos:[],audio:[]};
+    for(const p of (await sAll("photos"))||[]){if(!p||!p.data)continue;const b64=p.data.split(",")[1];if(!b64)continue;const file=`photos/${p.id}.jpg`;zip.file(file,b64,{base64:true});idx.photos.push({id:p.id,w:p.w,h:p.h,ts:p.ts,file})}
+    for(const m of (await sAll("vmeta"))||[]){const v=await sGet("videos",m.id);if(!v||!v.blob)continue;const file=`videos/${m.id}.${extOf(m.mime)}`;zip.file(file,v.blob);idx.videos.push({id:m.id,mime:m.mime,size:m.size,dur:m.dur,poster:m.poster,ts:m.ts,file})}
+    for(const a of (await sAll("audio"))||[]){if(!a||!a.blob)continue;const file=`audio/${a.id}.${extOf(a.mime)}`;zip.file(file,a.blob);idx.audio.push({id:a.id,name:a.name,mime:a.mime,size:a.size,file})}
+    zip.file("save.json",JSON.stringify(idx));
+    const blob=await zip.generateAsync({type:"blob",compression:"STORE"});const fname=`kabun-backup-${ymd()}.zip`;
+    const r=await deliver(fname,blob,mb(blob.size));S.msg=r||"この画面ではzipの保存ができません。";}
+  catch(e){S.msg=dlErrMsg(e)||"zipを作れませんでした。"}
+  UI.busy=false;save();render()}
+function importJsonText(text){let o=null;try{o=JSON.parse(String(text).trim())}catch(e){}
+  if(!(o&&o.app==="kabun"&&valid(o.save))){S.msg="読み込めませんでした。カブーンのセーブデータではないようです。";render();return}
+  UI.pendingImport={idx:o,zip:null};S.sub="import";render()}
+async function importFile(file){
+  if(/\.zip$/i.test(file.name)||file.type==="application/zip"||file.type==="application/x-zip-compressed"){
+    if(typeof JSZip==="undefined"){S.msg="zip機能を読み込めませんでした。通信できる状態で開き直してください。";render();return}
+    UI.busy=true;UI.busyText="zipを ひらいています…";render();
+    try{const zip=await JSZip.loadAsync(file);const f=zip.file("save.json");if(!f)throw new Error("nosave");const idx=JSON.parse(await f.async("text"));if(!(idx.app==="kabun"&&valid(idx.save)))throw new Error("bad");UI.pendingImport={idx,zip};S.sub="import"}
+    catch(e){S.msg="読み込めませんでした。カブーンのバックアップ（zip）ではないようです。"}
+    UI.busy=false;render();return}
+  try{importJsonText(await file.text())}catch(e){S.msg="ファイルを読めませんでした。";render()}}
+async function applyImport(){const pi=UI.pendingImport;UI.pendingImport=null;if(!pi)return;const {idx,zip}=pi;
+  UI.busy=true;UI.busyText="読み込んでいます…";render();let pmsg="";
+  try{
+    if(zip){for(const s of STORES)await sClear(s);let np=0,nv=0,na=0;
+      for(const p of idx.photos||[]){const f=zip.file(p.file);if(!f)continue;const b64=await f.async("base64");await sPut("photos",{id:p.id,data:"data:image/jpeg;base64,"+b64,w:p.w,h:p.h,ts:p.ts});np++}
+      for(const v of idx.videos||[]){const f=zip.file(v.file);if(!f)continue;const blob=await f.async("blob");await sPut("videos",{id:v.id,blob});await sPut("vmeta",{id:v.id,mime:v.mime,size:v.size,dur:v.dur,poster:v.poster,ts:v.ts});nv++}
+      for(const a of idx.audio||[]){const f=zip.file(a.file);if(!f)continue;const blob=await f.async("blob");await sPut("audio",{id:a.id,name:a.name,mime:a.mime,size:a.size,blob,ts:Date.now()});na++}
+      pmsg=`、写真 ${np}枚、動画 ${nv}本、音楽 ${na}曲`}
+    else if(Array.isArray(idx.photos)&&idx.photos.length&&idx.photos[0].data){await sClear("photos");for(const p of idx.photos)if(p&&p.id&&p.data)await sPut("photos",p);pmsg=`、写真 ${idx.photos.length}枚`}
+    await loadMedia()}
+  catch(e){pmsg="（写真・動画の一部を保存できませんでした）"}
+  S=Object.assign(FRESH(),idx.save);migrate();S.view="settings";S.sub="menu";UI.pending=[];UI.draft="";UI.mdraft="";
+  if(S.bgm.startsWith("a:")&&!AU.has(S.bgm.slice(2)))S.bgm="gen1";
+  S.msg=`読み込みました（ひびの記録 ${S.diary.length}こ、おもいで ${S.memories.length}こ${pmsg}）`;UI.busy=false;save();render()}
+async function resetAll(){UI.busy=true;UI.busyText="消しています…";render();for(const s of STORES){try{await sClear(s)}catch(e){}}PH.clear();VM.clear();AU.clear();S=FRESH();UI.pending=[];UI.draft="";UI.busy=false;try{localStorage.removeItem("kabun4")}catch(e){}render()}
+
+// ---------- BGM：生成曲（Web Audio）と 端末内の音楽ファイル ----------
+const GEN={
+ gen1:{name:"♪ ほのぼの（生成曲）",bpm:92,
+  tracks:[{type:"square",vol:.06,len:.9,seq:[[72,1],[76,1],[79,1],[81,2],[79,1],[76,1],[79,1],[76,1],[74,3],[72,1],[76,1],[79,1],[84,2],[81,1],[79,1],[76,1],[74,1],[72,3]]},
+          {type:"triangle",vol:.14,len:.8,seq:[[48,3],[45,3],[41,3],[43,3],[48,3],[45,3],[41,1.5],[43,1.5],[48,3]]}]},
+ gen2:{name:"♪ わくわく（生成曲）",bpm:126,
+  tracks:[{type:"square",vol:.055,len:.85,seq:[[67,.5],[67,.5],[71,.5],[74,.5],[72,1],[71,1],[69,.5],[69,.5],[72,.5],[76,.5],[74,2],[67,.5],[67,.5],[71,.5],[74,.5],[76,1],[74,1],[72,.5],[71,.5],[69,.5],[71,.5],[67,2]]},
+          {type:"triangle",vol:.15,len:.5,seq:[[43,1],[43,1],[43,1],[43,1],[40,1],[40,1],[40,1],[40,1],[48,1],[48,1],[48,1],[48,1],[50,1],[50,1],[43,1],[43,1]]}]}
+};
+const synth={ctx:null,master:null,timer:null,nextT:0};
+function actx(){if(!synth.ctx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;try{synth.ctx=new AC()}catch(e){return null}}if(synth.ctx.state==="suspended")synth.ctx.resume().catch(()=>{});return synth.ctx}
+function note(ctx,dest,type,midi,t,dur,vol){const o=ctx.createOscillator();o.type=type;o.frequency.value=440*Math.pow(2,(midi-69)/12);const g=ctx.createGain();g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(vol,t+0.015);g.gain.setValueAtTime(vol,t+dur*0.5);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.connect(g);g.connect(dest);o.start(t);o.stop(t+dur+0.03)}
+function synthStart(tune){synthStop();const ctx=actx();if(!ctx)return;const m=ctx.createGain();m.gain.value=0.0001;m.connect(ctx.destination);m.gain.linearRampToValueAtTime(BGM_VOL,ctx.currentTime+1);synth.master=m;
+  const spb=60/tune.bpm;const loop=tune.tracks[0].seq.reduce((a,n)=>a+n[1],0)*spb;synth.nextT=ctx.currentTime+0.1;
+  const sched=()=>{if(!synth.master)return;while(synth.nextT<ctx.currentTime+1.0){for(const tr of tune.tracks){let t=synth.nextT;for(const [n,b] of tr.seq){if(n!=null)note(ctx,synth.master,tr.type,n,t,b*spb*tr.len,tr.vol);t+=b*spb}}synth.nextT+=loop}};
+  sched();synth.timer=setInterval(sched,250)}
+function synthStop(){if(synth.timer){clearInterval(synth.timer);synth.timer=null}if(synth.master){const m=synth.master;synth.master=null;try{m.gain.setTargetAtTime(0.0001,synth.ctx.currentTime,0.15)}catch(e){}setTimeout(()=>{try{m.disconnect()}catch(e){}},900)}}
+const bgmEl=new Audio();bgmEl.loop=true;let bgmNode=null;
+function bgmFileStart(url){const ctx=actx();if(ctx&&!bgmNode){try{const src=ctx.createMediaElementSource(bgmEl);bgmNode=ctx.createGain();src.connect(bgmNode);bgmNode.connect(ctx.destination)}catch(e){}}
+  if(bgmNode)bgmNode.gain.value=BGM_VOL;else{try{bgmEl.volume=BGM_VOL}catch(e){}}
+  if(bgmEl.src!==url)bgmEl.src=url;try{bgmEl.currentTime=0}catch(e){}bgmEl.play().catch(()=>{})}
+function bgmFileStop(){try{bgmEl.pause()}catch(e){}}
+function setBgmLevel(v){const t=synth.ctx?synth.ctx.currentTime:0;if(synth.master)synth.master.gain.setTargetAtTime(v,t,0.2);if(bgmNode)bgmNode.gain.setTargetAtTime(v,t,0.2);else{try{bgmEl.volume=Math.min(1,v)}catch(e){}}}
+function playBgmOpt(opt){stopBgm();if(opt==="none")return;if(GEN[opt])synthStart(GEN[opt]);else if(opt.startsWith("a:")){const a=AU.get(opt.slice(2));if(a)bgmFileStart(a.url)}}
+function startBgm(){if(S.bgmOn)playBgmOpt(S.bgm||"gen1")}
+function stopBgm(){synthStop();bgmFileStop()}
+function duck(on){setBgmLevel(on?BGM_VOL*0.25:BGM_VOL)}
+let testTimer=null;
+function testBgm(opt){clearTimeout(testTimer);playBgmOpt(opt);testTimer=setTimeout(stopBgm,7000)}
+function bgmName(opt){if(GEN[opt])return GEN[opt].name;if(opt==="none")return "なし";if(opt&&opt.startsWith("a:")){const a=AU.get(opt.slice(2));return a?"♪ "+a.name:"（見つかりません）"}return "？"}
+
+// ---------- おもいでシアター ----------
+const T={q:[],i:-1,timer:null,on:false,slot:0,soundOK:false,vurl:null};
+const $=id=>document.getElementById(id);
+function isMedia(x){return x.k==="photo"||x.k==="video"}
+function buildQueue(entries,startIdx){const q=[];const single=entries.length===1;
+  entries.forEach(d=>{if(!(single&&startIdx>0))q.push({k:"card",d});(d.media||[]).forEach((m,mi)=>{if(single&&mi<startIdx)return;q.push({k:m.type,id:m.id,d})})});
+  q.push({k:"end"});return q}
+function openTheater(entries,startIdx=0){
+  T.q=buildQueue(entries,startIdx);T.i=-1;T.on=true;T.soundOK=false;
+  $("theater").hidden=false;$("tSound").hidden=true;$("tBgm").textContent=S.bgmOn?"♪ BGM オン":"♪ BGM オフ";
+  startBgm();next()}
+function closeTheater(){T.on=false;clearTimeout(T.timer);stopVideo();stopBgm();$("theater").hidden=true;
+  $("slA").className="slide";$("slB").className="slide";$("slBg").className="bgblur";$("tCard").className="tcard";$("tCap").className="tcap";$("slA").removeAttribute("src");$("slB").removeAttribute("src")}
+function stopVideo(){const v=$("slV");v.onended=null;try{v.pause()}catch(e){}v.removeAttribute("src");try{v.load()}catch(e){}v.className="slide";if(T.vurl){URL.revokeObjectURL(T.vurl);T.vurl=null}duck(false)}
+function showCount(){const n=T.q.filter(isMedia).length,done=T.q.slice(0,T.i+1).filter(isMedia).length;$("tCount").textContent=n?`${done} / ${n}`:""}
+function next(){if(!T.on)return;clearTimeout(T.timer);T.i++;const it=T.q[T.i];if(!it){closeTheater();return}showCount();
+  const card=$("tCard"),cap=$("tCap"),A=$("slA"),B=$("slB"),V=$("slV"),bg=$("slBg");stopVideo();
+  if(it.k==="card"||it.k==="end"){A.className="slide";B.className="slide";bg.className="bgblur";cap.className="tcap";
+    if(it.k==="card"){card.innerHTML=`<div><div class="em">${it.d.e}</div><div class="dt">${esc(it.d.date)}</div><div class="tx">${esc(it.d.t)}</div></div>`;card.className="tcard on";T.timer=setTimeout(next,CARD_MS)}
+    else{card.innerHTML=`<div><div class="em">🎬</div><div class="tx">おしまい</div><div class="tbtns"><button id="tAgain">もういちど</button><button id="tDone">とじる</button></div></div>`;card.className="tcard on";
+      $("tAgain").onclick=e=>{e.stopPropagation();T.i=-1;startBgm();next()};$("tDone").onclick=e=>{e.stopPropagation();closeTheater()};setBgmLevel(0.0001);setTimeout(()=>{if(T.on&&T.q[T.i]&&T.q[T.i].k==="end")stopBgm()},1500)}
+    return}
+  card.className="tcard";cap.innerHTML=`${it.d.e} <span class="d2">${esc(it.d.date)}</span>　${esc(it.d.t)}`;cap.className="tcap on";
+  if(it.k==="photo"){const src=PH.get(it.id);if(!src){T.timer=setTimeout(next,10);return}
+    const show=T.slot?B:A,hide=T.slot?A:B;T.slot^=1;
+    show.src=src;bg.src=src;bg.className="bgblur on";show.style.transformOrigin=`${30+Math.random()*40}% ${30+Math.random()*40}%`;
+    show.className="slide";void show.offsetWidth;show.className="slide on kb";hide.className="slide";
+    T.timer=setTimeout(next,PHOTO_MS);return}
+  A.className="slide";B.className="slide";bg.className="bgblur";
+  sGet("videos",it.id).then(rec=>{if(!T.on||T.q[T.i]!==it)return;if(!rec||!rec.blob){next();return}
+    T.vurl=URL.createObjectURL(rec.blob);V.src=T.vurl;V.className="slide on";V.muted=false;V.onended=()=>next();
+    const meta=VM.get(it.id);T.timer=setTimeout(next,(((meta&&meta.dur)||VIDEO_MAX_SEC)+3)*1000);duck(true);
+    V.play().then(()=>{T.soundOK=true;$("tSound").hidden=true}).catch(()=>{V.muted=true;V.play().catch(()=>{});if(!T.soundOK)$("tSound").hidden=false})
+  }).catch(()=>next())}
+$("tClose").onclick=closeTheater;
+$("stage").onclick=()=>{const it=T.q[T.i];if(it&&it.k!=="end")next()};
+$("tSound").onclick=e=>{e.stopPropagation();const V=$("slV");V.muted=false;T.soundOK=true;$("tSound").hidden=true;V.play().catch(()=>{})};
+$("tBgm").onclick=e=>{e.stopPropagation();S.bgmOn=!S.bgmOn;save();$("tBgm").textContent=S.bgmOn?"♪ BGM オン":"♪ BGM オフ";if(S.bgmOn)startBgm();else stopBgm()};
+document.addEventListener("keydown",e=>{if(!T.on)return;if(e.key==="Escape")closeTheater();else if(e.key==="ArrowRight"||e.key===" "){e.preventDefault();$("stage").click()}});
+document.addEventListener("visibilitychange",()=>{if(document.hidden&&T.on)closeTheater()});
+
+// ---------- 描画ぶひん ----------
+let typer=null;
+function typeText(node,text,done){
+  if(typer)clearInterval(typer);node.textContent="";let i=0;
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches){node.textContent=text;done&&done();return}
+  typer=setInterval(()=>{i++;node.textContent=text.slice(0,i);if(i>=text.length){clearInterval(typer);typer=null;done&&done()}},28);
+  node.onclick=()=>{if(typer){clearInterval(typer);typer=null;node.textContent=text;done&&done()}};
+}
+function hud(cls,name,lv,hp,max){
+  const r=Math.max(0,hp/max);
+  return el("div","hud "+cls,`<div class="nm"><span>${name}</span><span class="lv">Lv${lv}</span></div><div class="hp"><i class="${hpClass(r)}" style="width:${r*100}%"></i></div><div class="num">${Math.max(0,hp)} / ${max}</div>`);
+}
+function statRows(){
+  const col={str:"var(--c-str)",wise:"var(--c-wise)",world:"var(--c-world)",heart:"var(--c-heart)"};const MAX=40;
+  return `<div class="grow">${STATS.map(k=>`<div class="row"><span>${STAT_NAME[k]}</span><div class="bar"><i style="width:${Math.min(100,S[k]/MAX*100)}%;background:${col[k]}"></i></div><span class="n">${S[k]}</span></div>`).join("")}</div>`;
+}
+function fieldBattle(showFoe){
+  const f=$("field");f.innerHTML="";
+  const c=CHAPTERS[Math.min(S.ch,CHAPTERS.length-1)];
+  f.className="field "+(S.ch>=CHAPTERS.length?"day":c.bg);
+  const me=el("div","sprite me",STAGES[stageIdx()].ico);me.id="spMe";f.append(me);
+  f.append(hud("me","カブーン",level(),S.hp,MAXHP));
+  if(showFoe&&S.ch<CHAPTERS.length){const foe=el("div","sprite foe",c.foe.ico);foe.id="spFoe";f.append(foe);f.append(hud("foe",c.foe.name,S.ch+1,S.foehp??c.foe.hp,c.foe.hp))}
+}
+function fieldGrowth(idx,evolving,bg){
+  const f=$("field");f.innerHTML="";f.className="field "+(bg||"day");
+  f.append(el("div","glow"));
+  const sp=el("div","sprite center"+(evolving?" evolve":""),STAGES[idx].ico);sp.id="spMe";f.append(sp);
+  const path=el("div","path");
+  STAGES.forEach((st,i)=>{if(i)path.append(el("i","","→"));path.append(el("span",i<idx?"done":i===idx?"now":"",st.ico))});
+  f.append(path);
+}
+function nextEvolveInfo(){
+  for(let i=S.ch;i<CHAPTERS.length;i++)if(CHAPTERS[i].evolve!=null)return `あと ${i-S.ch+1} つの かべで「${STAGES[CHAPTERS[i].evolve].name}」に！`;
+  return "もう さいこうの すがた！";
+}
+function filebtn(html,accept,multiple,onFiles){const lab=el("label","filebtn",html);const fi=el("input");fi.type="file";fi.accept=accept;if(multiple)fi.multiple=true;
+  fi.onchange=e=>{const fs=Array.from(e.target.files||[]);if(fs.length)onFiles(fs);e.target.value=""};lab.append(fi);return lab}
+function renderNav(){
+  document.querySelectorAll(".nav .nb").forEach(b=>{b.classList.toggle("on",b.dataset.tab===S.view);b.disabled=!S.name&&b.dataset.tab!=="settings";
+    b.onclick=()=>{if(S.view===b.dataset.tab)return;S.view=b.dataset.tab;S.sub="menu";S.quiz=null;S.ans=null;S.msg=null;S.line=0;UI.confirm=false;UI.pendingImport=null;UI.exportText=null;stopBgm();save();render()}});
+}
+
+// ---------- がめん ----------
+function render(){
+  renderNav();
+  const box=$("msgbox");box.innerHTML="";
+  const msg=el("p","msg");box.append(msg);
+  const menu=el("div","menu");box.append(menu);
+  const tapBtn=(label,fn)=>{menu.className="menu one";const b=el("button","tap",label);b.onclick=()=>{if(typer){msg.click();return}fn()};menu.append(b)};
+
+  if(S.view==="settings")return renderSettings(msg,menu);
+  if(!S.name){
+    fieldGrowth(0,false);
+    typeText(msg,"カブトムシの たまご「カブーン」を もらった！\nそだてる きみの なまえは？");
+    menu.className="menu one";const inp=el("input");inp.id="nameInput";inp.placeholder="なまえを いれてね";inp.maxLength=10;
+    const b=el("button","wide","ぼうけんを はじめる");b.onclick=()=>{const n=inp.value.trim();if(!n){inp.focus();return}S.name=n;save();render()};
+    inp.addEventListener("keydown",e=>{if(e.key==="Enter")b.click()});menu.append(inp,b);return;
+  }
+  if(S.view==="growth")return renderGrowth(msg,menu,tapBtn);
+  if(S.view==="battle")return renderBattle(msg,menu,tapBtn);
+  if(S.view==="diary")return renderDiary(msg,menu);
+  S.view="growth";render();
+}
+
+// 📈 せいちょう：クイズで きたえる・わざを おぼえる
+function renderGrowth(msg,menu,tapBtn){
+  const idx=stageIdx();
+  if(S.sub==="quiz"&&!S.quiz)S.sub="menu";
+  if(S.sub==="menu"){
+    fieldGrowth(idx,false);
+    msg.innerHTML=`<div class="gh"><span><b>カブーン</b>　Lv${level()}　${STAGES[idx].name}</span><small>${nextEvolveInfo()}</small></div>${statRows()}`;
+    if(S.msg){msg.append(el("div","",`<span style="font-size:.9rem">${S.msg}</span>`))}
+    msg.append(el("div","",`<span class="note">とっくんを えらんで クイズに こたえよう</span>`));
+    for(const cat of Object.keys(CAT)){const k=STAT_OF[cat];
+      const b=el("button","",`${CAT[cat].ico} ${CAT[cat].n}の とっくん<small>${STAT_NAME[k]} +${GAIN}　わざ：${moveOf(k).n}</small>`);
+      b.onclick=()=>{S.quiz=pickQuiz(cat);S.ans=null;S.msg=null;S.sub="quiz";save();render()};menu.append(b)}
+    return;
+  }
+  if(S.sub==="quiz"){
+    fieldGrowth(idx,false);const q=S.quiz;const k=STAT_OF[q.cat];
+    if(S.ans===null){
+      const big=q.cat==="flag"||!!q.sub;
+      msg.innerHTML=big?`<span class="big">${q.q}</span>${q.cat==="flag"?"この こっきは どこの くに？":q.sub}`:q.q;
+      q.opts.forEach(o=>{const b=el("button","",o);b.onclick=()=>{
+        S.ans=o;
+        if(o===q.correct){const before=moveOf(k);S[k]+=GAIN;const after=moveOf(k);
+          S.msg=`せいかい！${STAT_NAME[k]} が ${GAIN} あがった！（${S[k]}）`;
+          if(after!==before)S.msg+=`\n✨ あたらしい わざ「${after.n}」を おぼえた！`;}
+        else S.msg=`ざんねん！こたえは「${q.correct}」。\nつぎは きっと できる！`;
+        save();render()};menu.append(b)});
+      if(q.opts.length%2)menu.className="menu one";return;
+    }
+    typeText(msg,S.msg,()=>{msg.append(el("span","cur","▼"))});
+    const again=el("button","",`${CAT[q.cat].ico} もういちど ${CAT[q.cat].n}`);again.onclick=()=>{S.quiz=pickQuiz(q.cat);S.ans=null;S.msg=null;save();render()};
+    const back=el("button","wide","せいちょうがめんに もどる");back.onclick=()=>{S.quiz=null;S.ans=null;S.msg=null;S.sub="menu";save();render()};
+    menu.className="menu";menu.append(again,back);return;
+  }
+}
+
+// ⚔️ バトル：おぼえた わざで たたかう
+function renderBattle(msg,menu,tapBtn){
+  if(S.ch>=CHAPTERS.length){
+    fieldGrowth(4,false);
+    typeText(msg,`👑 キング カブーン たんじょう！\n${S.name}と カブーンは ぜんぶの かべを のりこえた！`);
+    menu.className="menu one";const b=el("button","wide","バトルを はじめから");b.onclick=()=>{S.ch=0;S.hp=MAXHP;S.foehp=null;S.sub="menu";save();render()};menu.append(b);return;
+  }
+  const c=CHAPTERS[S.ch];
+  if(S.sub==="menu"){
+    fieldBattle(false);
+    msg.innerHTML=`<span class="big">${c.foe.ico}</span><div style="text-align:center;font-size:1.2rem">${c.title}</div>`;
+    menu.className="menu one";const b=el("button","wide",`▶ ${c.foe.name} に ちょうせん！`);
+    b.onclick=()=>{S.foehp=c.foe.hp;S.hp=MAXHP;S.msg=`${c.foe.name} が あらわれた！`;S.sub="fight";save();render()};menu.append(b);return;
+  }
+  if(S.sub==="fight"){
+    fieldBattle(true);
+    typeText(msg,S.msg||"カブーンは どうする？");
+    for(const k of STATS){const m=moveOf(k);
+      const b=el("button","",`${m.n}<small>${STAT_NAME[k]}の わざ　いりょく ${power(k)}</small>`);
+      b.onclick=()=>{
+        const dmg=power(k);S.foehp=Math.max(0,S.foehp-dmg);
+        let t=`カブーンの ${m.n}！\n${c.foe.name} に ${dmg} の ダメージ！`;
+        if(S.foehp>0){S.hp=Math.max(0,S.hp-c.foe.dmg);t+=`\n${c.foe.name} の はんげき！カブーンに ${c.foe.dmg} の ダメージ！`}
+        S.msg=t;S.sub="turn";save();render();
+        const sp=$("spMe");sp&&sp.classList.add("attack");const fo=$("spFoe");fo&&setTimeout(()=>fo.classList.add("hit"),200);
+        if(S.foehp>0)setTimeout(()=>{sp&&sp.classList.remove("attack");sp&&sp.classList.add("hit")},700);
+      };menu.append(b)}
+    return;
+  }
+  if(S.sub==="turn"){
+    fieldBattle(true);
+    typeText(msg,S.msg,()=>{msg.append(el("span","cur","▼"))});
+    tapBtn("▶ つぎへ",()=>{
+      if(S.foehp<=0){S.line=0;S.sub="win"}
+      else if(S.hp<=0){S.hp=MAXHP;S.msg="カブーンは めが まわった……。\nでも たちあがった！もういちど！";S.sub="fight"}
+      else{S.msg=null;S.sub="fight"}
+      save();render()});
+    return;
+  }
+  if(S.sub==="win"){
+    fieldBattle(false);
+    const lines=[`${c.foe.name} を のりこえた！`,c.win];const last=S.line>=lines.length-1;
+    typeText(msg,lines[Math.min(S.line,lines.length-1)],()=>{msg.append(el("span","cur","▼"))});
+    tapBtn(last?(c.evolve!=null?"▶ ？？？":"▶ つぎの かべへ"):"▶ つぎへ",()=>{
+      if(!last){S.line++}else if(c.evolve!=null){S.line=0;S.sub="evolve"}else{S.ch++;S.line=0;S.foehp=null;S.sub="menu"}
+      save();render()});
+    return;
+  }
+  if(S.sub==="evolve"){
+    const from=stageIdx(),to=c.evolve;
+    if(S.line===0){fieldGrowth(from,true);typeText(msg,"おや……？ カブーンの ようすが……！",()=>{msg.append(el("span","cur","▼"))});tapBtn("▶ つぎへ",()=>{S.line=1;save();render()})}
+    else{fieldGrowth(to,true);msg.innerHTML=`🎉 おめでとう！<br>カブーンは「<b>${STAGES[to].name}</b>」に せいちょうした！${statRows()}`;
+      menu.className="menu one";const b=el("button","wide","▶ つぎの かべへ");b.onclick=()=>{S.ch++;S.line=0;S.foehp=null;S.sub="menu";save();render()};menu.append(b)}
+    return;
+  }
+  S.sub="menu";render();
+}
+
+// 📖 ものがたり：「ひびの きろく」（こどもが じぶんで かく）と「おもいでシアター」（しゃしん・どうが）
+function mediaBadge(d){const p=d.media.filter(m=>m.type==="photo").length,v=d.media.length-p;return (p?`📷${p} `:"")+(v?`🎬${v}`:"")}
+function thumbEl(m,cls){const w=el("div",cls);const src=thumbOf(m);if(src){const im=el("img");im.src=src;im.alt="";w.append(im)}
+  if(m.type==="video")w.append(el("div","pl","▶"));else if(!src)w.append(el("div","pl","📷"));return w}
+function partBar(menu){const bar=el("div","menu");
+  const a=el("button",S.part!=="memory"?"wide sel":"wide","📝 ひびの きろく"),b=el("button",S.part==="memory"?"wide sel":"wide","🎬 おもいでシアター");
+  a.onclick=()=>{S.part="daily";S.sub="menu";S.msg=null;UI.confirm=false;save();render()};b.onclick=()=>{S.part="memory";S.sub="menu";S.msg=null;UI.confirm=false;save();render()};
+  bar.append(a,b);menu.append(bar)}
+function byDateDesc(arr){return arr.map((d,i)=>i).sort((a,b)=>parseDate(arr[b].date)-parseDate(arr[a].date)||b-a)}
+function renderDiary(msg,menu){
+  if(S.part==="memory")return renderMemories(msg,menu);
+  if(S.sub==="dentry")return renderDailyEntry(msg,menu);
+  fieldGrowth(stageIdx(),false,"diary");
+  const list=el("div","diary");
+  if(!S.diary.length)list.append(el("div","empty","まだ きろくが ないよ。できるように なったことを かいてみよう！"));
+  for(const i of byDateDesc(S.diary)){const d=S.diary[i];const row=el("div","has");row.append(el("span","ico",d.e));
+    row.append(el("span","",`<span class="d">${esc(d.date)}</span>${esc(d.t)}`));
+    row.onclick=()=>{S.pidx=i;S.sub="dentry";S.msg=null;UI.confirm=false;save();render()};list.append(row)}
+  msg.innerHTML=`<b>${esc(S.name)}の ひびの きろく</b>　${S.diary.length}こ`;msg.append(list);
+  if(S.msg)msg.append(el("div","",`<span style="font-size:.9rem">${S.msg}</span>`));
+  menu.className="menu one";partBar(menu);
+  msg.append(el("div","note","きょう できたことを かくと、カブーンの ぜんぶの ちからが +1"));
+  const emo=el("div","emo");DIARY_EMO.forEach(e=>{const b=el("button",S.emo===e?"on":"",e);b.onclick=()=>{S.emo=e;save();render()};emo.append(b)});
+  const inp=el("input");inp.id="diaryInput";inp.placeholder="れい：ひとりで じてんしゃに のれた！";inp.maxLength=40;inp.value=UI.draft;inp.oninput=()=>{UI.draft=inp.value};
+  const add=el("button","wide","✏️ きろくする（ぜんぶの ちから +1）");
+  add.onclick=()=>{const t=inp.value.trim();if(!t){inp.focus();return}
+    S.diary.push({date:todayJ(),e:S.emo,t});STATS.forEach(k=>S[k]+=1);UI.draft="";
+    S.msg=`🎉 ${esc(S.name)}が せいちょうしたから、カブーンも つよくなった！`;save();render()};
+  inp.addEventListener("keydown",e=>{if(e.key==="Enter")add.click()});
+  menu.append(emo,inp,add);
+}
+function renderDailyEntry(msg,menu){
+  const d=S.diary[S.pidx];if(!d){S.sub="menu";return renderDiary(msg,menu)}
+  fieldGrowth(stageIdx(),false,"diary");
+  msg.innerHTML=`<span style="font-size:2rem">${d.e}</span><br><span class="d">${esc(d.date)}</span><br><span style="font-size:1.2rem">${esc(d.t)}</span>`;
+  menu.className="menu";
+  const x=el("button","wide","とじる");x.onclick=()=>{UI.confirm=false;S.sub="menu";save();render()};
+  let del;
+  if(!UI.confirm){del=el("button","wide","けす");del.onclick=()=>{UI.confirm=true;render()}}
+  else{del=el("button","wide danger","ほんとうに けす");del.onclick=()=>{S.diary.splice(S.pidx,1);UI.confirm=false;S.sub="menu";S.msg="きろくを けしました";save();render()}}
+  menu.append(x,del);
+}
+function renderMemories(msg,menu){
+  if(S.sub==="entry")return renderEntry(msg,menu);
+  fieldGrowth(stageIdx(),false,"diary");
+  const list=el("div","diary");
+  if(!S.memories.length)list.append(el("div","empty","まだ おもいでが ないよ。写真や動画を入れて、おもいでを つくろう！"));
+  for(const i of byDateDesc(S.memories)){const d=S.memories[i];const has=d.media.length>0;
+    const row=el("div","has");row.append(el("span","ico",d.e));
+    if(has)row.append(thumbEl(d.media[0],"th"));
+    row.append(el("span","",`<span class="d">${esc(d.date)}${has?`　<span class="cnt">${mediaBadge(d)}</span>`:""}</span>${esc(d.t)}`));
+    row.onclick=()=>{S.pidx=i;S.sub="entry";S.msg=null;UI.confirm=false;save();render()};list.append(row)}
+  const withMedia=S.memories.filter(d=>d.media.length);
+  msg.innerHTML=`<b>おもいでシアター</b>　${S.memories.length}こ`;msg.append(list);
+  if(S.msg)msg.append(el("div","",`<span style="font-size:.9rem">${S.msg}</span>`));
+  menu.className="menu one";partBar(menu);
+  if(UI.busy){menu.append(el("div","note","⏳ "+UI.busyText));return}
+  if(withMedia.length){const all=el("button","wide","🎬 ぜんぶ シアターで みる");all.onclick=()=>openTheater(withMedia.slice().sort((a,b)=>parseDate(a.date)-parseDate(b.date)),0);menu.append(all)}
+  msg.append(el("div","note","あたらしい おもいでを つくる（日付・ひとこと・写真や動画）"));
+  const emo=el("div","emo");DIARY_EMO.forEach(e=>{const b=el("button",S.memo===e?"on":"",e);b.onclick=()=>{S.memo=e;save();render()};emo.append(b)});
+  const row2=el("div","row2");const dt=el("input");dt.type="date";dt.id="memDate";dt.value=UI.date||ymd();dt.onchange=()=>{UI.date=dt.value};
+  const inp=el("input");inp.id="memInput";inp.placeholder="れい：はじめての うんどうかい";inp.maxLength=40;inp.value=UI.mdraft;inp.oninput=()=>{UI.mdraft=inp.value};row2.append(dt,inp);
+  const pend=el("div","pend");
+  UI.pending.forEach((it,i)=>{const pm=el("div","pm");const src=it.type==="photo"?it.data:it.poster;if(src){const im=el("img");im.src=src;im.alt="";pm.append(im)}
+    if(it.type==="video")pm.append(el("div","pl","▶"));const x=el("button","","✕");x.setAttribute("aria-label","やめる");x.onclick=()=>{UI.pending.splice(i,1);render()};pm.append(x);pend.append(pm)});
+  const pick=DB_OK?filebtn(`📷 しゃしん・どうがを えらぶ<small>写真は小さくして、動画はそのまま この端末に保存（動画は ${VIDEO_MAX_SEC}秒・${VIDEO_MAX_MB}MBまで、1つの おもいでに ${MEDIA_MAX}こまで）</small>`,"image/*,video/*",true,async fs=>{
+    if(UI.pending.length+fs.length>MEDIA_MAX){S.msg=`1つの おもいでに つけられるのは ${MEDIA_MAX}こまでです`;render();return}
+    UI.busy=true;UI.busyText="写真・動画を よみこんでいます…";render();const {out,errs}=await ingestFiles(fs);UI.pending.push(...out);UI.busy=false;S.msg=errs.length?errs.join("\n"):null;render()}):el("div","note","⚠️ この端末では写真・動画を保存できません");
+  const add=el("button","wide","🎞️ おもいでを つくる");
+  add.onclick=async()=>{const t=inp.value.trim();if(!t){inp.focus();return}
+    UI.busy=true;UI.busyText="ほぞんしています…";render();
+    const {refs,warn}=await persistMedia(UI.pending);
+    S.memories.push({date:isoToJ(dt.value||ymd()),e:S.memo,t,media:refs});UI.pending=[];UI.mdraft="";UI.date="";UI.busy=false;
+    S.msg=`${warn}おもいでを つくりました${refs.length?"（"+refs.length+"こ）":"（あとから 写真や動画を たせます）"}`;save();render()};
+  inp.addEventListener("keydown",e=>{if(e.key==="Enter")add.click()});
+  menu.append(emo,row2,pend,pick,add);
+}
+function renderEntry(msg,menu){
+  const d=S.memories[S.pidx];if(!d){S.sub="menu";return renderMemories(msg,menu)}
+  const f=$("field");f.innerHTML="";f.className="field grid";
+  if(!d.media.length)f.append(el("div","empty2","しゃしん・どうがは まだ ないよ"));
+  d.media.forEach((m,i)=>{const t=thumbEl(m,"tm");t.onclick=()=>openTheater([d],i);f.append(t)});
+  msg.innerHTML=`<span style="font-size:1.4rem">${d.e}</span> <span class="d">${esc(d.date)}　${mediaBadge(d)}</span><br>${esc(d.t)}`;
+  if(S.msg)msg.append(el("div","",`<span style="font-size:.9rem">${S.msg}</span>`));
+  menu.className="menu one";
+  if(UI.busy){menu.append(el("div","note","⏳ "+UI.busyText));return}
+  const play=el("button","wide","🎬 シアターで みる（BGMつき）");play.disabled=!d.media.length;play.onclick=()=>openTheater([d],0);
+  const addm=DB_OK?filebtn("✚ しゃしん・どうがを たす","image/*,video/*",true,async fs=>{
+    if(d.media.length+fs.length>MEDIA_MAX){S.msg=`1つの おもいでに つけられるのは ${MEDIA_MAX}こまでです`;render();return}
+    UI.busy=true;UI.busyText="写真・動画を ほぞんしています…";render();const {out,errs}=await ingestFiles(fs);const {refs,warn}=await persistMedia(out);d.media.push(...refs);UI.busy=false;
+    S.msg=[warn,...errs].filter(Boolean).join("\n")||`${refs.length}こ たしました`;save();render()}):null;
+  const row=el("div","menu");
+  const x=el("button","wide","とじる");x.onclick=()=>{UI.confirm=false;S.sub="menu";S.msg=null;save();render()};
+  let del;
+  if(!UI.confirm){del=el("button","wide","けす");del.onclick=()=>{UI.confirm=true;render()}}
+  else{del=el("button","wide danger","ほんとうに けす");del.onclick=async()=>{const [it]=S.memories.splice(S.pidx,1);UI.busy=true;UI.busyText="けしています…";render();if(it)await deleteMedia(it.media);UI.busy=false;UI.confirm=false;S.sub="menu";S.msg="おもいでを けしました";save();render()}}
+  row.append(x,del);
+  menu.append(play);if(addm)menu.append(addm);menu.append(row);
+}
+
+// ⚙️ おうちのひと むけ：バックアップ・BGM
+function renderSettings(msg,menu){
+  fieldGrowth(stageIdx(),false);
+  if(S.sub==="export"&&!UI.exportText)S.sub="menu";
+  if(S.sub==="import"&&!UI.pendingImport)S.sub="menu";
+  msg.innerHTML=`<b>⚙️ おうちのひと むけ</b><br><span class="note">ひびの記録 ${S.diary.length}こ ／ おもいで ${S.memories.length}こ ／ 写真 ${PH.size}枚（約 ${mb(photoBytes())}）／ 動画 ${VM.size}本（約 ${mb(videoBytes())}）／ 音楽 ${AU.size}曲${UI.quota?"<br>"+UI.quota:""}${DB_OK?"":"<br>⚠️ この端末では写真・動画を保存できません"}</span>`;
+  if(S.msg)msg.append(el("div","",`<span style="font-size:.9rem">${S.msg}</span>`));
+  menu.className="menu one";
+  if(UI.busy){msg.append(el("div","","⏳ "+UI.busyText));return}
+  if(S.sub==="menu"){
+    const b1=el("button","","💾 バックアップ<small>セーブデータの保存・読み込み・全消去</small>");b1.onclick=()=>{S.sub="backup";save();render()};
+    const b2=el("button","",`🎵 BGM<small>いま：${esc(bgmName(S.bgm))}</small>`);b2.onclick=()=>{S.sub="bgm";save();render()};
+    menu.append(b1,b2);return;
+  }
+  if(S.sub==="backup"){
+    const b1=el("button","","📥 セーブデータを保存（記録だけ・小さい）<small>名前・ステータス・記録の文字。写真や動画は入りません</small>");b1.onclick=()=>exportJson();
+    const b2=el("button","","📦 ぜんぶバックアップ（zip）<small>写真・動画・音楽もまとめて1つのzipに。機種変更のときに</small>");b2.onclick=()=>exportZip();
+    const lab=filebtn("📂 読み込む（json または zip）<small>保存したファイルを選びます</small>",".json,.zip,application/json,application/zip,text/plain",false,fs=>importFile(fs[0]));
+    const b3=el("button","","✏️ テキストを貼りつけて読み込む");b3.onclick=()=>{S.sub="paste";save();render()};
+    const b4=el("button","danger","🗑️ はじめから（ぜんぶ消す）");b4.onclick=()=>{S.sub="reset";save();render()};
+    const x=el("button","wide","もどる");x.onclick=()=>{S.sub="menu";save();render()};
+    menu.append(b1,b2,lab,b3,b4,x);return;
+  }
+  if(S.sub==="bgm"){
+    msg.append(el("div","note","おもいでシアターで流れる曲です。▶ で7秒ためせます"));
+    const opts=["gen1","gen2",...[...AU.keys()].map(id=>"a:"+id),"none"];
+    for(const o of opts){const row=el("div","menu");row.style.gridTemplateColumns="1fr auto auto";
+      const sel=el("button",S.bgm===o?"sel":"",`${S.bgm===o?"✅ ":""}${esc(bgmName(o))}${o.startsWith("a:")?`<small>${mb((AU.get(o.slice(2))||{}).size||0)}</small>`:""}`);sel.onclick=()=>{S.bgm=o;save();render()};row.append(sel);
+      if(o!=="none"){const t=el("button","wide","▶");t.setAttribute("aria-label","ためす");t.onclick=()=>testBgm(o);row.append(t)}
+      if(o.startsWith("a:")){const dl=el("button","wide danger","🗑️");dl.setAttribute("aria-label","消す");dl.onclick=async()=>{const id=o.slice(2);stopBgm();try{await sDel("audio",id)}catch(e){}const a=AU.get(id);if(a)try{URL.revokeObjectURL(a.url)}catch(e){}AU.delete(id);if(S.bgm===o)S.bgm="gen1";save();render()};row.append(dl)}
+      menu.append(row)}
+    const lab=filebtn(`＋ 音楽ファイルを追加<small>mp3 / m4a / wav など、${AUDIO_MAX_MB}MBまで。フリー音源やご自身の曲など、使ってよい音源だけ入れてください</small>`,"audio/*,.mp3,.m4a,.wav,.ogg,.aac",false,async fs=>{const f=fs[0];
+      if(f.size>AUDIO_MAX_MB*1048576){S.msg=`${AUDIO_MAX_MB}MBをこえています`;render();return}
+      UI.busy=true;UI.busyText="音楽を ほぞんしています…";render();const id=uid("a");
+      try{await sPut("audio",{id,name:f.name.replace(/\.[^.]+$/,""),mime:f.type||"audio/mpeg",size:f.size,blob:f,ts:Date.now()});await loadMedia();S.bgm="a:"+id;S.msg="追加しました"}catch(e){S.msg="保存できませんでした"}
+      UI.busy=false;save();render()});
+    const x=el("button","wide","もどる");x.onclick=()=>{stopBgm();S.sub="menu";save();render()};
+    menu.append(lab,x);return;
+  }
+  if(S.sub==="export"){
+    msg.append(el("div","note","この画面ではファイル保存ができないので、下のテキストをコピーして、メモアプリなどに貼りつけて保存してください。"));
+    const ta=el("textarea");ta.id="exportText";ta.readOnly=true;ta.value=UI.exportText;
+    const c=el("button","wide","📋 テキストをコピー");c.onclick=()=>{navigator.clipboard.writeText(UI.exportText).then(()=>{c.textContent="✅ コピーしました"}).catch(()=>{ta.focus();ta.select();c.textContent="テキストを選んでコピーしてください"})};
+    const x=el("button","wide","とじる");x.onclick=()=>{UI.exportText=null;S.sub="backup";save();render()};
+    menu.append(ta,c,x);return;
+  }
+  if(S.sub==="paste"){
+    const ta=el("textarea");ta.id="pasteText";ta.placeholder="ここに セーブデータの テキストを 貼りつける";
+    const b=el("button","wide","読み込む");b.onclick=()=>importJsonText(ta.value);
+    const x=el("button","wide","やめる");x.onclick=()=>{S.sub="backup";save();render()};
+    menu.append(ta,b,x);return;
+  }
+  if(S.sub==="import"){
+    const {idx,zip}=UI.pendingImport;const sv=idx.save;
+    const media=zip?`写真 ${(idx.photos||[]).length}枚・動画 ${(idx.videos||[]).length}本・音楽 ${(idx.audio||[]).length}曲（この端末のものと入れかわります）`:(Array.isArray(idx.photos)&&idx.photos.length?`写真 ${idx.photos.length}枚（入れかわります）`:"なし（この端末の写真・動画はそのまま残ります）");
+    msg.append(el("div","",`<b>読み込む内容</b><br><span class="note">名前：${esc(sv.name||"（なし）")}／ひびの記録 ${sv.diary.length}こ／おもいで ${(sv.memories||[]).length}こ／${media}／保存日 ${esc(String(idx.exported||"").slice(0,10))}</span><br>⚠️ いまのデータは消えて、このデータに置きかわります。`));
+    const b=el("button","wide","✅ 読み込む");b.onclick=()=>applyImport();
+    const x=el("button","wide","やめる");x.onclick=()=>{UI.pendingImport=null;S.sub="backup";save();render()};
+    menu.append(b,x);return;
+  }
+  if(S.sub==="reset"){
+    msg.append(el("div","","⚠️ 名前・ステータス・記録・写真・動画・音楽が ぜんぶ消えます。先にバックアップを保存しておくと安心です。"));
+    const b=el("button","wide danger","🗑️ ぜんぶ消して はじめから");b.onclick=()=>resetAll();
+    const x=el("button","wide","やめる");x.onclick=()=>{S.sub="backup";save();render()};
+    menu.append(b,x);return;
+  }
+  S.sub="menu";render();
+}
+function updateQuota(){try{if(navigator.storage&&navigator.storage.estimate)navigator.storage.estimate().then(e=>{if(e&&e.quota){UI.quota=`この端末でアプリが使える容量の目安：${mb(e.usage||0)} / ${(e.quota/1073741824).toFixed(1)} GB`;if(S.view==="settings"&&!UI.busy)render()}}).catch(()=>{})}catch(e){}}
+
+function start(data){try{if(data&&valid(data.S))S=Object.assign(FRESH(),data.S);else load();if(!valid(S))S=FRESH();migrate();if(!S.used||typeof S.used!=="object")S.used={};if(S.sub==="entry"&&!S.memories[S.pidx])S.sub="menu";if(S.sub==="dentry"&&!S.diary[S.pidx])S.sub="menu";
+  render();loadMedia().then(()=>{if(S.bgm.startsWith("a:")&&!AU.has(S.bgm.slice(2)))S.bgm="gen1";if(S.view==="diary"||S.view==="settings")render();updateQuota()})}
+  catch(e){S=FRESH();try{localStorage.removeItem("kabun4")}catch(_){}render()}}
+window.claude?.hot?.snapshot?.(()=>({S}));
+window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
+</script>
