@@ -8,7 +8,7 @@ async function deliver(fname,data,size){
 function dlErrMsg(e){const c=e&&e.code;if(c==="declined")return "保存をやめました。";if(c==="too_large")return "大きすぎて保存できません。";return null}
 async function exportJson(){
   UI.busy=true;UI.busyText="つくっています…";S.msg=null;render();
-  const text=JSON.stringify({app:"kabun",ver:2,exported:new Date().toISOString(),save:S});const fname=`kabun-save-${ymd()}.json`;
+  const text=JSON.stringify({app:"kabun",ver:3,exported:new Date().toISOString(),save:S});const fname=`kabun-save-${ymd()}.json`;
   try{const r=await deliver(fname,text,mb(new Blob([text]).size));if(r)S.msg=r;else{UI.exportText=text;S.sub="export"}}
   catch(e){S.msg=dlErrMsg(e);if(!S.msg){UI.exportText=text;S.sub="export"}}
   UI.busy=false;save();render()}
@@ -16,7 +16,7 @@ const extOf=m=>({"video/mp4":"mp4","video/quicktime":"mov","video/webm":"webm","
 async function exportZip(){
   if(typeof JSZip==="undefined"){S.msg="zip機能を読み込めませんでした。通信できる状態で開き直してください。";render();return}
   UI.busy=true;UI.busyText="zipを つくっています…（動画が多いと時間がかかります）";S.msg=null;render();
-  try{const zip=new JSZip();const idx={app:"kabun",ver:2,exported:new Date().toISOString(),save:S,photos:[],videos:[],audio:[]};
+  try{const zip=new JSZip();const idx={app:"kabun",ver:3,exported:new Date().toISOString(),save:S,photos:[],videos:[],audio:[]};
     for(const p of (await sAll("photos"))||[]){if(!p||!p.data)continue;const b64=p.data.split(",")[1];if(!b64)continue;const file=`photos/${p.id}.jpg`;zip.file(file,b64,{base64:true});idx.photos.push({id:p.id,w:p.w,h:p.h,ts:p.ts,file})}
     for(const m of (await sAll("vmeta"))||[]){const v=await sGet("videos",m.id);if(!v||!v.blob)continue;const file=`videos/${m.id}.${extOf(m.mime)}`;zip.file(file,v.blob);idx.videos.push({id:m.id,mime:m.mime,size:m.size,dur:m.dur,poster:m.poster,ts:m.ts,file})}
     for(const a of (await sAll("audio"))||[]){if(!a||!a.blob)continue;const file=`audio/${a.id}.${extOf(a.mime)}`;zip.file(file,a.blob);idx.audio.push({id:a.id,name:a.name,mime:a.mime,size:a.size,file})}
@@ -47,8 +47,9 @@ async function applyImport(){const pi=UI.pendingImport;UI.pendingImport=null;if(
     else if(Array.isArray(idx.photos)&&idx.photos.length&&idx.photos[0].data){await sClear("photos");for(const p of idx.photos)if(p&&p.id&&p.data)await sPut("photos",p);pmsg=`、写真 ${idx.photos.length}枚`}
     await loadMedia()}
   catch(e){pmsg="（写真・動画の一部を保存できませんでした）"}
-  S=Object.assign(FRESH(),idx.save);migrate();S.view="settings";S.sub="menu";UI.pending=[];UI.draft="";UI.mdraft="";
+  S=Object.assign(FRESH(),idx.save);migrate();dayRoll();S.view="settings";S.sub="menu";UI.draft="";
   if(S.bgm.startsWith("a:")&&!AU.has(S.bgm.slice(2)))S.bgm="gen1";
   S.msg=`読み込みました（ひびの記録 ${S.diary.length}こ、おもいで ${S.memories.length}こ${pmsg}）`;UI.busy=false;save();render()}
-async function resetAll(){UI.busy=true;UI.busyText="消しています…";render();for(const s of STORES){try{await sClear(s)}catch(e){}}PH.clear();VM.clear();AU.clear();S=FRESH();UI.pending=[];UI.draft="";UI.busy=false;try{localStorage.removeItem("kabun4")}catch(e){}render()}
+async function resetAll(){UI.busy=true;UI.busyText="消しています…";render();for(const s of STORES){try{await sClear(s)}catch(e){}}PH.clear();VM.clear();AU.clear();S=FRESH();UI.draft="";UI.busy=false;
+  for(const key of [SAVE_KEY,...OLD_KEYS]){try{localStorage.removeItem(key)}catch(e){}}dayRoll();S.view="settings";render()}
 

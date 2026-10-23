@@ -1,28 +1,60 @@
 // ---------- 状態（localStorage） ----------
-const FRESH=()=>({name:"",ch:0,str:0,wise:0,world:0,heart:0,view:"growth",sub:"menu",line:0,hp:MAXHP,foehp:null,quiz:null,ans:null,used:{},msg:null,diary:[],memories:[],emo:"🌟",memo:"📸",part:"daily",pidx:-1,bgm:"gen1",bgmOn:true});
+const SAVE_KEY="kabun5", OLD_KEYS=["kabun4"];
+const H=()=>({n:0,best:0,miss:{},last:[]});
+const FRESH=()=>({name:"",ch:0,str:0,wise:0,world:0,heart:0,view:"growth",sub:"menu",line:0,hp:50,foe:null,sess:null,
+  daily:{d:"",done:{},score:{},diary:false,bonus:false,bonusNet:false},cap:1,
+  lv:{num:1,eng:1,flag:1,animal:1},rev:{num:[],eng:[],flag:[],animal:[]},hist:{num:H(),eng:H(),flag:H(),animal:H()},
+  used:{},items:{net:0},dex:{},flags:{},custom:[],chips:null,voice:true,se:true,
+  msg:null,diary:[],emo:"🌟",chip:null,memories:[],memo:"📸",part:"daily",pidx:-1,bgm:"gen1",bgmOn:true});
 function valid(o){return !!(o&&typeof o==="object"&&typeof o.ch==="number"&&typeof o.view==="string"&&typeof o.str==="number"&&typeof o.name==="string"&&Array.isArray(o.diary))}
-function migrate(){if(!Array.isArray(S.memories))S.memories=[];for(const d of S.memories)if(!Array.isArray(d.media))d.media=[];
+function migrate(){
+  const fresh=FRESH();
+  for(const key of ["daily","lv","rev","hist","used","items","dex","flags"])if(!S[key]||typeof S[key]!=="object"||Array.isArray(S[key]))S[key]=fresh[key];
+  if(!S.daily.done||typeof S.daily.done!=="object")S.daily.done={};if(!S.daily.score||typeof S.daily.score!=="object")S.daily.score={};
+  for(const c of CATS){
+    if(typeof S.lv[c]!=="number")S.lv[c]=1;if(!Array.isArray(S.rev[c]))S.rev[c]=[];
+    if(!S.hist[c]||typeof S.hist[c]!=="object")S.hist[c]=H();else{const h=S.hist[c];h.n=h.n||0;h.best=h.best||0;if(!h.miss||typeof h.miss!=="object")h.miss={};if(!Array.isArray(h.last))h.last=[]}
+    // 旧セーブ：出題済みが配列の添字だったので id に変換する
+    S.used[c]=Array.isArray(S.used[c])?S.used[c].map(x=>typeof x==="number"?legacyId(c,x):x).filter(x=>typeof x==="string"):[];
+  }
+  if(!Array.isArray(S.custom))S.custom=[];if(typeof S.items.net!=="number")S.items.net=0;
+  if(typeof S.voice!=="boolean")S.voice=true;if(typeof S.se!=="boolean")S.se=true;if(typeof S.cap!=="number")S.cap=1;
+  if(typeof S.chip!=="string")S.chip=null;
+  // おもいで（シアター）は v2 では UI から外したが、データは残す
+  if(!Array.isArray(S.memories))S.memories=[];for(const d of S.memories)if(!Array.isArray(d.media))d.media=[];
   S.diary=S.diary.filter(d=>{if(d.p){d.media=[{id:d.p,type:"photo"},...(d.media||[])];delete d.p}if(Array.isArray(d.media)&&d.media.length){S.memories.push({date:d.date,e:d.e,t:d.t,media:d.media});return false}delete d.media;return true});
-  if(typeof S.memo!=="string")S.memo="📸";if(S.part!=="memory")S.part="daily";if(typeof S.bgm!=="string")S.bgm="gen1";if(typeof S.bgmOn!=="boolean")S.bgmOn=true}
+  if(typeof S.memo!=="string")S.memo="📸";if(typeof S.bgm!=="string")S.bgm="gen1";if(typeof S.bgmOn!=="boolean")S.bgmOn=true;S.part="daily";
+  // 旧：1問ごとのクイズ状態は捨てる。戦っていた かべ のHPは S.foe に引き継ぐ
+  delete S.quiz;delete S.ans;
+  if(S.ch>CHAPTERS.length)S.ch=CHAPTERS.length;
+  if(typeof S.foehp==="number"&&S.ch<CHAPTERS.length&&S.foehp>0){S.foe=mkFoe(S.ch);S.foe.hp=Math.min(S.foe.max,S.foehp)}delete S.foehp;
+  if(S.foe&&(typeof S.foe!=="object"||S.foe.ch!==S.ch||typeof S.foe.hp!=="number"))S.foe=null;
+  if(S.foe){const base=mkFoe(S.ch);for(const key of Object.keys(base))if(S.foe[key]===undefined)S.foe[key]=base[key]}
+  if(!["growth","battle","diary","settings"].includes(S.view))S.view="growth";
+  if(S.view==="diary"&&S.sub==="dentry"&&!S.diary[S.pidx])S.sub="menu";
+  if(!["menu","dentry","backup","stats","cap","sound","pin","dev","paste"].includes(S.sub))S.sub="menu";
+  if(S.sess&&(!Array.isArray(S.sess.items)||S.sess.d!==ymd()))S.sess=null;
+  if(typeof S.hp!=="number"||S.hp<=0||S.hp>maxHp())S.hp=maxHp();
+  S.line=0;S.msg=null;
+}
 let S=FRESH();
-const UI={busy:false,busyText:"",exportText:null,pendingImport:null,pending:[],confirm:false,draft:"",mdraft:"",date:"",quota:""};
-function load(){try{const v=localStorage.getItem("kabun4");if(v){const o=JSON.parse(v);if(valid(o))S=Object.assign(FRESH(),o)}}catch(e){}}
-function save(){try{localStorage.setItem("kabun4",JSON.stringify(S))}catch(e){}}
+const UI={busy:false,busyText:"",exportText:null,pendingImport:null,confirm:false,draft:"",quota:"",lockUntil:0,pinBuf:"",pinNew:"",unlockUntil:0,pinFail:0,pinLockUntil:0,saveErr:false};
+function load(){for(const key of [SAVE_KEY,...OLD_KEYS]){try{const v=localStorage.getItem(key);if(v){const o=JSON.parse(v);if(valid(o)){S=Object.assign(FRESH(),o);return key}}}catch(e){}}return null}
+function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S));UI.saveErr=false}catch(e){UI.saveErr=true}}
+// 日付が変わったら きょうの分 をリセット（端末のローカル日付）
+function dayRoll(){const t=ymd();if(S.daily.d!==t){S.daily={d:t,done:{},score:{},diary:false,bonus:false,bonusNet:false};if(S.sess&&S.sess.d!==t)S.sess=null;return true}return false}
+const $=id=>document.getElementById(id);
 function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+// 進化段階：倒した章の evolve から求める（S.ch は戻さないので不可逆）
 function stageIdx(){let s=0;for(let i=0;i<S.ch&&i<CHAPTERS.length;i++)if(CHAPTERS[i].evolve!=null)s=CHAPTERS[i].evolve;return Math.min(s,STAGES.length-1)}
-function level(){return 1+Math.floor(STATS.reduce((a,k)=>a+S[k],0)/8)}
-function pickQuiz(cat){
-  const used=S.used[cat]||[];let idx=QUIZ[cat].map((_,i)=>i).filter(i=>!used.includes(i));
-  if(!idx.length){S.used[cat]=[];idx=QUIZ[cat].map((_,i)=>i)}
-  const i=idx[Math.floor(Math.random()*idx.length)];(S.used[cat]=S.used[cat]||[]).push(i);
-  const [q,opts,sub]=QUIZ[cat][i];return {cat,q,opts:opts.slice().sort(()=>Math.random()-.5),correct:opts[0],sub:sub||null};
-}
+function statSum(){return STATS.reduce((a,k)=>a+S[k],0)}
+function level(){return 1+Math.floor(statSum()/LV_DIV)}
 function hpClass(r){return r<.25?"bad":r<.5?"mid":""}
 function mb(n){return (n/1048576).toFixed(1)+" MB"}
 function uid(p){return p+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
-function ymd(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+function ymd(d){d=d||new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+function addDays(iso,n){const [y,m,d]=String(iso).split("-").map(Number);return ymd(new Date(y,m-1,d+n))}
 function parseDate(s){const [y,m,d]=String(s).split("/").map(Number);return new Date(y||2000,(m||1)-1,d||1).getTime()}
 function todayJ(){const d=new Date();return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`}
 function isoToJ(iso){const [y,m,d]=String(iso).split("-").map(Number);return y&&m&&d?`${y}/${m}/${d}`:todayJ()}
-

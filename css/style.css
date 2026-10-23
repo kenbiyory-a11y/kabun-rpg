@@ -2,7 +2,7 @@
 :root{
   --bg:#1b1f1a; --screen:#f4f1dc; --fg:#1f2418; --muted:#6b7055; --frame:#2d3326; --win:#ffffff; --winline:#1f2418;
   --hpok:#3fbf5f; --hpmid:#e6b800; --hpbad:#e0442f; --hpbg:#d8d4bd; --accent:#1f2418; --accent-ink:#f4f1dc; --sky:#cfe7f7; --ground:#9fd27a;
-  --c-str:#e0442f; --c-wise:#3a7bd5; --c-world:#2aa37a; --c-heart:#e8608a; --gold:#ffe066;
+  --c-str:#e0442f; --c-wise:#e6b800; --c-world:#3a7bd5; --c-heart:#e8608a; --gold:#ffe066;
   --font:'DotGothic16','Hiragino Maru Gothic ProN','Yu Gothic',monospace;
   color-scheme:light;
 }
@@ -138,3 +138,67 @@ img.slide.kb{animation:kb 4.5s linear forwards}
 .update{position:fixed;left:16px;right:16px;bottom:16px;max-width:488px;margin:0 auto;z-index:60;background:var(--win);border:3px solid var(--winline);border-radius:8px;padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;font-size:.95rem;box-shadow:4px 4px 0 var(--winline)}
 .update[hidden]{display:none}
 .update button{padding:6px 10px;font-size:.95rem}
+/* ---------- v2：へや・とっくん・バトル・おうちのひと ---------- */
+.msg{position:relative}
+.note2{font-size:.95rem;background:#fff6cc;border-radius:6px;padding:4px 8px;white-space:pre-wrap;margin-top:4px}
+.ctr{text-align:center}
+.big2{font-size:1.2rem}
+.lvbar{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:.95rem;margin:2px 0}
+.lvbar .bar{height:12px;background:var(--hpbg);border:2px solid var(--winline);border-radius:4px;overflow:hidden}
+.lvbar .bar i{display:block;height:100%;background:var(--gold);transition:width .4s}
+.lvbar small{color:var(--muted);font-size:.78rem}
+.board{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:1.05rem;background:#fff6cc;border:2px solid var(--winline);border-radius:6px;padding:3px 8px;margin:2px 0}
+.board small{font-size:.75rem;color:var(--muted);margin-right:2px}
+.board .slot{opacity:.5}.board .slot.on{opacity:1}
+.board .sep{color:var(--muted)}
+.dots{display:flex;gap:6px;align-items:center;font-size:1.3rem;margin-bottom:2px;padding-right:48px}
+.dots span.now{outline:3px solid var(--hpmid);border-radius:50%}
+.dots small{margin-left:auto;font-size:.8rem;color:var(--muted)}
+.chal{display:inline-block;font-size:.78rem;background:var(--gold);border-radius:6px;padding:0 6px;margin-bottom:4px}
+.qtext{display:block;font-size:1.35rem;text-align:center;margin:6px 0;line-height:1.4}
+.spk{position:absolute;right:0;top:0;padding:4px 8px;font-size:1.2rem;line-height:1;border-width:2px}
+.spk::before{display:none}
+.menu.ico3{grid-template-columns:1fr 1fr 1fr}
+button.opt{font-size:1.15rem;padding:10px 10px 10px 34px}
+button.opt .no{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:.8rem;color:var(--muted);border:2px solid var(--muted);border-radius:50%;width:1.4em;height:1.4em;display:grid;place-items:center;line-height:1}
+button.opt::before{display:none}
+button.opt.ico{font-size:2.4rem;text-align:center;padding:8px 4px;min-height:78px;line-height:1.2}
+button.opt.right{background:#dff5d8;border-color:var(--hpok);animation:pulse 1s infinite}
+button.opt.dim{opacity:.35}
+button.opt:disabled:not(.dim){opacity:.75}
+@keyframes pulse{50%{transform:scale(1.03)}}
+button.opt.live{animation:pop .25s}
+@keyframes pop{0%{transform:translateY(3px)}100%{transform:none}}
+/* わざ 2×2：位置固定（左上💪・右上💡・左下💨・右下💗）、色＋絵＋ひらがな */
+.menu.moves{grid-template-columns:1fr 1fr}
+button.mv{position:relative;padding:8px 10px 8px 44px;min-height:66px;text-align:left}
+button.mv::before{display:none}
+button.mv .mi{position:absolute;left:8px;top:10px;font-size:1.6rem;line-height:1}
+button.mv .mn{display:block;font-size:1rem;line-height:1.3}
+button.mv.str{border-color:var(--c-str);background:#ffe6e2}
+button.mv.wise{border-color:var(--c-wise);background:#fff6cc}
+button.mv.world{border-color:var(--c-world);background:#e2eeff}
+button.mv.heart{border-color:var(--c-heart);background:#ffe3ee}
+.bd{display:inline-block;border:2px solid var(--winline);border-radius:8px;padding:0 5px;font-size:.95rem;background:var(--win);line-height:1.5}
+.bd.star{background:var(--gold)}
+.bd.shield{background:#dde3ea}
+.hud .bds{display:flex;gap:4px;margin-top:3px}
+.hud .bds .bd{font-size:1.1rem;padding:0 6px}
+button.mv .bd{position:absolute;right:6px;top:6px;font-size:1.1rem}
+button.mv.star{box-shadow:0 0 0 3px var(--gold)}
+button.mv.star .bd.star{animation:wob 1.6s ease-in-out infinite}
+@keyframes wob{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
+.field.flash{animation:flash .35s}
+@keyframes flash{0%{filter:brightness(1)}30%{filter:brightness(2.4)}100%{filter:brightness(1)}}
+.bang{display:inline-block;background:var(--hpbad);color:#fff;border-radius:50%;padding:0 6px;font-size:.8rem;line-height:1.4}
+.chips{display:flex;gap:4px;flex-wrap:wrap}
+.chips button{padding:4px 8px;font-size:.85rem;line-height:1.3}
+.chips button::before{display:none}
+.chips button.on{background:var(--hpmid)}
+.menu.keypad{grid-template-columns:1fr 1fr 1fr}
+.menu.keypad button{text-align:center;padding:10px;font-size:1.3rem}
+.menu.keypad button::before{display:none}
+.pin{letter-spacing:.4em;font-size:1.6rem;text-align:center;margin:4px 0}
+.stats{display:grid;gap:6px;font-size:.9rem}
+.stats .srow{border-bottom:1px dashed var(--hpbg);padding-bottom:4px}
+@media (prefers-reduced-motion:reduce){button.opt.right,button.opt.live,button.mv.star .bd.star,.field.flash{animation:none}}

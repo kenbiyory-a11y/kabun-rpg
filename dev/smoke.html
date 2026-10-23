@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><title>smoke</title><link rel="stylesheet" href="../css/style.css"></head>
+<body>
+<div class="console"><div class="screen"><div class="field" id="field"></div><div class="msgbox" id="msgbox"></div></div>
+<div class="nav" id="nav"><button class="nb" data-tab="growth">📈</button><button class="nb" data-tab="battle">⚔️</button><button class="nb" data-tab="diary">📖</button><button class="nb gear" data-tab="settings">⚙️</button></div></div>
+<div id="update" hidden><button id="updateBtn"></button></div>
+<pre id="log"></pre>
+<script src="../vendor/jszip.min.js" defer></script>
+<script src="../js/data.js" defer></script>
+<script src="../js/quiz.js" defer></script>
+<script src="../js/quiz/num.js" defer></script>
+<script src="../js/quiz/eng.js" defer></script>
+<script src="../js/quiz/flag.js" defer></script>
+<script src="../js/quiz/animal.js" defer></script>
+<script src="../js/state.js" defer></script>
+<script src="../js/media.js" defer></script>
+<script src="../js/backup.js" defer></script>
+<script src="../js/bgm.js" defer></script>
+<script src="../js/voice.js" defer></script>
+<script src="../js/render.js" defer></script>
+<script src="../js/diary.js" defer></script>
+<script src="../js/settings.js" defer></script>
+<script defer>
+window.addEventListener("DOMContentLoaded",()=>{
+const L=[];const log=(...a)=>L.push(a.join(" "));
+window.onerror=(m,src,line)=>{log("JSERROR",m,src,line)};
+const txt=()=>$("msgbox").innerText;
+const btn=(t)=>Array.from(document.querySelectorAll("#msgbox button")).find(b=>b.innerText.includes(t));
+const chk=(c,m)=>log(c?"ok:":"FAIL:",m);
+try{
+  localStorage.clear();S=FRESH();migrate();dayRoll();S.se=false;S.voice=false;render();
+  chk(txt().includes("なまえ")||!!document.getElementById("nameInput"),"初回：なまえ入力");
+  S.name="テスト";save();render();
+  chk(txt().includes("きょうの 5つ")&&txt().includes("Lv1"),"へや：ボードとレベル");
+  chk(document.querySelectorAll("#msgbox button").length===4,"4分野のボタン");
+  btn("すうじの とっくん").click();
+  chk(S.sub==="quiz"&&S.sess&&S.sess.items.length===5,"セッション開始 5問");
+  for(let i=0;i<5;i++){UI.lockUntil=0;render();const it=S.sess.items[S.sess.i];
+    const opts=Array.from(document.querySelectorAll("#msgbox button.opt"));chk(opts.length===it.opts.length&&opts.every(b=>!b.disabled),`${i+1}もんめ：選択肢 ${opts.length}`);
+    const right=opts.find(b=>b.innerText.replace(/^\d+\s*/,"").trim()===it.a);if(!right){log("no right button for",it.a,opts.map(b=>b.innerText));break}
+    right.click();chk(S.sess.phase==="after"&&S.sess.res[i]===true,"せいかい");
+    if(typer)typeNode.click();btn("つぎへ").click()}
+  chk(S.sub==="result"&&S.sess.result&&S.sess.result.ok===5&&S.sess.result.gain===7,"結果：5/5 +7 "+JSON.stringify(S.sess.result&&{ok:S.sess.result.ok,gain:S.sess.result.gain}));
+  chk(txt().includes("ぜんもん せいかい"),"結果画面の文言");
+  btn("もどる").click();chk(S.sess===null&&S.sub==="menu"&&S.str===7,"もどる → ちから7");
+  chk(btn("おやすみちゅう")&&btn("おやすみちゅう").disabled,"すうじ は おやすみちゅう");
+  // まちがい → 正解をタップして締める
+  btn("えいごの とっくん")?btn("えいごの とっくん").click():log("skip eng (no data)");
+  if(S.sess){UI.lockUntil=0;render();const it=S.sess.items[0];const wrong=Array.from(document.querySelectorAll("#msgbox button.opt")).find(b=>b.innerText.replace(/^\d+\s*/,"").trim()!==it.a);wrong.click();
+    chk(S.sess.pending===true&&txt().includes("こたえは これだよ"),"まちがい → こたえは これだよ");
+    const right=Array.from(document.querySelectorAll("#msgbox button.opt")).find(b=>!b.disabled);chk(right&&right.innerText.replace(/^\d+\s*/,"").trim()===it.a,"正解だけ押せる");right.click();
+    chk(S.sess.res[0]===false&&S.sess.phase==="after","正解タップで次へ");S.sess=null;S.sub="menu";S.daily.done.eng=0}
+  // バトル：Lv5 にして 第1話
+  S.str=8;S.wise=8;S.world=8;S.heart=8;save();S.view="battle";S.sub="menu";render();
+  chk(txt().includes("からを やぶれ"),"第1話が出る");btn("ちょうせん").click();
+  chk(S.sub==="fight"&&S.foe&&S.foe.name==="たまごのから","バトル開始");
+  let turns=0;while(S.foe&&S.foe.hp>0&&turns<10){turns++;const star=document.querySelector("#msgbox button.mv.star");chk(!!star,"★ボタンあり");star.click();chk(S.sub==="turn"&&S.msg.includes("ばつぐん"),"ばつぐん表示");if(typer)typeNode.click();btn("つぎへ").click()}
+  chk(turns===4&&S.sub==="win","★4ターンで勝ち（"+turns+"）");
+  if(typer)typeNode.click();btn("つぎへ").click();if(typer)typeNode.click();chk(S.sub==="win"&&S.line===1,"勝利台詞2行目");btn("？？？").click();
+  chk(S.sub==="evolve","進化へ");if(typer)typeNode.click();btn("つぎへ").click();chk(txt().includes("ようちゅう")&&txt().includes("あたらしい わざ"),"進化画面");btn("すすむ").click();
+  chk(S.ch===1&&stageIdx()===1&&S.foe===null,"第1話クリア → ようちゅう");
+  chk(txt().includes("レベル 8"),"第2話は Lv8 待ち");
+  // 負け：第2話を無理やり、HP を 1 にして反撃で負ける
+  S.str=14;S.wise=14;S.world=14;S.heart=14;render();btn("ちょうせん").click();S.hp=1;const nonstar=Array.from(document.querySelectorAll("#msgbox button.mv")).find(b=>!b.classList.contains("star"));nonstar.click();
+  if(typer)typeNode.click();btn("つぎへ").click();chk(S.sub==="lose"&&S.foe.hp<S.foe.max,"負け画面、かべのきずは残る");if(typer)typeNode.click();btn("もどる").click();chk(S.sub==="menu"&&S.hp===maxHp()&&S.foe&&S.foe.hp<S.foe.max,"もどる：HP全快、かべHPは減ったまま");
+  // きろく
+  S.view="diary";S.sub="menu";render();chk(txt().includes("ひびの きろく"),"きろく画面");btn("おてつだい した").click();chk(S.chip==="おてつだい した","できたこと選択");
+  const before=S.str;btn("きろくする").click();chk(S.daily.diary===true&&S.str===before+1&&S.diary.length===1,"きろく → +1");
+  btn("はやく ねた").click();btn("きろくする").click();chk(S.diary.length===2&&S.str===before+1&&txt().includes("もう もらったよ"),"2件目は +1 なし");
+  // 設定：暗証番号
+  localStorage.removeItem("kabun-pin");S.view="settings";S.sub="menu";render();chk(txt().includes("おうちのひと むけ"),"PINなし：設定が開く");
+  pinSet("1234");UI.unlockUntil=0;render();chk(document.querySelectorAll("#msgbox button").length===12&&txt().includes("ばんごう"),"PINあり：テンキー");
+  for(const d of ["9","9","9","9"])btn(d).click();chk(txt().includes("ちがうみたい"),"まちがい番号");
+  for(const d of ["1","2","3","4"])btn(d).click();chk(unlocked()&&txt().includes("おうちのひと むけ"),"正しい番号で解除");
+  btn("せいせき").click();chk(txt().includes("すうじ")&&txt().includes("さいこう 5/5"),"せいせき");
+  localStorage.removeItem("kabun-pin");
+}catch(e){log("EXC",e&&e.stack||e)}
+$("log").textContent=L.join("\n");document.title="DONE "+(L.some(l=>l.startsWith("FAIL")||l.startsWith("JSERROR")||l.startsWith("EXC"))?"NG":"OK");
+});
+</script>
+</body></html>

@@ -33,34 +33,26 @@
     <button class="nb gear" data-tab="settings" aria-label="おうちのひと むけ せってい">⚙️</button>
   </div>
 </div>
-<p class="foot">データ・写真・動画はこの端末に保存されます。⚙️ からバックアップの保存・読み込みとBGMの設定ができます</p>
-
-<div id="theater" hidden>
-  <div class="tbar"><span class="tcount" id="tCount"></span><button id="tClose" aria-label="とじる">✕ とじる</button></div>
-  <div class="stage" id="stage">
-    <img class="bgblur" id="slBg" alt="">
-    <img class="slide" id="slA" alt=""><img class="slide" id="slB" alt="">
-    <video class="slide" id="slV" playsinline preload="auto"></video>
-    <div class="tcap" id="tCap"></div>
-    <div class="tcard" id="tCard"></div>
-  </div>
-  <div class="tbar"><button id="tBgm">♪ BGM</button><button id="tSound" hidden>🔊 どうがの おとを だす</button><span class="tcount" id="tHint">タップで つぎへ</span></div>
-</div>
+<p class="foot">きろくは この端末に保存されます。⚙️ はおうちのひと用で、バックアップ・せいせき・おとの設定ができます</p>
 
 <div id="update" class="update" hidden role="status">
   <span>あたらしい バージョンが あります</span>
   <button id="updateBtn" class="wide">🔄 さいよみこみ</button>
 </div>
 
-<!-- 読み込み順に意味があります（後のファイルが前のファイルの関数・定数を使います） -->
+<!-- 読み込み順に意味があります（後のファイルが前のファイルの関数・定数を使います）。新しいファイルは sw.js の SHELL にも足すこと -->
 <script src="./vendor/jszip.min.js" defer></script>
 <script src="./js/data.js" defer></script>
 <script src="./js/quiz.js" defer></script>
+<script src="./js/quiz/num.js" defer></script>
+<script src="./js/quiz/eng.js" defer></script>
+<script src="./js/quiz/flag.js" defer></script>
+<script src="./js/quiz/animal.js" defer></script>
 <script src="./js/state.js" defer></script>
 <script src="./js/media.js" defer></script>
 <script src="./js/backup.js" defer></script>
 <script src="./js/bgm.js" defer></script>
-<script src="./js/theater.js" defer></script>
+<script src="./js/voice.js" defer></script>
 <script src="./js/render.js" defer></script>
 <script src="./js/diary.js" defer></script>
 <script src="./js/settings.js" defer></script>

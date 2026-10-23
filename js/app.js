@@ -1,8 +1,16 @@
 // ---------- きどう ----------
-function start(){try{load();if(!valid(S))S=FRESH();migrate();if(!S.used||typeof S.used!=="object")S.used={};if(S.sub==="entry"&&!S.memories[S.pidx])S.sub="menu";if(S.sub==="dentry"&&!S.diary[S.pidx])S.sub="menu";
-  render();loadMedia().then(()=>{if(S.bgm.startsWith("a:")&&!AU.has(S.bgm.slice(2)))S.bgm="gen1";if(S.view==="diary"||S.view==="settings")render();updateQuota()})}
-  catch(e){S=FRESH();try{localStorage.removeItem("kabun4")}catch(_){}render()}}
+function start(){
+  let bad=false;
+  try{load();if(!valid(S))S=FRESH();migrate();dayRoll()}
+  catch(e){S=FRESH();bad=true} // 読めなくても旧データは消さない（kabun4 / kabun5 はそのまま残る）
+  if(bad)S.msg="⚠️ セーブデータを よみこめませんでした。おうちのひとに つたえてね（データは けしていません）";
+  render();
+  loadMedia().then(()=>{if(S.view==="settings")render();updateQuota()}).catch(()=>{});
+}
 start();
+// 開いたまま日付をまたいだとき、きょうの分 を描き直す
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&dayRoll()&&S.sub==="menu"){save();render()}});
+window.addEventListener("focus",()=>{if(dayRoll()&&S.sub==="menu"){save();render()}});
 
 // ---------- PWA：service worker の登録と、更新のおしらせ ----------
 // 新しい sw.js が有効になると controllerchange が飛ぶ。自動で再読み込みはせず、ボタンで。

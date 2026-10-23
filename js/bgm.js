@@ -29,3 +29,9 @@ let testTimer=null;
 function testBgm(opt){clearTimeout(testTimer);playBgmOpt(opt);testTimer=setTimeout(stopBgm,7000)}
 function bgmName(opt){if(GEN[opt])return GEN[opt].name;if(opt==="none")return "なし";if(opt&&opt.startsWith("a:")){const a=AU.get(opt.slice(2));return a?"♪ "+a.name:"（見つかりません）"}return "？"}
 
+// ---------- 効果音（同じシンセで鳴らす。素材ファイルなし。BGM とは独立のゲイン） ----------
+const SFX={tap:[[76,.05]],ok:[[76,.08],[84,.14]],ng:[[62,.22]],gain:[[72,.08],[76,.08],[79,.08],[84,.2]],hit:[[40,.12]],batsu:[[79,.06],[86,.06],[91,.22]],guard:[[45,.12]],evolve:[[60,.1],[64,.1],[67,.1],[72,.1],[76,.1],[79,.4]],catch:[[67,.08],[72,.08],[76,.3]],lvup:[[72,.07],[79,.07],[84,.25]]};
+let sfxGain=null;
+function sfx(n){if(!S||!S.se)return;const ctx=actx();if(!ctx)return;if(!sfxGain){sfxGain=ctx.createGain();sfxGain.gain.value=.5;sfxGain.connect(ctx.destination)}
+  let t=ctx.currentTime;for(const [m,d] of SFX[n]||[]){note(ctx,sfxGain,(n==="ng"||n==="guard"||n==="hit")?"triangle":"square",m,t,d,.18);t+=d}}
+
