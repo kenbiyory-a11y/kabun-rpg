@@ -31,10 +31,12 @@ function renderSettings(msg,menu){
       ["📊 せいせき","分野ごとの回数・にがてな問題・つぎの技","stats"],
       ["⏱ 1日の かず",`いま：分野ごと ${S.cap===0?"せいげんなし":S.cap+"かい"}${S.daily.bonus?"（きょうは もう1かい あり）":""}`,"cap"],
       ["🔊 おと",`よみあげ ${S.voice?"オン":"オフ"} ／ こうかおん ${S.se?"オン":"オフ"} ／ BGM ${S.bgmOn?"オン":"オフ"}`,"sound"],
+      ["👨‍👩‍👧‍👦 かぞくの なまえ",`${S.kids.length?S.kids.join("・"):"（未登録）"}　いま あそんでいるのは ${S.name||"—"}`,"kids"],
       ["🔒 あんしょうばんごう",pinGet()?"設定ずみ（変更・解除）":"未設定","pin"],
       ["💾 バックアップ","セーブデータの保存・読み込み・全消去","backup"],
       ["🔧 かいはつ","ためしに進める・きょうの分を戻す","dev"]];
     for(const [t,s,sub] of items){const b=el("button","",`${t}<small>${esc(s)}</small>`);b.onclick=()=>{S.sub=sub;S.msg=null;save();render()};menu.append(b)}
+    const story=el("button","",`📖 はじまりの おはなし<small>最初に流れるおはなしを読み返す</small>`);story.onclick=()=>{UI.replay=true;S.intro=0;UI.introSaid=false;S.view="growth";S.sub="menu";save();render()};menu.append(story);
     return;
   }
   if(S.sub==="stats"){
@@ -43,6 +45,17 @@ function renderSettings(msg,menu){
       return `<div class="srow"><b>${CAT[c].ico} ${CAT[c].n}</b>　レベル${S.lv[c]}　${h.n}かい　さいこう ${h.best}/5　さいきん ${h.last.length?h.last.join(" "):"—"}<br><span class="note">ふくしゅうばこ ${S.rev[c].length}もん${miss?"　にがて："+miss:""}</span></div>`}).join("");
     const nxt=STATS.map(k=>{const n=nextMoveInfo(k);return n?`${STAT_ICO[k]}「${esc(n.n)}」まで あと ${n.left}`:null}).filter(Boolean).join("　");
     msg.append(el("div","stats",rows+`<div class="note">${nxt?"つぎの わざ："+nxt:(stageIdx()<3?"せいちゅうに なると わざを おぼえていく":"わざは ぜんぶ おぼえた")}</div>`));
+    back();return;
+  }
+  if(S.sub==="kids"){
+    msg.append(el("div","note",`はじまりの おはなし で えらぶ なまえ です（${KIDS_MAX}人まで、8文字まで）。なまえは この端末とバックアップにだけ保存され、インターネットや GitHub には送られません。きろくと カブーンは きょうだいで いっしょです。`));
+    S.kids.forEach((n,i)=>{const row=el("div","menu");row.style.gridTemplateColumns="1fr auto";
+      const cur=el("button",S.name===n?"sel":"",`${S.name===n?"✅ ":""}${esc(n)}<small>${S.name===n?"いま あそんでいる":"この なまえで あそぶ"}</small>`);cur.onclick=()=>{S.name=n;save();render()};
+      const del=el("button","wide danger","🗑️");del.setAttribute("aria-label","けす");del.onclick=()=>{S.kids.splice(i,1);save();render()};
+      row.append(cur,del);menu.append(row)});
+    if(S.kids.length<KIDS_MAX){const inp=el("input");inp.id="kidInput";inp.placeholder="なまえ（ひらがな）";inp.maxLength=8;
+      const add=el("button","wide","＋ とうろく");add.onclick=()=>{const n=inp.value.trim();if(!n){inp.focus();return}if(!S.kids.includes(n))S.kids.push(n);if(!S.name)S.name=n;save();render()};
+      inp.addEventListener("keydown",e=>{if(e.key==="Enter")add.click()});menu.append(inp,add)}
     back();return;
   }
   if(S.sub==="cap"){

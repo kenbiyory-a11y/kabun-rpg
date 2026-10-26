@@ -44,7 +44,7 @@ function renderNav(){
   const ready=!!chapterReady();
   document.querySelectorAll(".nav .nb").forEach(b=>{const t=b.dataset.tab;b.classList.toggle("on",t===S.view);b.disabled=!S.name&&t!=="settings";
     if(t==="battle")b.innerHTML=`⚔️ バトル${ready&&S.view!=="battle"?' <span class="bang">！</span>':""}`;
-    b.onclick=()=>{if(S.view===t)return;S.view=t;S.sub="menu";S.msg=null;S.line=0;UI.confirm=false;UI.pendingImport=null;UI.exportText=null;sayStop();save();render()}});
+    b.onclick=()=>{if(S.view===t&&!UI.replay)return;S.view=t;S.sub="menu";S.msg=null;S.line=0;UI.confirm=false;UI.pendingImport=null;UI.exportText=null;UI.replay=false;UI.introSaid=false;sayStop();save();render()}});
 }
 
 // ---------- がめん ----------
@@ -57,17 +57,41 @@ function renderMain(){
   const tapBtn=(label,fn)=>{menu.className="menu one";const b=el("button","tap",label);b.onclick=()=>{if(typer){typeNode&&typeNode.click();return}fn()};menu.append(b)};
 
   if(S.view==="settings")return renderSettings(msg,menu);
-  if(!S.name){
-    fieldGrowth(0,false);
-    typeText(msg,"カブトムシの たまご「カブーン」を もらった！\nそだてる きみの なまえは？");
-    menu.className="menu one";const inp=el("input");inp.id="nameInput";inp.placeholder="なまえを いれてね";inp.maxLength=10;
-    const b=el("button","wide","ぼうけんを はじめる");b.onclick=()=>{const n=inp.value.trim();if(!n){inp.focus();return}S.name=n;sfx("gain");save();render()};
-    inp.addEventListener("keydown",e=>{if(e.key==="Enter")b.click()});menu.append(inp,b);return;
-  }
+  if(UI.replay||!S.flags.intro)return renderIntro(msg,menu,tapBtn);
+  if(!S.name)return nameSelect(msg,menu,"この たまごを そだてる きみの なまえは？");
   if(S.view==="growth")return renderGrowth(msg,menu,tapBtn);
   if(S.view==="battle")return renderBattle(msg,menu,tapBtn);
   if(S.view==="diary")return renderDiary(msg,menu);
   S.view="growth";renderMain();
+}
+
+// 📖 はじまりの おはなし：初回だけ（UI.replay で読み返し）。タップで1枚ずつ、途中で なまえ を えらぶ
+function fieldScene(bg,ico){const f=$("field");f.innerHTML="";f.className="field "+bg;f.append(el("div","glow"));const sp=el("div","sprite center",ico);sp.id="spMe";f.append(sp)}
+// なまえ を えらぶ：⚙️ で登録した きょうだいの なまえ がボタンに並ぶ。まだ無ければ おうちのひとが入力する（入力した なまえ は登録される）
+function nameSelect(msg,menu,text){
+  fieldScene("diary","🏠");msg.innerHTML=`<span class="qtext">${esc(text)}</span>`;
+  if(!UI.introSaid){UI.introSaid=true;say(text)}
+  menu.className="menu";
+  const pick=n=>{S.name=n;if(!S.kids.includes(n)&&S.kids.length<KIDS_MAX)S.kids.push(n);S.intro=(S.intro||0)+1;UI.introSaid=false;sfx("gain");say(`${n}、よろしくね！`);save();render()};
+  for(const n of S.kids){const b=el("button","wide big2",esc(n));b.onclick=()=>pick(n);menu.append(b)}
+  if(S.kids.length<KIDS_MAX){
+    const inp=el("input");inp.id="nameInput";inp.placeholder=S.kids.length?"ほかの なまえ":"なまえを いれてね";inp.maxLength=8;inp.style.gridColumn="1/-1";
+    const b=el("button","wide",S.kids.length?"この なまえで はじめる":"ぼうけんを はじめる");b.style.gridColumn="1/-1";b.onclick=()=>{const n=inp.value.trim();if(!n){inp.focus();return}pick(n)};
+    inp.addEventListener("keydown",e=>{if(e.key==="Enter")b.click()});menu.append(inp,b);
+  }
+  msg.append(el("div","note","きょうだいの なまえは ⚙️ の「かぞくの なまえ」で とうろく・へんこう できます（この端末にだけ保存）"));
+}
+function introDone(){S.flags.intro=true;S.intro=0;UI.replay=false;UI.introSaid=false;S.view="growth";S.sub="menu";sayStop();save();render()}
+function renderIntro(msg,menu,tapBtn){
+  const i=Math.min(Math.max(S.intro||0,0),INTRO.length-1);const sc=INTRO[i];
+  if(sc.name){if(!S.name)return nameSelect(msg,menu,sc.t);S.intro=i+1;return renderMain()} // 読み返しのときは なまえ の場面を飛ばす
+  fieldScene(sc.bg,sc.ico);
+  const text=sc.t.replace(/\{name\}/g,S.name||"きみ").replace(/\{family\}/g,familyLine());
+  typeText(msg,text,()=>{msg.append(el("span","cur","▼"))});
+  if(!UI.introSaid){UI.introSaid=true;say(text)}
+  const last=i>=INTRO.length-1;
+  tapBtn(last?"▶ ぼうけんの はじまり！":"▶ つぎへ",()=>{UI.introSaid=false;if(last)introDone();else{S.intro=i+1;save();render()}});
+  const skip=el("button","tap","とばす");skip.onclick=()=>{UI.introSaid=false;sayStop();if(!S.name){S.intro=INTRO.findIndex(s=>s.name);save();render()}else introDone()};menu.append(skip);
 }
 
 // 📈 せいちょう（へや）：きょうの 5つ・レベル・とっくん

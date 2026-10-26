@@ -12,7 +12,7 @@ index.html             画面の骨組み（コンソール・タブ・更新の
 manifest.webmanifest   PWA のマニフェスト（名前・アイコン・起動URL）
 sw.js                  Service Worker（アプリ本体をキャッシュしてオフライン対応）
 css/style.css          見た目ぜんぶ
-js/data.js             ステータス・技・相性・進化段階・章（かべ）・各種定数
+js/data.js             ステータス・技・相性・進化段階・章（かべ）・はじまりの おはなし（INTRO / PLAYERS）・各種定数
 js/quiz.js             クイズの器と 5問セッションの組み立て・採点・復習箱・段階式難易度
 js/quiz/num.js         問題データ：すうじ（30問。かぞえる・あわせて・のこり は quiz.js が自動生成）
 js/quiz/eng.js         問題データ：えいご（30問）

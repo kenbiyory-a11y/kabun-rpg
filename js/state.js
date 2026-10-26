@@ -1,7 +1,7 @@
 // ---------- 状態（localStorage） ----------
 const SAVE_KEY="kabun5", OLD_KEYS=["kabun4"];
 const H=()=>({n:0,best:0,miss:{},last:[]});
-const FRESH=()=>({name:"",ch:0,str:0,wise:0,world:0,heart:0,view:"growth",sub:"menu",line:0,hp:50,foe:null,sess:null,
+const FRESH=()=>({name:"",kids:[],intro:0,ch:0,str:0,wise:0,world:0,heart:0,view:"growth",sub:"menu",line:0,hp:50,foe:null,sess:null,
   daily:{d:"",done:{},score:{},diary:false,bonus:false,bonusNet:false},cap:1,
   lv:{num:1,eng:1,flag:1,animal:1},rev:{num:[],eng:[],flag:[],animal:[]},hist:{num:H(),eng:H(),flag:H(),animal:H()},
   used:{},items:{net:0},dex:{},flags:{},custom:[],chips:null,voice:true,se:true,
@@ -18,6 +18,9 @@ function migrate(){
     S.used[c]=Array.isArray(S.used[c])?S.used[c].map(x=>typeof x==="number"?legacyId(c,x):x).filter(x=>typeof x==="string"):[];
   }
   if(!Array.isArray(S.custom))S.custom=[];if(typeof S.items.net!=="number")S.items.net=0;
+  if(typeof S.intro!=="number")S.intro=0;if(S.name&&S.flags.intro===undefined)S.flags.intro=true; // すでに遊んでいる人には はじまりの おはなし を出さない
+  if(!Array.isArray(S.kids))S.kids=[];S.kids=S.kids.filter(x=>typeof x==="string"&&x.trim()).map(x=>x.trim()).slice(0,KIDS_MAX);
+  if(S.name&&!S.kids.includes(S.name)&&S.kids.length<KIDS_MAX)S.kids.push(S.name);
   if(typeof S.voice!=="boolean")S.voice=true;if(typeof S.se!=="boolean")S.se=true;if(typeof S.cap!=="number")S.cap=1;
   if(typeof S.chip!=="string")S.chip=null;
   // おもいで（シアター）は v2 では UI から外したが、データは残す
@@ -32,13 +35,13 @@ function migrate(){
   if(S.foe){const base=mkFoe(S.ch);for(const key of Object.keys(base))if(S.foe[key]===undefined)S.foe[key]=base[key]}
   if(!["growth","battle","diary","settings"].includes(S.view))S.view="growth";
   if(S.view==="diary"&&S.sub==="dentry"&&!S.diary[S.pidx])S.sub="menu";
-  if(!["menu","dentry","backup","stats","cap","sound","pin","dev","paste"].includes(S.sub))S.sub="menu";
+  if(!["menu","dentry","backup","stats","cap","sound","pin","dev","paste","kids"].includes(S.sub))S.sub="menu";
   if(S.sess&&(!Array.isArray(S.sess.items)||S.sess.d!==ymd()))S.sess=null;
   if(typeof S.hp!=="number"||S.hp<=0||S.hp>maxHp())S.hp=maxHp();
   S.line=0;S.msg=null;
 }
 let S=FRESH();
-const UI={busy:false,busyText:"",exportText:null,pendingImport:null,confirm:false,draft:"",quota:"",lockUntil:0,pinBuf:"",pinNew:"",unlockUntil:0,pinFail:0,pinLockUntil:0,saveErr:false};
+const UI={busy:false,busyText:"",exportText:null,pendingImport:null,confirm:false,draft:"",quota:"",lockUntil:0,pinBuf:"",pinNew:"",unlockUntil:0,pinFail:0,pinLockUntil:0,saveErr:false,replay:false,introSaid:false};
 function load(){for(const key of [SAVE_KEY,...OLD_KEYS]){try{const v=localStorage.getItem(key);if(v){const o=JSON.parse(v);if(valid(o)){S=Object.assign(FRESH(),o);return key}}}catch(e){}}return null}
 function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S));UI.saveErr=false}catch(e){UI.saveErr=true}}
 // 日付が変わったら きょうの分 をリセット（端末のローカル日付）

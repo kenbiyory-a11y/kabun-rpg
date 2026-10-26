@@ -29,7 +29,16 @@ const btn=(t)=>Array.from(document.querySelectorAll("#msgbox button")).find(b=>b
 const chk=(c,m)=>log(c?"ok:":"FAIL:",m);
 try{
   localStorage.clear();S=FRESH();migrate();dayRoll();S.se=false;S.voice=false;S.bgmOn=false;render();
-  chk(txt().includes("なまえ")||!!document.getElementById("nameInput"),"初回：なまえ入力");
+  if(typer)typeNode.click();chk(S.flags.intro!==true&&txt().includes("なつの よる"),"初回：はじまりの おはなし 1枚目");
+  for(let g=0;g<4&&!document.getElementById("nameInput");g++){if(typer)typeNode.click();btn("つぎへ").click()}
+  chk(!!document.getElementById("nameInput")&&S.intro===2&&S.kids.length===0,"3枚目：なまえ が未登録なら入力欄");
+  document.getElementById("nameInput").value="はると";btn("ぼうけんを はじめる").click();chk(S.name==="はると"&&S.kids.includes("はると")&&S.intro===3,"入力した なまえ が登録される");
+  chk(txt().includes("パパと ママと はるとが くらす")||(typer&&(typeNode.click(),txt().includes("はるとが くらす"))),"4枚目：かぞくの文に なまえ が入る");
+  let g2=0;while(S.flags.intro!==true&&g2++<10){if(typer)typeNode.click();(btn("ぼうけんの はじまり")||btn("つぎへ")).click()}
+  chk(S.flags.intro===true&&S.view==="growth"&&S.intro===0,"おはなし おわり → へや");
+  UI.replay=true;S.intro=0;render();if(typer)typeNode.click();chk(txt().includes("なつの よる"),"読み返しできる");for(let g=0;g<3;g++){if(typer)typeNode.click();btn("つぎへ").click()}chk(!document.getElementById("nameInput")&&S.intro>=4,"読み返しでは なまえ の場面を飛ばす");btn("とばす").click();chk(!UI.replay&&S.view==="growth","とばす で へや に戻る");
+  // 2人目を ⚙️ で登録すると、おはなし の なまえ の場面がボタンになる
+  S.kids.push("あおい");S.flags.intro=false;S.name="";S.intro=2;render();chk(btn("はると")&&btn("あおい")&&!!document.getElementById("nameInput"),"登録ずみの なまえ はボタンで えらべる");btn("あおい").click();chk(S.name==="あおい","あおい を選んだ");S.flags.intro=true;S.intro=0;
   S.name="テスト";save();render();
   chk(txt().includes("きょうの 5つ")&&txt().includes("Lv1"),"へや：ボードとレベル");
   chk(document.querySelectorAll("#msgbox button").length===4,"4分野のボタン");

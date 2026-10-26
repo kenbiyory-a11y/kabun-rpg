@@ -23,7 +23,8 @@ function renderDiary(msg,menu){
     say(KABUN_SAY[S.chip]||"すごいね！");
     S.msg=m;UI.draft="";S.chip=null;save();render()};
   inp.addEventListener("keydown",e=>{if(e.key==="Enter")add.click()});
-  menu.append(emo,chips,inp,add);
+  const story=el("button","wide","📖 はじまりの おはなしを みる");story.onclick=()=>{UI.replay=true;S.intro=0;UI.introSaid=false;sfx("tap");render()};
+  menu.append(emo,chips,inp,add,story);
 }
 function renderDailyEntry(msg,menu){
   const d=S.diary[S.pidx];if(!d){S.sub="menu";return renderDiary(msg,menu)}

@@ -2,6 +2,9 @@ let fails=0;const ok=(cond,msg)=>{if(!cond){fails++;console.log("  FAIL:",msg)}e
 
 console.log("== 1. 新規セーブ ==");
 S=FRESH();migrate();dayRoll();
+ok(S.flags.intro!==true&&INTRO.length===7&&INTRO.filter(s=>s.name).length===1&&S.kids.length===0,"新規は はじまりの おはなし（7枚、なまえ の場面1つ、なまえ は未登録）");
+ok(familyLine()==="パパと ママと こどもたち","なまえ が無いときの かぞくの文");
+S.kids=["はると","あおい"];ok(familyLine()==="パパと ママと はるとと あおい","2人のときの かぞくの文: "+familyLine());S.kids=[];
 ok(level()===1&&stageIdx()===0&&maxHp()===52,"Lv1 たまご maxHp52");
 ok(chapterReady()===null,"Lv1 では かべ なし");
 ok(moveOf("str").n==="ごろごろ"&&power("str")===6,"たまご の固定技 ごろごろ 威力6");
@@ -14,6 +17,8 @@ ok(S.name==="はると"&&S.ch===1&&stageIdx()===1,"名前・章・段階（よ�
 ok(JSON.stringify(S.used.num)===JSON.stringify(["num_a01","num_a04","num_a15"]),"used の添字→id 変換: "+JSON.stringify(S.used.num));
 ok(S.quiz===undefined&&S.sub==="menu"&&S.foe===null,"旧 quiz 状態を捨てて menu に");
 ok(S.lv.num===1&&Array.isArray(S.rev.num)&&S.hist.num.n===0,"v5 のフィールドが補われる");
+ok(S.flags.intro===true,"すでに遊んでいる人には はじまりの おはなし を出さない");
+ok(S.kids.length===1&&S.kids[0]==="はると","いまの なまえ が かぞくの なまえ に入る");
 save();ok(!!__store["kabun5"]&&!!__store["kabun4"],"kabun5 に保存し kabun4 は残る");
 
 console.log("== 3. セッション ==");

@@ -76,7 +76,7 @@ function bgmStart(name,onEnd){bgmStop();const ctx=actx();if(!ctx||ctx.state!=="r
 function setBgmLevel(v){if(bgm.master&&synth.ctx){try{bgm.master.gain.setTargetAtTime(v,synth.ctx.currentTime,0.15)}catch(e){}}}
 function duck(on){setBgmLevel(on?bgm.vol*0.3:bgm.vol)}
 // 画面に合わせて曲を選ぶ。render() の最後と、タップのたびに呼ばれる
-function bgmWanted(){if(!S||!S.bgmOn||!S.name)return null;
+function bgmWanted(){if(!S||!S.bgmOn)return null;if(!S.name||UI.replay||!S.flags.intro)return "room";
   if(S.view==="battle"){if(["fight","turn","lose"].includes(S.sub))return "battle";if(["win","evolve"].includes(S.sub))return "win"}
   return "room"}
 function bgmSync(){const want=bgmWanted();
