@@ -67,7 +67,7 @@ function gainNotes(before){const notes=[];
 function finishSession(){
   const s=S.sess;if(!s||s.result)return s&&s.result;
   const cat=s.cat,k=STAT_OF[cat];const ok=s.res.filter(Boolean).length;const gain=GAIN_TABLE[Math.min(ok,GAIN_TABLE.length-1)];
-  const before=snapshot();
+  const before=snapshot();const pBefore=power(k);
   S[k]+=gain;
   const h=S.hist[cat];h.n++;h.best=Math.max(h.best||0,ok);h.last=(h.last||[]).concat(ok).slice(-10);
   const today=ymd(),tomorrow=addDays(today,1);const rev=S.rev[cat];
@@ -81,6 +81,7 @@ function finishSession(){
   else if(last.length>=2&&last.slice(-2).every(x=>x<=1)&&S.lv[cat]>1){S.lv[cat]--;h.last=[]}
   S.daily.done[cat]=(S.daily.done[cat]||0)+1;S.daily.score[cat]=ok;
   S.items.net=Math.min(NET_MAX,(S.items.net||0)+(ok===5?2:1));
-  const notes=gainNotes(before);if(lvNote)notes.push(lvNote);const bn=checkBoard();if(bn)notes.push(bn);
+  const notes=[];if(gain>0)notes.push(`⚔️ ${moveOf(k).n}の いりょく ${pBefore} → ${power(k)}`);
+  notes.push(...gainNotes(before));if(lvNote)notes.push(lvNote);const bn=checkBoard();if(bn)notes.push(bn);
   s.result={ok,gain,k,notes};return s.result;
 }

@@ -28,7 +28,7 @@ const txt=()=>$("msgbox").innerText;
 const btn=(t)=>Array.from(document.querySelectorAll("#msgbox button")).find(b=>b.innerText.includes(t));
 const chk=(c,m)=>log(c?"ok:":"FAIL:",m);
 try{
-  localStorage.clear();S=FRESH();migrate();dayRoll();S.se=false;S.voice=false;render();
+  localStorage.clear();S=FRESH();migrate();dayRoll();S.se=false;S.voice=false;S.bgmOn=false;render();
   chk(txt().includes("なまえ")||!!document.getElementById("nameInput"),"初回：なまえ入力");
   S.name="テスト";save();render();
   chk(txt().includes("きょうの 5つ")&&txt().includes("Lv1"),"へや：ボードとレベル");

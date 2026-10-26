@@ -46,6 +46,9 @@ function dayRoll(){const t=ymd();if(S.daily.d!==t){S.daily={d:t,done:{},score:{}
 const $=id=>document.getElementById(id);
 function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+// esc に加えて、国旗の絵文字（地域表示記号2文字）を同梱 SVG の <img> に置き換える（画像が無い国はそのまま）
+const FLAG_RE=/[\u{1F1E6}-\u{1F1FF}]{2}/gu;
+function rich(s){return esc(s).replace(FLAG_RE,m=>{const code=Array.from(m).map(c=>String.fromCharCode(c.codePointAt(0)-0x1F1E6+97)).join("");return FLAG_CODES.has(code)?`<img class="flag" src="./img/flags/${code}.svg" alt="${code}">`:m})}
 // 進化段階：倒した章の evolve から求める（S.ch は戻さないので不可逆）
 function stageIdx(){let s=0;for(let i=0;i<S.ch&&i<CHAPTERS.length;i++)if(CHAPTERS[i].evolve!=null)s=CHAPTERS[i].evolve;return Math.min(s,STAGES.length-1)}
 function statSum(){return STATS.reduce((a,k)=>a+S[k],0)}

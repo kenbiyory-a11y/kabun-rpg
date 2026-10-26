@@ -11,11 +11,15 @@ function pickVoice(lang){const c=VOICE.list.filter(v=>String(v.lang||"").replace
 function say(parts){
   if(!voiceOK())return;const segs=typeof parts==="string"?[[parts,"ja"]]:(Array.isArray(parts)?parts:[]);
   try{speechSynthesis.cancel()}catch(e){return}
+  const us=[];
   for(const [text,lang] of segs){if(!text)continue;const l=lang==="en"?"en":"ja";if(l==="en"&&!VOICE.en)continue;
-    const v=pickVoice(l);if(!v)continue;const u=new SpeechSynthesisUtterance(String(text));u.voice=v;u.lang=l==="en"?"en-US":"ja-JP";u.rate=l==="en"?0.85:0.95;u.pitch=1.1;
-    try{speechSynthesis.speak(u)}catch(e){}}
+    const v=pickVoice(l);if(!v)continue;const u=new SpeechSynthesisUtterance(String(text));u.voice=v;u.lang=l==="en"?"en-US":"ja-JP";u.rate=l==="en"?0.85:0.95;u.pitch=1.1;us.push(u)}
+  if(!us.length)return;
+  // 読み上げ中は BGM を小さくする（最初の発話で下げ、最後の発話で戻す）
+  us[0].onstart=()=>{try{duck(true)}catch(e){}};const last=us[us.length-1];last.onend=last.onerror=()=>{try{duck(false)}catch(e){}};
+  for(const u of us){try{speechSynthesis.speak(u)}catch(e){}}
 }
-function sayStop(){try{if("speechSynthesis" in window)speechSynthesis.cancel()}catch(e){}}
+function sayStop(){try{if("speechSynthesis" in window)speechSynthesis.cancel()}catch(e){}try{duck(false)}catch(e){}}
 document.addEventListener("visibilitychange",()=>{if(document.hidden)sayStop()});
 // 問題を読む：say があればそれ、無ければ sub か q。文字の選択肢は番号付きで続けて読む
 function sayQ(it){

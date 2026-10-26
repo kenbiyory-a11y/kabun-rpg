@@ -5,7 +5,7 @@
  * 更新のしかた：ファイルを変えたら VERSION を変える（例：2026-10-19-1 → 2026-10-19-2）。
  * 古いキャッシュは activate 時に消え、開いている画面には「さいよみこみ」ボタンが出る。
  */
-const VERSION = "2026-10-23-1";
+const VERSION = "2026-10-26-1";
 const CACHE = "kabun-app-" + VERSION;
 const FONT_CACHE = "kabun-fonts";
 
@@ -34,7 +34,14 @@ const SHELL = [
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/maskable-512.png",
-  "./icons/apple-touch-icon.png"
+  "./icons/apple-touch-icon.png",
+  // 国旗 SVG（flag-icons、MIT）。js/data.js の FLAG_CODES と同じ一覧にすること
+  "./img/flags/jp.svg","./img/flags/us.svg","./img/flags/fr.svg","./img/flags/br.svg","./img/flags/it.svg","./img/flags/ca.svg",
+  "./img/flags/kr.svg","./img/flags/gb.svg","./img/flags/au.svg","./img/flags/de.svg","./img/flags/in.svg","./img/flags/cn.svg",
+  "./img/flags/es.svg","./img/flags/eg.svg","./img/flags/mx.svg","./img/flags/nl.svg","./img/flags/bd.svg","./img/flags/pw.svg",
+  "./img/flags/th.svg","./img/flags/vn.svg","./img/flags/tr.svg","./img/flags/ru.svg","./img/flags/se.svg","./img/flags/no.svg",
+  "./img/flags/gr.svg","./img/flags/ch.svg","./img/flags/ar.svg","./img/flags/cl.svg","./img/flags/za.svg","./img/flags/ke.svg",
+  "./img/flags/id.svg","./img/flags/ph.svg","./img/flags/nz.svg"
 ];
 
 self.addEventListener("install", (e) => {

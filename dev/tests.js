@@ -53,6 +53,10 @@ ok(level()===30&&chapterReady().foe.name==="ガキーン","Lv30 → ガキーン
 S.ch=9;ok(stageIdx()===4&&chapterReady()===null,"全章クリアで キング、かべ なし");
 S.str=130;ok(moveOf("str").n==="おうさまのつの","キングで おうさまのつの");
 
+console.log("== 4b. 国旗の画像化 ==");
+ok(rich("🇯🇵 と 🇺🇸").includes('src="./img/flags/jp.svg"')&&rich("🇯🇵 と 🇺🇸").includes('us.svg'),"🇯🇵🇺🇸 → img");
+ok(rich("🇽🇾")==="🇽🇾"&&rich("<b>")==="&lt;b&gt;","画像の無い国はそのまま、HTML はエスケープ");
+
 console.log("== 5. 日替わり ==");
 S=FRESH();migrate();dayRoll();S.daily.done.num=1;S.daily.d="2000-01-01";
 ok(dayRoll()===true&&!S.daily.done.num,"日付が変わると きょうの分 がリセット");

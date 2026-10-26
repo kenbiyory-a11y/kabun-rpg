@@ -16,7 +16,7 @@ function hud(cls,name,lv,hp,max,foe){
 }
 function statRows(){
   const mx=Math.max(40,...STATS.map(k=>S[k]))*1.1;
-  return `<div class="grow">${STATS.map(k=>`<div class="row"><span>${STAT_ICO[k]} ${STAT_NAME[k]}</span><div class="bar"><i style="width:${Math.min(100,S[k]/mx*100)}%;background:var(--c-${k})"></i></div><span class="n">${S[k]}</span></div>`).join("")}</div>`;
+  return `<div class="grow">${STATS.map(k=>`<div class="row"><span>${STAT_ICO[k]} ${STAT_NAME[k]}</span><div class="bar"><i style="width:${Math.min(100,S[k]/mx*100)}%;background:var(--c-${k})"></i></div><span class="n">${S[k]}</span><small class="pw" title="${esc(moveOf(k).n)}">⚔️${power(k)}</small></div>`).join("")}<div class="note">⚔️ は わざの いりょく（きほん ＋ ステータス）</div></div>`;
 }
 function levelBar(){const into=statSum()%LV_DIV;return `<div class="lvbar"><b>Lv${level()}</b><div class="bar"><i style="width:${into/LV_DIV*100}%"></i></div><small>つぎまで あと ${LV_DIV-into}</small></div>`}
 function board(){
@@ -48,7 +48,8 @@ function renderNav(){
 }
 
 // ---------- がめん ----------
-function render(){
+function render(){renderMain();try{bgmSync()}catch(e){}}
+function renderMain(){
   dayRoll();renderNav();
   const box=$("msgbox");box.innerHTML="";
   const msg=el("p","msg");box.append(msg);
@@ -66,7 +67,7 @@ function render(){
   if(S.view==="growth")return renderGrowth(msg,menu,tapBtn);
   if(S.view==="battle")return renderBattle(msg,menu,tapBtn);
   if(S.view==="diary")return renderDiary(msg,menu);
-  S.view="growth";render();
+  S.view="growth";renderMain();
 }
 
 // 📈 せいちょう（へや）：きょうの 5つ・レベル・とっくん
@@ -111,8 +112,8 @@ function quizScreen(msg,menu,idx,tapBtn){
   const tags=(it.chal?'<span class="chal">✨ ちょうせん</span> ':"")+(it.rev?'<span class="chal">🔁 まえに みた もんだい</span>':"");
   let qhtml;
   if(it.t==="listen")qhtml=`<span class="big">🔊</span><span class="ctr">${esc(it.sub||"よく きいて こたえてね")}</span>`;
-  else if(it.t==="ico")qhtml=`<span class="qtext">${esc(it.q)}</span>${it.sub?`<span class="ctr note">${esc(it.sub)}</span>`:""}`;
-  else{const emojiQ=!hasKana(it.q);qhtml=(emojiQ||it.sub)?`<span class="big">${esc(it.q)}</span><span class="ctr">${esc(it.sub||(s.cat==="flag"?"この こっきは どこの くに？":""))}</span>`:`<span class="qtext">${esc(it.q)}</span>`}
+  else if(it.t==="ico")qhtml=`<span class="qtext">${rich(it.q)}</span>${it.sub?`<span class="ctr note">${esc(it.sub)}</span>`:""}`;
+  else{const emojiQ=!hasKana(it.q);qhtml=(emojiQ||it.sub)?`<span class="big">${rich(it.q)}</span><span class="ctr">${esc(it.sub||(s.cat==="flag"?"この こっきは どこの くに？":""))}</span>`:`<span class="qtext">${rich(it.q)}</span>`}
   if(s.pending)qhtml+='<div class="note2">こたえは これだよ。おしてみて！</div>';
   msg.innerHTML=dots+tags+qhtml;
   if(voiceOK()){const sp=el("button","spk","🔊");sp.setAttribute("aria-label","もういちど きく");sp.onclick=()=>sayQ(it);msg.append(sp)}
@@ -120,7 +121,7 @@ function quizScreen(msg,menu,idx,tapBtn){
   const iconOpts=it.t==="ico"||it.t==="listen"||it.opts.every(o=>EMOJI_RE.test(o)&&!hasKana(o));
   menu.className="menu "+(iconOpts?"ico3":(it.opts.length===2?"":"one"));
   const locked=!s.pending&&Date.now()<(UI.lockUntil||0);
-  it.opts.forEach((o,i)=>{const b=el("button","opt"+(iconOpts?" ico":""),(iconOpts?"":`<span class="no">${i+1}</span>`)+esc(o));
+  it.opts.forEach((o,i)=>{const b=el("button","opt"+(iconOpts?" ico":""),(iconOpts?"":`<span class="no">${i+1}</span>`)+rich(o));
     if(s.pending){if(o===it.a)b.classList.add("right");else{b.classList.add("dim");b.disabled=true}}
     else if(locked)b.disabled=true;
     b.onclick=()=>answerQ(o);menu.append(b)});
@@ -167,7 +168,7 @@ function renderBattle(msg,menu,tapBtn){
     fieldBattle(true);typeText(msg,S.msg||"カブーンは どうする？");
     menu.className="menu moves";
     for(const k of STATS){const m=moveOf(k);const w=S.foe.weak===k,g=S.foe.guard===k;
-      const b=el("button","mv "+k+(w?" star":"")+(g?" shield":""),`<span class="mi">${STAT_ICO[k]}</span><span class="mn">${esc(m.n)}</span><small>いりょく ${power(k)}</small>${w?'<span class="bd star">★</span>':""}${g?'<span class="bd shield">🛡️</span>':""}`);
+      const b=el("button","mv "+k+(w?" star":"")+(g?" shield":""),`<span class="mi">${STAT_ICO[k]}</span><span class="mn">${esc(m.n)}</span><small>いりょく ${power(k)}　<span class="eq">${m.base}＋${STAT_NAME[k]}${S[k]}</span></small>${w?'<span class="bd star">★</span>':""}${g?'<span class="bd shield">🛡️</span>':""}`);
       b.onclick=()=>attack(k);menu.append(b)}
     return;
   }

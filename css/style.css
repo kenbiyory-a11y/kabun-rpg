@@ -77,7 +77,11 @@ textarea{min-height:90px;font-size:.72rem;resize:vertical;line-height:1.4}
 .path span{opacity:.35}.path span.done{opacity:1}.path span.now{opacity:1;background:var(--win);border:3px solid var(--winline);border-radius:8px;padding:0 4px}
 .path i{font-style:normal;font-size:.9rem;opacity:.6}
 .grow{display:grid;gap:4px;font-size:.92rem}
-.grow .row{display:grid;grid-template-columns:4.2em 1fr 2.5em;align-items:center;gap:8px}
+.grow .row{display:grid;grid-template-columns:4.6em 1fr 2.2em 3.4em;align-items:center;gap:6px}
+.grow .pw{font-size:.78rem;color:var(--muted);text-align:right;white-space:nowrap}
+.grow .note{font-size:.72rem}
+.flag{height:1em;width:auto;vertical-align:-0.12em;border:1px solid rgba(0,0,0,.25);border-radius:2px;background:#fff}
+button.mv .eq{color:var(--muted);font-size:.68rem}
 .grow .bar{height:12px;background:var(--hpbg);border:2px solid var(--winline);border-radius:4px;overflow:hidden}
 .grow .bar i{display:block;height:100%;transition:width .4s}
 .grow .n{text-align:right;font-variant-numeric:tabular-nums}

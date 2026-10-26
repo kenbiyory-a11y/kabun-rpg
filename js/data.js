@@ -41,6 +41,9 @@ function nextMoveInfo(k){if(stageIdx()<3)return null;const st=stageIdx();const x
 const BATSUGUN=1.5, WEAK_MULT=1, GUARD_MULT=0.5;
 function multOf(k,foe){if(foe.weak===k)return BATSUGUN;if(foe.guard===k)return GUARD_MULT;return WEAK_MULT}
 
+// 国旗：絵文字は Windows で文字になるので、img/flags/*.svg（flag-icons、MIT）を同梱して差し替える。ここにある国コードだけ画像になる
+const FLAG_CODES=new Set("jp us fr br it ca kr gb au de in cn es eg mx nl bd pw th vn tr ru se no gr ch ar cl za ke id ph nz".split(" "));
+
 // 進化段階
 const STAGES=[{ico:"🥚",name:"たまご"},{ico:"🐛",name:"ようちゅう"},{ico:"🫘",name:"さなぎ"},{ico:"🪲",name:"せいちゅう"},{ico:"👑",name:"キング カブーン"}];
 const STAGE_CHEER=["ぷるぷる！","もぐもぐ！","ぴくっ！","やったー！","さすが おうさま！"];

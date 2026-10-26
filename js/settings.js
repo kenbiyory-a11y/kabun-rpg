@@ -30,7 +30,7 @@ function renderSettings(msg,menu){
     const items=[
       ["📊 せいせき","分野ごとの回数・にがてな問題・つぎの技","stats"],
       ["⏱ 1日の かず",`いま：分野ごと ${S.cap===0?"せいげんなし":S.cap+"かい"}${S.daily.bonus?"（きょうは もう1かい あり）":""}`,"cap"],
-      ["🔊 おと",`よみあげ ${S.voice?"オン":"オフ"} ／ こうかおん ${S.se?"オン":"オフ"}`,"sound"],
+      ["🔊 おと",`よみあげ ${S.voice?"オン":"オフ"} ／ こうかおん ${S.se?"オン":"オフ"} ／ BGM ${S.bgmOn?"オン":"オフ"}`,"sound"],
       ["🔒 あんしょうばんごう",pinGet()?"設定ずみ（変更・解除）":"未設定","pin"],
       ["💾 バックアップ","セーブデータの保存・読み込み・全消去","backup"],
       ["🔧 かいはつ","ためしに進める・きょうの分を戻す","dev"]];
@@ -56,7 +56,8 @@ function renderSettings(msg,menu){
     const v=el("button","",`${S.voice?"✅":"⬜"} よみあげ<small>問題文・選択肢・結果を読み上げる</small>`);v.onclick=()=>{S.voice=!S.voice;if(!S.voice)sayStop();save();render()};
     const t=el("button","",`${S.se?"✅":"⬜"} こうかおん<small>正解音・ばつぐん音など</small>`);t.onclick=()=>{S.se=!S.se;save();if(S.se)sfx("ok");render()};
     const test=el("button","wide","🔊 ためしに よむ");test.disabled=!voiceOK();test.onclick=()=>say([["こんにちは、カブーンです","ja"],["Hello","en"]]);
-    menu.append(v,t,test);back();return;
+    const b=el("button","",`${S.bgmOn?"✅":"⬜"} BGM<small>ゲームボーイふうの オリジナル曲（へや／バトル／かち）。読み上げ中は小さくなる</small>`);b.onclick=()=>{S.bgmOn=!S.bgmOn;save();if(!S.bgmOn)bgmStop();render()};
+    menu.append(v,t,b,test);back();return;
   }
   if(S.sub==="pin"){
     const cur=pinGet();

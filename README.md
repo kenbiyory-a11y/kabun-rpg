@@ -21,7 +21,7 @@ js/quiz/animal.js      問題データ：いきもの（30問）
 js/state.js            セーブデータ S（localStorage "kabun5"、旧 "kabun4" から自動移行）、UI 状態、共通ヘルパー
 js/media.js            写真・動画・音楽の保存（IndexedDB "kabun-photos"）
 js/backup.js           バックアップの書き出し・読み込み（json / zip）
-js/bgm.js              Web Audio のシンセ（効果音 sfx）。BGM の生成曲も残っているが v2 では鳴らさない
+js/bgm.js              ゲームボーイ風シンセ：BGM（へや／バトル／かち。オリジナル曲）と効果音 sfx
 js/voice.js            よみあげ（端末内蔵の音声合成）
 js/render.js           描画部品・画面の振り分け・せいちょう画面（5問セッション）・バトル画面
 js/diary.js            ものがたり（ひびの きろく）
@@ -30,6 +30,7 @@ js/app.js              起動と Service Worker の登録
 js/theater.js          おもいでシアター（v2 では読み込んでいない。データは残しているので戻せる）
 vendor/jszip.min.js    JSZip 3.10.1（zip バックアップ用。オフラインでも動くよう同梱）
 icons/                 PWA アイコン（192 / 512 / maskable / apple-touch-icon）
+img/flags/             国旗の SVG（flag-icons、MIT。LICENSE.txt 同梱）。絵文字の国旗が文字になる端末向け
 dev/                   開発用テスト（下記）。アプリからは読み込まない
 .nojekyll              GitHub Pages で Jekyll 処理をさせない
 seichou-rpg.html       分割前の 1 ファイル版（参考。公開する必要がなければ削除してよい）
@@ -96,5 +97,7 @@ git push -u origin main
 - 写真・動画・セーブデータは端末の中（IndexedDB / localStorage）にだけ保存される。GitHub Pages には一切送られない。
 - おうちのひと向け画面の暗証番号は localStorage `kabun-pin` に別保存している（バックアップには入らない）。忘れたときはブラウザのサイトデータから `kabun-pin` だけを消す（Chrome：アドレスバーの鍵アイコン → Cookie とサイトデータ → 管理）。セーブデータは消えない。
 - よみあげは端末内蔵の音声を使う。日本語音声が無い端末では 🔊 が出ない。iPhone は消音スイッチがオンだと鳴らない。
+- BGM と効果音は Web Audio で合成している（音源ファイルなし）。曲はこのリポジトリで書いたオリジナルで、既存ゲームの曲は使っていない。ブラウザの制限で最初のタップから鳴り始める。⚙️ → おと で切れる。
+- 国旗は `img/flags/*.svg` を使う。国を増やすときは SVG を足し、`js/data.js` の `FLAG_CODES` と `sw.js` の `SHELL` に同じ国コードを追加する（出典：https://github.com/lipis/flag-icons 、MIT）。
 - Service Worker がキャッシュするのはアプリ本体とフォントだけ。ユーザーのデータにはさわらない。
 - フォント（DotGothic16）は Google Fonts から取得し、一度取れたらキャッシュされる。初回がオフラインのときは端末のフォントで表示される。

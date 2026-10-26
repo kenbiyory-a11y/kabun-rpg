@@ -8,6 +8,8 @@ function start(){
   loadMedia().then(()=>{if(S.view==="settings")render();updateQuota()}).catch(()=>{});
 }
 start();
+// BGM は最初のタップで始まる（ブラウザの制限で、タップの中でしか音を出し始められない）
+document.addEventListener("pointerdown",()=>{try{bgmSync()}catch(e){}},{passive:true});
 // 開いたまま日付をまたいだとき、きょうの分 を描き直す
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&dayRoll()&&S.sub==="menu"){save();render()}});
 window.addEventListener("focus",()=>{if(dayRoll()&&S.sub==="menu"){save();render()}});
