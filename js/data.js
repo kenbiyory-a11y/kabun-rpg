@@ -45,26 +45,32 @@ function multOf(k,foe){if(foe.weak===k)return BATSUGUN;if(foe.guard===k)return G
 const FLAG_CODES=new Set(("jp us cn kr gb fr it de ca au br in es ru mx th "+"vn ph id tw sg my eg tr nl ch se no dk fi gr be ie pl ua ar cl pe za ke nz np sa jm "+"pt at cu mn is cz hu hr ro il ir iq pk bd lk kh mm kz ng gh ma et co ve fj pw").split(" "));
 
 // 進化段階
-const STAGES=[{ico:"🥚",name:"たまご"},{ico:"🐛",name:"ようちゅう"},{ico:"🫘",name:"さなぎ"},{ico:"🪲",name:"せいちゅう"},{ico:"👑",name:"キング カブーン"}];
+const STAGES=[{ico:"🥚",name:"たまご",id:"kabun_egg"},{ico:"🐛",name:"ようちゅう",id:"kabun_larva"},{ico:"🫘",name:"さなぎ",id:"kabun_pupa"},{ico:"🪲",name:"せいちゅう",id:"kabun_adult"},{ico:"👑",name:"キング カブーン",id:"kabun_king"}];
+
+// キャラの絵：img/chars/<id>.png（背景が透明の正方形 PNG）を置くと、その絵文字の代わりに表示される。無ければ絵文字のまま
+// 例：img/chars/kabun_egg.png、img/chars/kugaan.png。kid1 / kid2 は ⚙️ で登録した なまえ の順
+const CHARS={kabun_egg:"🥚",kabun_larva:"🐛",kabun_pupa:"🫘",kabun_adult:"🪲",kabun_king:"👑",
+  shell:"🪨",fly:"🪰",soil:"🧱",wind:"❄️",dirt:"🌀",skin:"🥥",gakeen:"🦗",hourin:"🦉",kugaan:"🐉",
+  papa:"👨",mama:"👩",kid1:"🧒",kid2:"🧒",kid3:"🧒"};
 const STAGE_CHEER=["ぷるぷる！","もぐもぐ！","ぴくっ！","やったー！","さすが おうさま！"];
 
 // 章（かべ）：lv に達すると現れる。倒すと章が進み、evolve があれば進化。全敵の HP は PACE で一括調整
 // HP の目安：★連打で 4〜5ターン、ふつう連打で 7〜8ターン（第1話は 4ターン、第2話の小イベントは 3ターン）
 const PACE=1.0;
 const CHAPTERS=[
- {lv:5, bg:"cave", place:"へや",             title:"だい1わ　からを やぶれ",                    foe:{ico:"🪨",name:"たまごのから",hp:70, dmg:5, weak:"str"},              why:"からは つので つつけば われる",                      win:"バリッ！ からが われた！",evolve:1},
- {lv:8, bg:"cave", place:"へや",             title:"だい2わ　コバエを おいはらえ",              foe:{ico:"🪰",alt:"🦟",name:"コバエ",hp:80,dmg:5,weak:"world"},        why:"かるい むしは かぜで ふきとばせる",                  win:"コバエは とんでいった！ かごが きれいに なった！"},
- {lv:12,bg:"cave", place:"へや",             title:"だい3わ　つちを ほって さなぎの へやを つくれ",foe:{ico:"🧱",name:"かたいつち",hp:220,dmg:7,weak:"wise"},             why:"かたい つちは ぴかっと てらして やわらかい ところを さがす",win:"ほれた！ りっぱな へやで さなぎに なった！",evolve:2},
- {lv:15,bg:"snow", place:"へや",             title:"だい4わ　さむい ふゆを こえろ",              foe:{ico:"❄️",name:"こおりのかぜ",hp:290,dmg:8,weak:"heart"},           why:"さむい かぜも なかまと いれば へっちゃら",            win:"はるが きた！ さなぎは がんばった！"},
- {lv:18,bg:"cave", place:"へや",             title:"だい5わ　さなぎの へやを まもれ",            foe:{ico:"🌀",name:"くずれるつち",hp:330,dmg:9,weak:"world",guard:"str"},why:"くずれる つちは かぜで ぱたぱた はらう",              win:"へやは ぶじ！ もうすこしで そとだ！"},
- {lv:20,bg:"cave", place:"へや",             title:"だい6わ　さなぎから はいだせ",              foe:{ico:"🥥",name:"さなぎのかわ",hp:360,dmg:10,weak:"str"},            why:"かわは つので やぶる",                                win:"バリバリッ！ つのが でてきた！ カブーンだ！",evolve:3},
- {lv:30,bg:"day",  place:"くさむら の おく", title:"だい7わ　ガキーンと しょうぶ",              foe:{ico:"🦗",name:"ガキーン",hp:560,dmg:12,weak:"wise",guard:"str"},   why:"ガキーンは ぴかっと ひかると めが くらむ",            win:"ガキーン「つよいな……じゅえきを わけてやる」"},
- {lv:40,bg:"night",place:"もり の おく",     title:"だい8わ　よるの もりを こえて",              foe:{ico:"🦉",name:"ホウリン",hp:750,dmg:14,weak:"heart",guard:"world"},why:"ふくろうは やさしい こえで ねむくなる",                win:"ホウリンは おどろいて とんでいった！"},
- {lv:50,bg:"day",  place:"やま の ちょうじょう",title:"さいしゅうわ　もりの おうさまへ",         foe:{ico:"🐉",name:"ちょうろう クガーン",hp:900,dmg:15,weak:"wise",guard:"str",shift:true},why:"★は ばつぐんの あとで となりに うごく",win:"クガーン「みごとじゃ…… この おうかんを さずけよう」",evolve:4}
+ {lv:5, bg:"cave", place:"へや",             title:"だい1わ　からを やぶれ",                    foe:{id:"shell",ico:"🪨",name:"たまごのから",hp:70, dmg:5, weak:"str"},              why:"からは つので つつけば われる",                      win:"バリッ！ からが われた！",evolve:1},
+ {lv:8, bg:"cave", place:"へや",             title:"だい2わ　コバエを おいはらえ",              foe:{id:"fly",ico:"🪰",alt:"🦟",name:"コバエ",hp:80,dmg:5,weak:"world"},        why:"かるい むしは かぜで ふきとばせる",                  win:"コバエは とんでいった！ かごが きれいに なった！"},
+ {lv:12,bg:"cave", place:"へや",             title:"だい3わ　つちを ほって さなぎの へやを つくれ",foe:{id:"soil",ico:"🧱",name:"かたいつち",hp:220,dmg:7,weak:"wise"},             why:"かたい つちは ぴかっと てらして やわらかい ところを さがす",win:"ほれた！ りっぱな へやで さなぎに なった！",evolve:2},
+ {lv:15,bg:"snow", place:"へや",             title:"だい4わ　さむい ふゆを こえろ",              foe:{id:"wind",ico:"❄️",name:"こおりのかぜ",hp:290,dmg:8,weak:"heart"},           why:"さむい かぜも なかまと いれば へっちゃら",            win:"はるが きた！ さなぎは がんばった！"},
+ {lv:18,bg:"cave", place:"へや",             title:"だい5わ　さなぎの へやを まもれ",            foe:{id:"dirt",ico:"🌀",name:"くずれるつち",hp:330,dmg:9,weak:"world",guard:"str"},why:"くずれる つちは かぜで ぱたぱた はらう",              win:"へやは ぶじ！ もうすこしで そとだ！"},
+ {lv:20,bg:"cave", place:"へや",             title:"だい6わ　さなぎから はいだせ",              foe:{id:"skin",ico:"🥥",name:"さなぎのかわ",hp:360,dmg:10,weak:"str"},            why:"かわは つので やぶる",                                win:"バリバリッ！ つのが でてきた！ カブーンだ！",evolve:3},
+ {lv:30,bg:"day",  place:"くさむら の おく", title:"だい7わ　ガキーンと しょうぶ",              foe:{id:"gakeen",ico:"🦗",name:"ガキーン",hp:560,dmg:12,weak:"wise",guard:"str"},   why:"ガキーンは ぴかっと ひかると めが くらむ",            win:"ガキーン「つよいな……じゅえきを わけてやる」"},
+ {lv:40,bg:"night",place:"もり の おく",     title:"だい8わ　よるの もりを こえて",              foe:{id:"hourin",ico:"🦉",name:"ホウリン",hp:750,dmg:14,weak:"heart",guard:"world"},why:"ふくろうは やさしい こえで ねむくなる",                win:"ホウリンは おどろいて とんでいった！"},
+ {lv:50,bg:"day",  place:"やま の ちょうじょう",title:"さいしゅうわ　もりの おうさまへ",         foe:{id:"kugaan",ico:"🐉",name:"ちょうろう クガーン",hp:900,dmg:15,weak:"wise",guard:"str",shift:true},why:"★は ばつぐんの あとで となりに うごく",win:"クガーン「みごとじゃ…… この おうかんを さずけよう」",evolve:4}
 ];
 function maxHp(){return Math.min(120,50+2*level())}
 function mkFoe(i){const c=CHAPTERS[i];const hp=Math.round(c.foe.hp*PACE);
-  return {ch:i,ico:c.foe.ico,alt:c.foe.alt||null,name:c.foe.name,hp,max:hp,dmg:c.foe.dmg,weak:c.foe.weak||null,guard:c.foe.guard||null,shift:!!c.foe.shift,src:"story",whySaid:false}}
+  return {ch:i,id:c.foe.id||null,ico:c.foe.ico,alt:c.foe.alt||null,name:c.foe.name,hp,max:hp,dmg:c.foe.dmg,weak:c.foe.weak||null,guard:c.foe.guard||null,shift:!!c.foe.shift,src:"story",whySaid:false}}
 // いま挑める章（レベル条件を満たしている）。無ければ null
 function chapterReady(){const c=CHAPTERS[S.ch];return c&&level()>=c.lv?c:null}
 
@@ -74,12 +80,12 @@ const KIDS_MAX=3;
 function familyLine(){const ks=(S.kids||[]).filter(Boolean);return `パパと ママと ${ks.length?ks.join("と "):"こどもたち"}`}
 const INTRO=[
  {bg:"night",ico:"🌙",t:"なつの よる。もりの おくで、カブトムシの おかあさんが たまごを うみました。"},
- {bg:"cave", ico:"🥚",t:"たまごは つちの なかで、しずかに ねむっています。\n『はやく おおきく なりたいなあ』"},
+ {bg:"cave", ico:"🥚",char:"kabun_egg",t:"たまごは つちの なかで、しずかに ねむっています。\n『はやく おおきく なりたいなあ』"},
  {bg:"diary",ico:"🏠",name:true,t:"この たまごを そだてる きみの なまえは？"},
- {bg:"diary",ico:"🏠",t:"ある ひ、{family}が くらす おうちに、ちいさな たまごが やってきました。"},
- {bg:"day",  ico:"🐉",t:"もりの ちょうろう クガーンが いいました。\n『この たまごは、{name}が がんばると おおきく なるんじゃ。いつか わしの ところまで おいで』"},
+ {bg:"diary",ico:"🏠",family:true,t:"ある ひ、{family}が くらす おうちに、ちいさな たまごが やってきました。"},
+ {bg:"day",  ico:"🐉",char:"kugaan",t:"もりの ちょうろう クガーンが いいました。\n『この たまごは、{name}が がんばると おおきく なるんじゃ。いつか わしの ところまで おいで』"},
  {bg:"day",  ico:"📖",t:"とっくんで ちからを つけると、たまごは そだちます。\nかべが あらわれたら、★の ボタンで たたかおう。"},
- {bg:"day",  ico:"🥚",t:"たまごに『カブーン』と なまえを つけると、たまごが ぷるぷる うごいた！\nぼうけんの はじまり！"}
+ {bg:"day",  ico:"🥚",char:"kabun_egg",t:"たまごに『カブーン』と なまえを つけると、たまごが ぷるぷる うごいた！\nぼうけんの はじまり！"}
 ];
 
 // ひびの きろく

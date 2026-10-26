@@ -17,6 +17,7 @@
 <script src="../js/backup.js" defer></script>
 <script src="../js/bgm.js" defer></script>
 <script src="../js/voice.js" defer></script>
+<script src="../js/chars.js" defer></script>
 <script src="../js/render.js" defer></script>
 <script src="../js/diary.js" defer></script>
 <script src="../js/settings.js" defer></script>
@@ -41,6 +42,7 @@ try{
   S.kids.push("あおい");S.flags.intro=false;S.name="";S.intro=2;render();chk(btn("はると")&&btn("あおい")&&!!document.getElementById("nameInput"),"登録ずみの なまえ はボタンで えらべる");btn("あおい").click();chk(S.name==="あおい","あおい を選んだ");S.flags.intro=true;S.intro=0;
   S.name="テスト";save();render();
   chk(txt().includes("きょうの 5つ")&&txt().includes("Lv1"),"へや：ボードとレベル");
+  CHAR_OK.kabun_egg=true;render();chk(!!document.querySelector("#field #spMe img.spimg[src$='kabun_egg.png']"),"キャラ画像があれば絵文字の代わりに出る");CHAR_OK.kabun_egg=false;render();chk(!document.querySelector("#field img.spimg")&&$("spMe").textContent==="🥚","無ければ絵文字のまま");
   chk(document.querySelectorAll("#msgbox button").length===4,"4分野のボタン");
   btn("すうじの とっくん").click();
   chk(S.sub==="quiz"&&S.sess&&S.sess.items.length===5,"セッション開始 5問");

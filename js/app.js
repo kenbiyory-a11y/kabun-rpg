@@ -5,6 +5,7 @@ function start(){
   catch(e){S=FRESH();bad=true} // 読めなくても旧データは消さない（kabun4 / kabun5 はそのまま残る）
   if(bad)S.msg="⚠️ セーブデータを よみこめませんでした。おうちのひとに つたえてね（データは けしていません）";
   render();
+  try{preloadChars()}catch(e){} // img/chars/ の絵があれば読み込んで差し替える
   loadMedia().then(()=>{if(S.view==="settings")render();updateQuota()}).catch(()=>{});
 }
 start();

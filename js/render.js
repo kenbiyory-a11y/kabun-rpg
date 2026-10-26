@@ -23,17 +23,18 @@ function board(){
   const m=CATS.map(c=>{const n=S.daily.done[c]||0;const sc=S.daily.score[c];return `<span class="slot${n?" on":""}">${CAT[c].ico}${n?(sc===0?"💪":"✅"):"⚪"}</span>`}).join("");
   return `<div class="board"><small>きょうの 5つ</small>${m}<span class="sep">｜</span><span class="slot${S.daily.diary?" on":""}">📝${S.daily.diary?"✅":"⚪"}</span></div>`;
 }
+function kabunHtml(idx){const st=STAGES[idx];return spriteHtml(st.id,st.ico)}
 function fieldBattle(showFoe){
   const f=$("field");f.innerHTML="";const c=CHAPTERS[Math.min(S.ch,CHAPTERS.length-1)];
   f.className="field "+(S.ch>=CHAPTERS.length?"day":c.bg);
-  const me=el("div","sprite me",STAGES[stageIdx()].ico);me.id="spMe";f.append(me);
+  const me=el("div","sprite me",kabunHtml(stageIdx()));me.id="spMe";f.append(me);
   f.append(hud("me","カブーン","Lv"+level(),S.hp,maxHp()));
-  if(showFoe&&S.foe){const foe=el("div","sprite foe",S.foe.ico);foe.id="spFoe";f.append(foe);f.append(hud("foe",S.foe.name,"",S.foe.hp,S.foe.max,S.foe))}
+  if(showFoe&&S.foe){const foe=el("div","sprite foe",spriteHtml(S.foe.id,S.foe.ico));foe.id="spFoe";f.append(foe);f.append(hud("foe",S.foe.name,"",S.foe.hp,S.foe.max,S.foe))}
 }
 function fieldGrowth(idx,evolving,bg){
   const f=$("field");f.innerHTML="";f.className="field "+(bg||"day");
   f.append(el("div","glow"));
-  const sp=el("div","sprite center"+(evolving?" evolve":""),STAGES[idx].ico);sp.id="spMe";sp.style.fontSize=Math.min(6,4.2+level()*0.08)+"rem";f.append(sp);
+  const sp=el("div","sprite center"+(evolving?" evolve":""),kabunHtml(idx));sp.id="spMe";sp.style.fontSize=Math.min(6,4.2+level()*0.08)+"rem";f.append(sp);
   const path=el("div","path");
   STAGES.forEach((st,i)=>{if(i)path.append(el("i","","→"));path.append(el("span",i<idx?"done":i===idx?"now":"",st.ico))});
   f.append(path);
@@ -66,7 +67,12 @@ function renderMain(){
 }
 
 // 📖 はじまりの おはなし：初回だけ（UI.replay で読み返し）。タップで1枚ずつ、途中で なまえ を えらぶ
-function fieldScene(bg,ico){const f=$("field");f.innerHTML="";f.className="field "+bg;f.append(el("div","glow"));const sp=el("div","sprite center",ico);sp.id="spMe";f.append(sp)}
+// おはなし の場面：char があればその絵、family なら かぞく を横に並べる
+function fieldScene(bg,ico,sc){const f=$("field");f.innerHTML="";f.className="field "+bg;f.append(el("div","glow"));
+  if(sc&&sc.family){const row=el("div","famrow");const kids=Math.max(1,Math.min(KIDS_MAX,(S.kids||[]).length||2));
+    const ids=["papa","mama",...Array.from({length:kids},(_,i)=>"kid"+(i+1))];
+    ids.forEach(id=>row.append(el("div","sprite fam",spriteHtml(id))));f.append(row);return}
+  const sp=el("div","sprite center",sc&&sc.char?spriteHtml(sc.char,ico):ico);sp.id="spMe";f.append(sp)}
 // なまえ を えらぶ：⚙️ で登録した きょうだいの なまえ がボタンに並ぶ。まだ無ければ おうちのひとが入力する（入力した なまえ は登録される）
 function nameSelect(msg,menu,text){
   fieldScene("diary","🏠");msg.innerHTML=`<span class="qtext">${esc(text)}</span>`;
@@ -85,7 +91,7 @@ function introDone(){S.flags.intro=true;S.intro=0;UI.replay=false;UI.introSaid=f
 function renderIntro(msg,menu,tapBtn){
   const i=Math.min(Math.max(S.intro||0,0),INTRO.length-1);const sc=INTRO[i];
   if(sc.name){if(!S.name)return nameSelect(msg,menu,sc.t);S.intro=i+1;return renderMain()} // 読み返しのときは なまえ の場面を飛ばす
-  fieldScene(sc.bg,sc.ico);
+  fieldScene(sc.bg,sc.ico,sc);
   const text=sc.t.replace(/\{name\}/g,S.name||"きみ").replace(/\{family\}/g,familyLine());
   typeText(msg,text,()=>{msg.append(el("span","cur","▼"))});
   if(!UI.introSaid){UI.introSaid=true;say(text)}

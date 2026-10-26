@@ -23,6 +23,7 @@ js/media.js            写真・動画・音楽の保存（IndexedDB "kabun-phot
 js/backup.js           バックアップの書き出し・読み込み（json / zip）
 js/bgm.js              ゲームボーイ風シンセ：BGM（へや／バトル／かち。オリジナル曲）と効果音 sfx
 js/voice.js            よみあげ（端末内蔵の音声合成）
+js/chars.js            キャラの絵（img/chars/<id>.png があれば絵文字の代わりに表示。無ければ絵文字）
 js/render.js           描画部品・画面の振り分け・せいちょう画面（5問セッション）・バトル画面
 js/diary.js            ものがたり（ひびの きろく）
 js/settings.js         おうちのひと向け（暗証番号・せいせき・1日のかず・おと・バックアップ・開発用）
@@ -31,6 +32,7 @@ js/theater.js          おもいでシアター（v2 では読み込んでいな
 vendor/jszip.min.js    JSZip 3.10.1（zip バックアップ用。オフラインでも動くよう同梱）
 icons/                 PWA アイコン（192 / 512 / maskable / apple-touch-icon）
 img/flags/             国旗の SVG（flag-icons、MIT。LICENSE.txt 同梱）。絵文字の国旗が文字になる端末向け
+img/chars/             キャラの絵（PNG）を置く場所。ファイル名と条件は img/chars/README.md
 dev/                   開発用テスト（下記）。アプリからは読み込まない
 .nojekyll              GitHub Pages で Jekyll 処理をさせない
 seichou-rpg.html       分割前の 1 ファイル版（参考。公開する必要がなければ削除してよい）
