@@ -28,7 +28,8 @@ for(const cat of ["num","eng","flag","animal"]){
   }
   for(let i=1;i<=15;i++){const id=`${cat}_a${String(i).padStart(2,"0")}`;if(!ids.has(id))warn(`${cat}: 既存問題 ${id} が無い`)}
   console.log(`${cat}: ${qs.length}問　lv1 ${lv[1]} / lv2 ${lv[2]} / lv3 ${lv[3]}　pick ${t.pick} / ico ${t.ico} / listen ${t.listen}`);
-  if(qs.length!==30)warn(`${cat}: 30問ではない（${qs.length}）`);
+  if(qs.length<30)warn(`${cat}: 30問より少ない（${qs.length}）`);
+  if(lv[1]<12)warn(`${cat}: lv1 が12問より少ない（${lv[1]}）。lv1 は3日で尽きるので多めに`);
 }
 // 国データ：svg があるか、sw.js の SHELL に入っているか
 const COUNTRIES=vm.runInContext("typeof COUNTRIES==='undefined'?[]:COUNTRIES",ctx);
