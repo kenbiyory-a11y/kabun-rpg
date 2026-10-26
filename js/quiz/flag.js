@@ -3,6 +3,32 @@
 // a01〜a15 は もとの quiz.js の 15問（順番そのまま）。b01〜 が 追加分。
 // 国旗の絵文字は Windows では 文字（2文字の記号）になる。img/flags の採用時は q と選択肢を差し替える。
 // 「ペンギンが いるのは？」の さむい ところは ❄️（こおりの絵文字 U+1F9CA は Unicode 12 で 古い端末に出ないことがあるため）。
+// ---- 国のデータ（70か国、知名度が高い順）----
+// lv1＝4歳でも知っている国、lv2＝よく見る国、lv3＝はじめて見る国。like は似ている国旗（はずれ の候補になる）。
+// ここから quiz.js の genFlag() が「こっき→くに」（id: flag_f_xx）と「くに→こっき」（id: flag_i_xx）の問題を作る。
+// 国を増やすときは、ここに1行足し、img/flags/xx.svg を置き、js/data.js の FLAG_CODES と sw.js の SHELL にも同じコードを足す。
+const COUNTRIES=[
+ {c:"jp",n:"にほん",lv:1,like:["bd","pw"]},{c:"us",n:"アメリカ",lv:1,like:["my"]},{c:"cn",n:"ちゅうごく",lv:1,like:["vn"]},{c:"kr",n:"かんこく",lv:1},
+ {c:"gb",n:"イギリス",lv:1,like:["au","nz"]},{c:"fr",n:"フランス",lv:1,like:["nl","it"]},{c:"it",n:"イタリア",lv:1,like:["ie","mx","hu"]},{c:"de",n:"ドイツ",lv:1,like:["be"]},
+ {c:"ca",n:"カナダ",lv:1},{c:"au",n:"オーストラリア",lv:1,like:["nz","gb"]},{c:"br",n:"ブラジル",lv:1},{c:"in",n:"インド",lv:1,like:["ie"]},
+ {c:"es",n:"スペイン",lv:1},{c:"ru",n:"ロシア",lv:1,like:["nl","fr"]},{c:"mx",n:"メキシコ",lv:1,like:["it"]},{c:"th",n:"タイ",lv:1,like:["nl","ru"]},
+ // lv2
+ {c:"vn",n:"ベトナム",lv:2,like:["cn"]},{c:"ph",n:"フィリピン",lv:2,like:["cz"]},{c:"id",n:"インドネシア",lv:2,like:["pl","sg"]},{c:"tw",n:"たいわん",lv:2},
+ {c:"sg",n:"シンガポール",lv:2,like:["id","pl"]},{c:"my",n:"マレーシア",lv:2,like:["us"]},{c:"eg",n:"エジプト",lv:2,like:["iq"]},{c:"tr",n:"トルコ",lv:2},
+ {c:"nl",n:"オランダ",lv:2,like:["ru","fr","th"]},{c:"ch",n:"スイス",lv:2,like:["dk"]},{c:"se",n:"スウェーデン",lv:2,like:["no","dk","fi"]},{c:"no",n:"ノルウェー",lv:2,like:["se","dk","is"]},
+ {c:"dk",n:"デンマーク",lv:2,like:["no","se","ch"]},{c:"fi",n:"フィンランド",lv:2,like:["se","no"]},{c:"gr",n:"ギリシャ",lv:2},{c:"be",n:"ベルギー",lv:2,like:["de","fr"]},
+ {c:"ie",n:"アイルランド",lv:2,like:["it","in"]},{c:"pl",n:"ポーランド",lv:2,like:["id","sg"]},{c:"ua",n:"ウクライナ",lv:2},{c:"ar",n:"アルゼンチン",lv:2},
+ {c:"cl",n:"チリ",lv:2},{c:"pe",n:"ペルー",lv:2,like:["ca"]},{c:"za",n:"みなみアフリカ",lv:2},{c:"ke",n:"ケニア",lv:2},
+ {c:"nz",n:"ニュージーランド",lv:2,like:["au","gb"]},{c:"np",n:"ネパール",lv:2},{c:"sa",n:"サウジアラビア",lv:2},{c:"jm",n:"ジャマイカ",lv:2},
+ // lv3
+ {c:"pt",n:"ポルトガル",lv:3},{c:"at",n:"オーストリア",lv:3,like:["id","pl"]},{c:"cu",n:"キューバ",lv:3},{c:"mn",n:"モンゴル",lv:3},
+ {c:"is",n:"アイスランド",lv:3,like:["no"]},{c:"cz",n:"チェコ",lv:3,like:["ph"]},{c:"hu",n:"ハンガリー",lv:3,like:["it"]},{c:"hr",n:"クロアチア",lv:3,like:["nl"]},
+ {c:"ro",n:"ルーマニア",lv:3,like:["be"]},{c:"il",n:"イスラエル",lv:3},{c:"ir",n:"イラン",lv:3,like:["hu"]},{c:"iq",n:"イラク",lv:3,like:["eg"]},
+ {c:"pk",n:"パキスタン",lv:3},{c:"bd",n:"バングラデシュ",lv:3,like:["jp","pw"]},{c:"lk",n:"スリランカ",lv:3},{c:"kh",n:"カンボジア",lv:3},
+ {c:"mm",n:"ミャンマー",lv:3},{c:"kz",n:"カザフスタン",lv:3},{c:"ng",n:"ナイジェリア",lv:3},{c:"gh",n:"ガーナ",lv:3},
+ {c:"ma",n:"モロッコ",lv:3},{c:"et",n:"エチオピア",lv:3},{c:"co",n:"コロンビア",lv:3,like:["ve"]},{c:"ve",n:"ベネズエラ",lv:3,like:["co"]},
+ {c:"fj",n:"フィジー",lv:3,like:["au","nz"]},{c:"pw",n:"パラオ",lv:3,like:["jp","bd"]}
+];
 QUIZ.flag.push(
  {id:"flag_a01",t:"pick",q:"🇯🇵",a:"にほん",d:["かんこく","ちゅうごく"],sub:"どこの くにの こっき？",lv:1,g:"どこのくに",say:"どこの くにの こっき？"},
  {id:"flag_a02",t:"pick",q:"🇺🇸",a:"アメリカ",d:["イギリス","オーストラリア"],sub:"どこの くにの こっき？",lv:1,g:"どこのくに",say:"どこの くにの こっき？"},

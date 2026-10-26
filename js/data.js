@@ -42,7 +42,7 @@ const BATSUGUN=1.5, WEAK_MULT=1, GUARD_MULT=0.5;
 function multOf(k,foe){if(foe.weak===k)return BATSUGUN;if(foe.guard===k)return GUARD_MULT;return WEAK_MULT}
 
 // 国旗：絵文字は Windows で文字になるので、img/flags/*.svg（flag-icons、MIT）を同梱して差し替える。ここにある国コードだけ画像になる
-const FLAG_CODES=new Set("jp us fr br it ca kr gb au de in cn es eg mx nl bd pw th vn tr ru se no gr ch ar cl za ke id ph nz".split(" "));
+const FLAG_CODES=new Set(("jp us cn kr gb fr it de ca au br in es ru mx th "+"vn ph id tw sg my eg tr nl ch se no dk fi gr be ie pl ua ar cl pe za ke nz np sa jm "+"pt at cu mn is cz hu hr ro il ir iq pk bd lk kh mm kz ng gh ma et co ve fj pw").split(" "));
 
 // 進化段階
 const STAGES=[{ico:"🥚",name:"たまご"},{ico:"🐛",name:"ようちゅう"},{ico:"🫘",name:"さなぎ"},{ico:"🪲",name:"せいちゅう"},{ico:"👑",name:"キング カブーン"}];

@@ -205,8 +205,23 @@ function attack(k){const f=S.foe;const m=moveOf(k);const mult=multOf(k,f);const 
   else t+=`\n${f.name}に ${dmg}の ダメージ！`;
   if(f.hp>0&&f.shift&&mult>1){const order=STATS.filter(s=>s!==f.guard);const i=order.indexOf(f.weak);f.weak=order[(i+1)%order.length];t+=`\n★が ${STAT_ICO[f.weak]}に うごいた！`}
   if(f.hp>0){S.hp=Math.max(0,S.hp-f.dmg);t+=`\n${f.name}の はんげき！ カブーンに ${f.dmg}の ダメージ！`}
-  S.msg=t;S.sub="turn";sfx(mult>1?"batsu":mult<1?"guard":"hit");if(mult>1)say("ばつぐん！");save();render();
-  const sp=$("spMe");sp&&sp.classList.add("attack");const fo=$("spFoe");const fl=$("field");
-  setTimeout(()=>{fo&&fo.classList.add("hit");if(mult>1&&fl)fl.classList.add("flash")},200);
-  if(f.hp>0)setTimeout(()=>{sp&&sp.classList.remove("attack");sp&&sp.classList.add("hit")},700);
+  S.msg=t;S.sub="turn";if(mult>1)say("ばつぐん！");save();render();
+  playFx(k,m.n,mult,f.hp>0);
+}
+// わざの演出：技名の札 → カブーンが突っ込む → ステータスごとの効果（💪 ぶつかる／💡 ひかりの線／💨 はっぱと かぜ／💗 おんぷ）→ 相手がゆれる → 反撃
+function playFx(k,name,mult,foeAlive){
+  const f=$("field"),me=$("spMe"),fo=$("spFoe");if(!f||!me||!fo)return;
+  const r=f.getBoundingClientRect(),a=me.getBoundingClientRect(),b=fo.getBoundingClientRect();
+  const x1=a.left-r.left+a.width/2,y1=a.top-r.top+a.height/2,x2=b.left-r.left+b.width/2,y2=b.top-r.top+b.height/2;
+  const spawn=(cls,txt,x,y,ms,dx,dy)=>{const e=el("div","fx "+cls,txt);e.style.left=x+"px";e.style.top=y+"px";if(dx!=null){e.style.setProperty("--dx",dx+"px");e.style.setProperty("--dy",dy+"px")}f.append(e);setTimeout(()=>e.remove(),ms);return e};
+  const after=(ms,fn)=>setTimeout(fn,ms);
+  const banner=spawn("name",esc(name),0,0,900);banner.style.left="50%";banner.style.top="14px";
+  me.classList.add("attack");
+  const hitFx=()=>{fo.classList.add("hit");sfx(mult>1?"batsu":mult<1?"guard":"hit");if(mult>1){f.classList.add("flash");spawn("burst","💥",x2,y2,500)}if(mult<1)spawn("shield","🛡️",x2,y2-10,600)};
+  if(k==="str"){after(220,()=>{spawn("burst","💥",x2,y2,500);f.classList.add("quake");hitFx()});after(650,()=>f.classList.remove("quake"))}
+  else if(k==="wise"){const dx=x2-x1,dy=y2-y1;const beam=spawn("beam","",x1,y1,450);beam.style.width=Math.hypot(dx,dy)+"px";beam.style.transform=`translateY(-50%) rotate(${Math.atan2(dy,dx)}rad)`;
+    after(220,()=>{spawn("sparkle","✨",x2,y2,600);spawn("sparkle d2","✨",x2+22,y2-18,700);spawn("sparkle d2","✨",x2-18,y2+14,700);hitFx()})}
+  else if(k==="world"){for(let i=0;i<5;i++)after(i*70,()=>spawn("leaf",i%2?"🍃":"💨",x1,y1,700,x2-x1,y2-y1-18*i));after(420,hitFx)}
+  else{for(let i=0;i<4;i++)after(i*90,()=>spawn("noteup",i%2?"💗":"🎵",x1+i*10,y1,800,x2-x1,y2-y1-30));after(480,hitFx)}
+  if(foeAlive)after(950,()=>{fo.classList.add("lunge");after(180,()=>{me.classList.remove("attack");me.classList.add("hit");spawn("burst small","💢",x1+10,y1-16,450);sfx("hit")})});
 }

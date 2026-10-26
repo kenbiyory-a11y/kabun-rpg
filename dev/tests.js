@@ -57,6 +57,20 @@ console.log("== 4b. 国旗の画像化 ==");
 ok(rich("🇯🇵 と 🇺🇸").includes('src="./img/flags/jp.svg"')&&rich("🇯🇵 と 🇺🇸").includes('us.svg'),"🇯🇵🇺🇸 → img");
 ok(rich("🇽🇾")==="🇽🇾"&&rich("<b>")==="&lt;b&gt;","画像の無い国はそのまま、HTML はエスケープ");
 
+console.log("== 4c. こっき の生成問題（70か国） ==");
+const codeOf=e=>Array.from(e).map(c=>String.fromCharCode(c.codePointAt(0)-0x1F1E6+97)).join("");
+ok(typeof COUNTRIES!=="undefined"&&COUNTRIES.length===70,"COUNTRIES は 70 か国: "+(typeof COUNTRIES!=="undefined"?COUNTRIES.length:"-"));
+ok(COUNTRIES.every(c=>FLAG_CODES.has(c.c)),"全部の国に FLAG_CODES がある");
+ok(new Set(COUNTRIES.map(c=>c.c)).size===70&&new Set(COUNTRIES.map(c=>c.n)).size===70,"国コードと国名に重複なし");
+ok(COUNTRIES.every(c=>Array.from(c.n).length<=12),"国名は12文字以内");
+const fq=genFlag();
+ok(fq.length===(70-15)+(70-4),"生成数 "+fq.length+"（こっき→くに 55、くに→こっき 66）");
+ok(fq.every(q=>!q.d.includes(q.a)&&new Set(q.d).size===q.d.length&&q.d.length>=1),"はずれ が正解と重ならない");
+ok(fq.filter(q=>q.t==="ico").every(q=>[q.a,...q.d].every(e=>FLAG_CODES.has(codeOf(e)))),"くに→こっき の旗はぜんぶ画像がある");
+ok(fq.filter(q=>q.t==="pick").every(q=>FLAG_CODES.has(codeOf(q.q))),"こっき→くに の旗はぜんぶ画像がある");
+const fjq=fq.find(q=>q.id==="flag_f_fj");ok(fjq&&fjq.d.some(n=>["オーストラリア","ニュージーランド"].includes(n)),"lv3 は似ている国旗を はずれ に使う: "+(fjq&&fjq.d.join("/")));
+ok(poolOf("flag").length>=30+fq.length-2,"こっき の出題プールが増えた: "+poolOf("flag").length);
+
 console.log("== 5. 日替わり ==");
 S=FRESH();migrate();dayRoll();S.daily.done.num=1;S.daily.d="2000-01-01";
 ok(dayRoll()===true&&!S.daily.done.num,"日付が変わると きょうの分 がリセット");

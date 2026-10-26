@@ -16,7 +16,7 @@ js/data.js             ステータス・技・相性・進化段階・章（か
 js/quiz.js             クイズの器と 5問セッションの組み立て・採点・復習箱・段階式難易度
 js/quiz/num.js         問題データ：すうじ（30問。かぞえる・あわせて・のこり は quiz.js が自動生成）
 js/quiz/eng.js         問題データ：えいご（30問）
-js/quiz/flag.js        問題データ：こっき（30問）
+js/quiz/flag.js        問題データ：こっき（手書き30問 ＋ 70か国の表 COUNTRIES。表から quiz.js が こっき→くに／くに→こっき を自動生成）
 js/quiz/animal.js      問題データ：いきもの（30問）
 js/state.js            セーブデータ S（localStorage "kabun5"、旧 "kabun4" から自動移行）、UI 状態、共通ヘルパー
 js/media.js            写真・動画・音楽の保存（IndexedDB "kabun-photos"）
@@ -98,6 +98,6 @@ git push -u origin main
 - おうちのひと向け画面の暗証番号は localStorage `kabun-pin` に別保存している（バックアップには入らない）。忘れたときはブラウザのサイトデータから `kabun-pin` だけを消す（Chrome：アドレスバーの鍵アイコン → Cookie とサイトデータ → 管理）。セーブデータは消えない。
 - よみあげは端末内蔵の音声を使う。日本語音声が無い端末では 🔊 が出ない。iPhone は消音スイッチがオンだと鳴らない。
 - BGM と効果音は Web Audio で合成している（音源ファイルなし）。曲はこのリポジトリで書いたオリジナルで、既存ゲームの曲は使っていない。ブラウザの制限で最初のタップから鳴り始める。⚙️ → おと で切れる。
-- 国旗は `img/flags/*.svg` を使う。国を増やすときは SVG を足し、`js/data.js` の `FLAG_CODES` と `sw.js` の `SHELL` に同じ国コードを追加する（出典：https://github.com/lipis/flag-icons 、MIT）。
+- 国旗は `img/flags/*.svg`（70か国）を使う。国を増やすときは `js/quiz/flag.js` の `COUNTRIES` に1行足し、SVG を置き、`js/data.js` の `FLAG_CODES` と `sw.js` の `SHELL` に同じ国コードを追加する（出典：https://github.com/lipis/flag-icons 、MIT）。`node dev/checkquiz.js .` が抜けを見つける。
 - Service Worker がキャッシュするのはアプリ本体とフォントだけ。ユーザーのデータにはさわらない。
 - フォント（DotGothic16）は Google Fonts から取得し、一度取れたらキャッシュされる。初回がオフラインのときは端末のフォントで表示される。

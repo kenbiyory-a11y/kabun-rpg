@@ -26,7 +26,15 @@ const bassOf=(chs,o1,o2)=>chs.map(c=>{const r=CHORD[c][0];return Array.from({len
 // アルペジオ：3度・5度・ルート(上)・5度 を step ステップずつ（1小節＝16ステップ）
 const arpOf=(chs,oct,step)=>chs.map(c=>{const [r,t,f]=CHORD[c];const seq=[`${t}${oct}:${step}`,`${f}${oct}:${step}`,`${r}${oct+1}:${step}`,`${f}${oct}:${step}`];return Array.from({length:16/(4*step)},()=>seq.join(" ")).join(" ")}).join(" ");
 const rep=(s,n)=>Array.from({length:n},()=>s).join(" ");
-const ROOM_CH=["C","G","Am","F","C","G","F","G"], BATTLE_CH=["Am","Am","F","G","Am","Am","F","E"];
+// 移調：音名トークンを semi 半音ずらす（ドラムや休符はそのまま）
+const NOTE_NAMES=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+function tp(pat,semi){return pat.trim().split(/\s+/).map(tok=>{const [n,l]=tok.split(":");if(!/^[A-G]#?-?\d$/.test(n))return tok;const m=midiOf(n)+semi;return `${NOTE_NAMES[m%12]}${Math.floor(m/12)-1}${l?":"+l:""}`}).join(" ")}
+// バトルのベース：オクターブを行き来しつつ、小節の終わりで駆け上がる（1小節＝16ステップ）
+const bass2=(chs)=>chs.map(c=>{const r=CHORD[c][0];return `${r}2:2 ${r}3:2 ${r}2:2 ${r}3:2 ${r}2:2 ${r}3:2 ${r}2:1 ${r}2:1 ${r}3:2`}).join(" ");
+const ROOM_CH=["C","G","Am","F","C","G","F","G"], BATTLE_CH=["Am","Am","Dm","E","Am","Am","F","E"];
+// バトルの主旋律（8小節、Aマイナー）。2周目は2半音上げて（Bマイナー）緊張感を出し、またイントロ無しで戻る
+const BATTLE_MEL="A4:1 A4:1 R:1 A4:1 C5:2 E5:2 A5:3 G5:1 E5:2 D5:2  C5:2 B4:1 C5:1 D5:2 C5:2 B4:4 R:2 E4:2  D5:1 D5:1 R:1 D5:1 F5:2 A5:2 D6:3 C6:1 A5:2 F5:2  G#5:2 B5:2 E6:2 D6:2 B5:2 G#5:2 E5:2 R:2  A5:1 A5:1 R:1 A5:1 G5:2 E5:2 C5:3 D5:1 E5:2 C5:2  B4:2 C5:2 D5:2 E5:2 F5:2 E5:2 D5:2 B4:2  F5:1 F5:1 R:1 F5:1 A5:2 C6:2 F6:3 E6:1 C6:2 A5:2  G#5:2 E5:2 B5:2 E5:2 G#5:1 A5:1 B5:1 C6:1 D6:2 E6:2";
+const BATTLE_DR="K H . H S H . H K H K H S H . H", BATTLE_FILL="K H . H S H . H K K S S K K S S";
 const TUNES={
  // へや：のんびり、歩くようなベース
  room:{bpm:120,tracks:[
@@ -34,12 +42,12 @@ const TUNES={
   {w:"p25",v:0.03,p:arpOf(ROOM_CH,4,2)},
   {w:"tri",v:0.16,p:bassOf(ROOM_CH,2,3)},
   {w:"drum",v:0.3,p:rep("K . H . S . H . K . H . S . H H",8)}]},
- // バトル：速く、短い音で
- battle:{bpm:152,tracks:[
-  {w:"p50",v:0.06,p:"A4:2 A4:2 C5:2 A4:2 E5:4 D5:2 C5:2  B4:2 B4:2 D5:2 B4:2 E5:4 R:2 E5:2  F5:2 F5:2 A5:2 F5:2 C6:4 A5:2 F5:2  G5:2 F5:2 E5:2 D5:2 E5:4 D5:2 B4:2  A4:2 A4:2 C5:2 A4:2 E5:4 D5:2 C5:2  B4:2 C5:2 D5:2 E5:2 A5:4 G5:2 E5:2  F5:2 A5:2 C6:2 A5:2 D6:4 C6:2 A5:2  G#5:2 E5:2 B4:2 E5:2 G#5:4 B5:2 E6:2"},
-  {w:"p12",v:0.03,p:arpOf(BATTLE_CH,4,1)},
-  {w:"tri",v:0.17,p:bassOf(BATTLE_CH,2,3)},
-  {w:"drum",v:0.32,p:rep("K H . H S H . H K H K H S H . H",8)}]},
+ // バトル：1小節のイントロ（半音で駆け下りる）→ 8小節 → 2半音上で8小節 → イントロを飛ばして繰り返す
+ battle:{bpm:168,loopStart:16,tracks:[
+  {w:"p50",v:0.06,p:"A6:1 G#6:1 G6:1 F#6:1 F6:1 E6:1 D#6:1 D6:1 C#6:1 C6:1 B5:1 A#5:1 A5:1 R:3 "+BATTLE_MEL+" "+tp(BATTLE_MEL,2)},
+  {w:"p25",v:0.028,p:"R:16 "+arpOf(BATTLE_CH,4,1)+" "+tp(arpOf(BATTLE_CH,4,1),2)},
+  {w:"tri",v:0.17,p:"A2:4 A2:4 A2:4 A2:2 G#2:1 A2:1 "+bass2(BATTLE_CH)+" "+tp(bass2(BATTLE_CH),2)},
+  {w:"drum",v:0.32,p:"K . . . K . . . K . . . S S S S "+rep(BATTLE_DR,7)+" "+BATTLE_FILL+" "+rep(BATTLE_DR,7)+" "+BATTLE_FILL}]},
  // かち：1回だけ鳴るジングル
  win:{bpm:140,once:true,tracks:[
   {w:"p50",v:0.065,p:"C5:2 E5:2 G5:2 C6:4 R:2 G5:2 B5:2 C6:8"},
@@ -49,7 +57,8 @@ const TUNES={
 };
 function compile(tune){const spb=60/tune.bpm/4;const ev=[];let total=0;
   for(const tr of tune.tracks){let step=0;for(const tok of tr.p.trim().split(/\s+/)){const [n,l]=tok.split(":");const len=l?parseInt(l,10):1;if(n!=="R"&&n!==".")ev.push({t:step*spb,dur:len*spb,w:tr.w,v:tr.v,n});step+=len}total=Math.max(total,step)}
-  return {ev:ev.sort((a,b)=>a.t-b.t),len:total*spb}}
+  ev.sort((a,b)=>a.t-b.t);const loopT=(tune.loopStart||0)*spb;let loopIdx=ev.findIndex(e=>e.t>=loopT-1e-6);if(loopIdx<0)loopIdx=0;
+  return {ev,len:total*spb,loopT,loopIdx}}
 
 // ---------- 再生 ----------
 const bgm={cur:null,master:null,timer:null,vol:0.35};
@@ -60,7 +69,7 @@ function bgmStart(name,onEnd){bgmStop();const ctx=actx();if(!ctx||ctx.state!=="r
   bgm.master=m;bgm.cur=name;let base=ctx.currentTime+0.12,idx=0;
   const sched=()=>{if(bgm.master!==m)return;const horizon=ctx.currentTime+1.0;
     for(;;){
-      if(idx>=c.ev.length){if(tune.once){if(ctx.currentTime>=base+c.len){bgmStop();onEnd&&onEnd()}return}base+=c.len;idx=0;if(!c.ev.length)return}
+      if(idx>=c.ev.length){if(tune.once){if(ctx.currentTime>=base+c.len){bgmStop();onEnd&&onEnd()}return}base+=c.len-c.loopT;idx=c.loopIdx;if(!c.ev.length||c.loopIdx>=c.ev.length)return}
       const e=c.ev[idx];const t=base+e.t;if(t>horizon)return;
       if(e.w==="drum")drum(ctx,m,e.n,t,e.v);else note(ctx,m,e.w,midiOf(e.n),t,e.dur*0.95,e.v);idx++}};
   sched();bgm.timer=setInterval(sched,200);return true}

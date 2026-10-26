@@ -194,6 +194,28 @@ button.mv.star .bd.star{animation:wob 1.6s ease-in-out infinite}
 @keyframes wob{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
 .field.flash{animation:flash .35s}
 @keyframes flash{0%{filter:brightness(1)}30%{filter:brightness(2.4)}100%{filter:brightness(1)}}
+/* わざの演出 */
+.fx{position:absolute;transform:translate(-50%,-50%);pointer-events:none;font-size:2.2rem;line-height:1;z-index:5;filter:drop-shadow(0 2px 0 rgba(0,0,0,.25))}
+.fx.name{transform:translate(-50%,0);font-size:1.1rem;background:var(--win);border:3px solid var(--winline);border-radius:8px;padding:2px 12px;box-shadow:3px 3px 0 var(--winline);white-space:nowrap;filter:none;animation:namein .9s ease-out forwards}
+@keyframes namein{0%{opacity:0;transform:translate(-50%,-10px)}15%{opacity:1;transform:translate(-50%,0)}80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,0)}}
+.fx.burst{animation:burst .5s ease-out forwards}
+.fx.burst.small{font-size:1.5rem}
+@keyframes burst{0%{transform:translate(-50%,-50%) scale(.3);opacity:1}70%{transform:translate(-50%,-50%) scale(1.6)}100%{transform:translate(-50%,-50%) scale(1.9);opacity:0}}
+.fx.beam{height:6px;border-radius:3px;background:linear-gradient(90deg,rgba(255,255,255,0),#fff176 30%,#fff);box-shadow:0 0 12px #fff176;transform-origin:0 50%;animation:beam .45s ease-out forwards;filter:none}
+@keyframes beam{0%{opacity:0;clip-path:inset(0 100% 0 0)}35%{opacity:1;clip-path:inset(0 0 0 0)}100%{opacity:0;clip-path:inset(0 0 0 0)}}
+.fx.sparkle{animation:sparkle .6s ease-out forwards}
+.fx.sparkle.d2{animation-delay:.1s;opacity:0}
+@keyframes sparkle{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}40%{opacity:1;transform:translate(-50%,-50%) scale(1.3)}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+.fx.leaf{animation:fly .7s ease-in forwards}
+@keyframes fly{0%{transform:translate(-50%,-50%) rotate(0)}100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) rotate(540deg);opacity:0}}
+.fx.noteup{animation:noteup .8s ease-out forwards}
+@keyframes noteup{0%{transform:translate(-50%,-50%) scale(.8);opacity:0}20%{opacity:1}100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1.2);opacity:0}}
+.fx.shield{font-size:2.8rem;animation:shieldpop .6s ease-out forwards}
+@keyframes shieldpop{0%{transform:translate(-50%,-50%) scale(.3);opacity:0}40%{transform:translate(-50%,-50%) scale(1.2);opacity:1}100%{transform:translate(-50%,-50%) scale(1);opacity:0}}
+.field.quake{animation:quake .4s}
+@keyframes quake{0%,100%{transform:translate(0,0)}20%{transform:translate(-6px,2px)}40%{transform:translate(6px,-2px)}60%{transform:translate(-4px,1px)}80%{transform:translate(4px,-1px)}}
+.sprite.foe.lunge{animation:foelunge .4s}
+@keyframes foelunge{50%{transform:translate(-26px,20px)}}
 .bang{display:inline-block;background:var(--hpbad);color:#fff;border-radius:50%;padding:0 6px;font-size:.8rem;line-height:1.4}
 .chips{display:flex;gap:4px;flex-wrap:wrap}
 .chips button{padding:4px 8px;font-size:.85rem;line-height:1.3}
@@ -205,4 +227,4 @@ button.mv.star .bd.star{animation:wob 1.6s ease-in-out infinite}
 .pin{letter-spacing:.4em;font-size:1.6rem;text-align:center;margin:4px 0}
 .stats{display:grid;gap:6px;font-size:.9rem}
 .stats .srow{border-bottom:1px dashed var(--hpbg);padding-bottom:4px}
-@media (prefers-reduced-motion:reduce){button.opt.right,button.opt.live,button.mv.star .bd.star,.field.flash{animation:none}}
+@media (prefers-reduced-motion:reduce){button.opt.right,button.opt.live,button.mv.star .bd.star,.field.flash,.field.quake,.sprite.foe.lunge{animation:none}.fx{display:none}.fx.name{display:block;animation:none}}

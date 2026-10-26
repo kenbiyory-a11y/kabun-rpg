@@ -5,7 +5,7 @@
  * 更新のしかた：ファイルを変えたら VERSION を変える（例：2026-10-19-1 → 2026-10-19-2）。
  * 古いキャッシュは activate 時に消え、開いている画面には「さいよみこみ」ボタンが出る。
  */
-const VERSION = "2026-10-26-1";
+const VERSION = "2026-10-26-2";
 const CACHE = "kabun-app-" + VERSION;
 const FONT_CACHE = "kabun-fonts";
 
@@ -35,13 +35,17 @@ const SHELL = [
   "./icons/icon-512.png",
   "./icons/maskable-512.png",
   "./icons/apple-touch-icon.png",
-  // 国旗 SVG（flag-icons、MIT）。js/data.js の FLAG_CODES と同じ一覧にすること
-  "./img/flags/jp.svg","./img/flags/us.svg","./img/flags/fr.svg","./img/flags/br.svg","./img/flags/it.svg","./img/flags/ca.svg",
-  "./img/flags/kr.svg","./img/flags/gb.svg","./img/flags/au.svg","./img/flags/de.svg","./img/flags/in.svg","./img/flags/cn.svg",
-  "./img/flags/es.svg","./img/flags/eg.svg","./img/flags/mx.svg","./img/flags/nl.svg","./img/flags/bd.svg","./img/flags/pw.svg",
-  "./img/flags/th.svg","./img/flags/vn.svg","./img/flags/tr.svg","./img/flags/ru.svg","./img/flags/se.svg","./img/flags/no.svg",
-  "./img/flags/gr.svg","./img/flags/ch.svg","./img/flags/ar.svg","./img/flags/cl.svg","./img/flags/za.svg","./img/flags/ke.svg",
-  "./img/flags/id.svg","./img/flags/ph.svg","./img/flags/nz.svg"
+  // 国旗 SVG（flag-icons、MIT）。js/data.js の FLAG_CODES と同じ 70 か国にすること
+  "./img/flags/jp.svg","./img/flags/us.svg","./img/flags/cn.svg","./img/flags/kr.svg","./img/flags/gb.svg","./img/flags/fr.svg","./img/flags/it.svg","./img/flags/de.svg",
+  "./img/flags/ca.svg","./img/flags/au.svg","./img/flags/br.svg","./img/flags/in.svg","./img/flags/es.svg","./img/flags/ru.svg","./img/flags/mx.svg","./img/flags/th.svg",
+  "./img/flags/vn.svg","./img/flags/ph.svg","./img/flags/id.svg","./img/flags/tw.svg","./img/flags/sg.svg","./img/flags/my.svg","./img/flags/eg.svg","./img/flags/tr.svg",
+  "./img/flags/nl.svg","./img/flags/ch.svg","./img/flags/se.svg","./img/flags/no.svg","./img/flags/dk.svg","./img/flags/fi.svg","./img/flags/gr.svg","./img/flags/be.svg",
+  "./img/flags/ie.svg","./img/flags/pl.svg","./img/flags/ua.svg","./img/flags/ar.svg","./img/flags/cl.svg","./img/flags/pe.svg","./img/flags/za.svg","./img/flags/ke.svg",
+  "./img/flags/nz.svg","./img/flags/np.svg","./img/flags/sa.svg","./img/flags/jm.svg",
+  "./img/flags/pt.svg","./img/flags/at.svg","./img/flags/cu.svg","./img/flags/mn.svg","./img/flags/is.svg","./img/flags/cz.svg","./img/flags/hu.svg","./img/flags/hr.svg",
+  "./img/flags/ro.svg","./img/flags/il.svg","./img/flags/ir.svg","./img/flags/iq.svg","./img/flags/pk.svg","./img/flags/bd.svg","./img/flags/lk.svg","./img/flags/kh.svg",
+  "./img/flags/mm.svg","./img/flags/kz.svg","./img/flags/ng.svg","./img/flags/gh.svg","./img/flags/ma.svg","./img/flags/et.svg","./img/flags/co.svg","./img/flags/ve.svg",
+  "./img/flags/fj.svg","./img/flags/pw.svg"
 ];
 
 self.addEventListener("install", (e) => {

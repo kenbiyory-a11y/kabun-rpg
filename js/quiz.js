@@ -14,8 +14,25 @@ function genNum(){
   for(let a=2;a<=6;a++)for(let b=1;b<a;b++){const r=a-b;const e=pick();out.push({id:`num_sub_${a}_${b}`,t:"pick",q:`${e.repeat(a)} から ${e.repeat(b)} たべた`,a:String(r),d:r===1?["2","3"]:[String(r-1),String(r+1)],sub:"のこりは いくつ？",lv:a<=4?2:3,g:"のこり",say:"のこりは いくつ？"})}
   return out;
 }
+// こっき の生成問題：COUNTRIES（js/quiz/flag.js）から「こっき→くに」と「くに→こっき」を作る。
+// 手書きの問題（a01〜a15 の こっき→くに、b01/b02/b13〜b15 の くに→こっき）と重なる国は作らない
+const FLAG_HAND_PICK=new Set(["jp","us","fr","br","it","ca","kr","gb","au","de","in","cn","es","eg","mx"]);
+const FLAG_HAND_ICO=new Set(["jp","us","cn","fr"]);
+function flagEmoji(code){return String.fromCodePoint(...Array.from(code).map(ch=>0x1F1E6+ch.charCodeAt(0)-97))}
+function genFlag(){
+  if(typeof COUNTRIES==="undefined")return [];
+  const byCode=Object.fromEntries(COUNTRIES.map(c=>[c.c,c]));const out=[];
+  // はずれ：useLike なら似ている国旗を先に、残りは同じかやさしいレベルの国から
+  const others=(me,n,useLike)=>{const cand=[];if(useLike&&me.like)for(const l of me.like)if(byCode[l]&&cand.length<n)cand.push(byCode[l]);
+    const pool=shuffle(COUNTRIES.filter(c=>c.c!==me.c&&c.lv<=me.lv&&!cand.includes(c)));while(cand.length<n&&pool.length)cand.push(pool.shift());return cand};
+  for(const c of COUNTRIES){
+    if(!FLAG_HAND_PICK.has(c.c)){const sub="どこの くにの こっき？";out.push({id:`flag_f_${c.c}`,t:"pick",q:flagEmoji(c.c),a:c.n,d:others(c,2,c.lv>=3).map(x=>x.n),sub,lv:c.lv,g:"どこのくに",say:sub})}
+    if(!FLAG_HAND_ICO.has(c.c)){const q=`${c.n}の こっきは どれ？`;out.push({id:`flag_i_${c.c}`,t:"ico",q,a:flagEmoji(c.c),d:others(c,c.lv===1?1:2,c.lv>=2).map(x=>flagEmoji(x.c)),lv:c.lv,g:"どのこっき",say:q})}
+  }
+  return out;
+}
 // 出題できる問題（音声の無い端末では listen を外す）
-function poolOf(cat){let p=(QUIZ[cat]||[]).slice();if(cat==="num")p=p.concat(genNum());if(!voiceOK())p=p.filter(q=>q.t!=="listen");return p}
+function poolOf(cat){let p=(QUIZ[cat]||[]).slice();if(cat==="num")p=p.concat(genNum());if(cat==="flag")p=p.concat(genFlag());if(!voiceOK())p=p.filter(q=>q.t!=="listen");return p}
 function qById(cat,id){return poolOf(cat).find(q=>q.id===id)||null}
 function qLabel(q){return q.t==="listen"?(q.sub||"（よみあげ）"):(q.q&&q.sub?`${q.q} ${q.sub}`:(q.q||q.sub||q.id))}
 

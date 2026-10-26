@@ -30,5 +30,15 @@ for(const cat of ["num","eng","flag","animal"]){
   console.log(`${cat}: ${qs.length}問　lv1 ${lv[1]} / lv2 ${lv[2]} / lv3 ${lv[3]}　pick ${t.pick} / ico ${t.ico} / listen ${t.listen}`);
   if(qs.length!==30)warn(`${cat}: 30問ではない（${qs.length}）`);
 }
+// 国データ：svg があるか、sw.js の SHELL に入っているか
+const COUNTRIES=vm.runInContext("typeof COUNTRIES==='undefined'?[]:COUNTRIES",ctx);
+const sw=fs.readFileSync(path.join(ROOT,"sw.js"),"utf8");const dataJs=fs.readFileSync(path.join(ROOT,"js/data.js"),"utf8");
+for(const c of COUNTRIES){
+  if(!fs.existsSync(path.join(ROOT,`img/flags/${c.c}.svg`)))warn(`国旗の画像が無い: ${c.c}`);
+  if(!sw.includes(`./img/flags/${c.c}.svg`))warn(`sw.js の SHELL に無い: ${c.c}`);
+  if(!new RegExp(`\\b${c.c}\\b`).test(dataJs.split("FLAG_CODES")[1]||""))warn(`data.js の FLAG_CODES に無い: ${c.c}`);
+  for(const l of c.like||[])if(!COUNTRIES.some(x=>x.c===l))warn(`${c.c} の like に無い国: ${l}`);
+}
+console.log(`国：${COUNTRIES.length}か国（lv1 ${COUNTRIES.filter(c=>c.lv===1).length} / lv2 ${COUNTRIES.filter(c=>c.lv===2).length} / lv3 ${COUNTRIES.filter(c=>c.lv===3).length}）`);
 console.log(bad?`\n${bad} 件の問題あり`:"\nOK");
 process.exit(bad?1:0);
