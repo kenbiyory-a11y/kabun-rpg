@@ -27,8 +27,9 @@ const L=[];const log=(...a)=>L.push(a.join(" "));
 window.onerror=(m,src,line)=>{log("JSERROR",m,src,line)};
 const txt=()=>$("msgbox").innerText;
 const btn=(t)=>Array.from(document.querySelectorAll("#msgbox button")).find(b=>b.innerText.includes(t));
-const chk=(c,m)=>log(c?"ok:":"FAIL:",m);
+const chk=(c,m)=>log(c?"ok:":"FAIL:",m);const optText=b=>{const c=b.cloneNode(true);const n=c.querySelector(".no");if(n)n.remove();return c.textContent.trim()};
 try{
+  $("msgbox").addEventListener("click",msgboxTap);UI.active=true;
   localStorage.clear();S=FRESH();migrate();dayRoll();S.se=false;S.voice=false;S.bgmOn=false;render();
   if(typer)typeNode.click();chk(S.flags.intro!==true&&txt().includes("なつの よる"),"初回：はじまりの おはなし 1枚目");
   for(let g=0;g<4&&!document.getElementById("nameInput");g++){if(typer)typeNode.click();btn("つぎへ").click()}
@@ -37,7 +38,7 @@ try{
   chk(txt().includes("パパと ママと はるとが くらす")||(typer&&(typeNode.click(),txt().includes("はるとが くらす"))),"4枚目：かぞくの文に なまえ が入る");
   let g2=0;while(S.flags.intro!==true&&g2++<10){if(typer)typeNode.click();(btn("ぼうけんの はじまり")||btn("つぎへ")).click()}
   chk(S.flags.intro===true&&S.view==="growth"&&S.intro===0,"おはなし おわり → へや");
-  UI.replay=true;S.intro=0;render();if(typer)typeNode.click();chk(txt().includes("なつの よる"),"読み返しできる");for(let g=0;g<3;g++){if(typer)typeNode.click();btn("つぎへ").click()}chk(!document.getElementById("nameInput")&&S.intro>=4,"読み返しでは なまえ の場面を飛ばす");btn("とばす").click();chk(!UI.replay&&S.view==="growth","とばす で へや に戻る");
+  UI.replay=true;S.intro=0;render();if(typer)typeNode.click();chk(txt().includes("なつの よる"),"読み返しできる");for(let g=0;g<3;g++){if(typer)typeNode.click();btn("つぎへ").click()}chk(!document.getElementById("nameInput")&&S.intro>=4,"読み返しでは なまえ の場面を飛ばす");document.querySelector("#field .skip").click();chk(!UI.replay&&S.view==="growth","とばす で へや に戻る");
   // 2人目を ⚙️ で登録すると、おはなし の なまえ の場面がボタンになる
   S.kids.push("あおい");S.flags.intro=false;S.name="";S.intro=2;render();chk(btn("はると")&&btn("あおい")&&!!document.getElementById("nameInput"),"登録ずみの なまえ はボタンで えらべる");btn("あおい").click();chk(S.name==="あおい","あおい を選んだ");S.flags.intro=true;S.intro=0;
   S.name="テスト";save();render();
@@ -48,18 +49,18 @@ try{
   chk(S.sub==="quiz"&&S.sess&&S.sess.items.length===5,"セッション開始 5問");
   for(let i=0;i<5;i++){UI.lockUntil=0;render();const it=S.sess.items[S.sess.i];
     const opts=Array.from(document.querySelectorAll("#msgbox button.opt"));chk(opts.length===it.opts.length&&opts.every(b=>!b.disabled),`${i+1}もんめ：選択肢 ${opts.length}`);
-    const right=opts.find(b=>b.innerText.replace(/^\d+\s*/,"").trim()===it.a);if(!right){log("no right button for",it.a,opts.map(b=>b.innerText));break}
+    const right=opts.find(b=>optText(b)===it.a);if(!right){log("no right button for",it.a,opts.map(b=>b.innerText));break}
     right.click();chk(S.sess.phase==="after"&&S.sess.res[i]===true,"せいかい");
     if(typer)typeNode.click();btn("つぎへ").click()}
   chk(S.sub==="result"&&S.sess.result&&S.sess.result.ok===5&&S.sess.result.gain===7,"結果：5/5 +7 "+JSON.stringify(S.sess.result&&{ok:S.sess.result.ok,gain:S.sess.result.gain}));
   chk(txt().includes("ぜんもん せいかい"),"結果画面の文言");
   btn("もどる").click();chk(S.sess===null&&S.sub==="menu"&&S.str===7,"もどる → ちから7");
-  chk(btn("おやすみちゅう")&&btn("おやすみちゅう").disabled,"すうじ は おやすみちゅう");
+  chk(btn("おやすみちゅう")&&btn("おやすみちゅう").classList.contains("rest"),"すうじ は おやすみちゅう");
   // まちがい → 正解をタップして締める
   btn("えいごの とっくん")?btn("えいごの とっくん").click():log("skip eng (no data)");
-  if(S.sess){UI.lockUntil=0;render();const it=S.sess.items[0];const wrong=Array.from(document.querySelectorAll("#msgbox button.opt")).find(b=>b.innerText.replace(/^\d+\s*/,"").trim()!==it.a);wrong.click();
+  if(S.sess){UI.lockUntil=0;render();const it=S.sess.items[0];const wrong=Array.from(document.querySelectorAll("#msgbox button.opt")).find(b=>optText(b)!==it.a);wrong.click();
     chk(S.sess.pending===true&&txt().includes("こたえは これだよ"),"まちがい → こたえは これだよ");
-    const right=Array.from(document.querySelectorAll("#msgbox button.opt")).find(b=>!b.disabled);chk(right&&right.innerText.replace(/^\d+\s*/,"").trim()===it.a,"正解だけ押せる");right.click();
+    const right=Array.from(document.querySelectorAll("#msgbox button.opt")).find(b=>!b.disabled);chk(right&&optText(right)===it.a,"正解だけ押せる");right.click();
     chk(S.sess.res[0]===false&&S.sess.phase==="after","正解タップで次へ");S.sess=null;S.sub="menu";S.daily.done.eng=0}
   // バトル：Lv5 にして 第1話
   S.str=8;S.wise=8;S.world=8;S.heart=8;save();S.view="battle";S.sub="menu";render();
@@ -67,6 +68,8 @@ try{
   chk(S.sub==="fight"&&S.foe&&S.foe.name==="たまごのから","バトル開始");
   let turns=0;while(S.foe&&S.foe.hp>0&&turns<10){turns++;const star=document.querySelector("#msgbox button.mv.star");chk(!!star,"★ボタンあり");star.click();chk(S.sub==="turn"&&S.msg.includes("ばつぐん"),"ばつぐん表示");if(typer)typeNode.click();btn("つぎへ").click()}
   chk(turns===4&&S.sub==="win","★4ターンで勝ち（"+turns+"）");
+  S.view="growth";S.sub="menu";render();S.view="battle";render();chk(S.sub==="win"&&S.line===0&&S.foe&&S.foe.hp===0,"勝った直後にタブを離れても 勝ち画面から再開（再戦にならない）");
+  S.sub="menu";save();load();migrate();S.view="battle";render();chk(S.sub==="win","再読み込みしても 勝ち画面から再開");
   if(typer)typeNode.click();btn("つぎへ").click();if(typer)typeNode.click();chk(S.sub==="win"&&S.line===1,"勝利台詞2行目");btn("？？？").click();
   chk(S.sub==="evolve","進化へ");if(typer)typeNode.click();btn("つぎへ").click();chk(txt().includes("ようちゅう")&&txt().includes("あたらしい わざ"),"進化画面");btn("すすむ").click();
   chk(S.ch===1&&stageIdx()===1&&S.foe===null,"第1話クリア → ようちゅう");
@@ -78,13 +81,29 @@ try{
   S.view="diary";S.sub="menu";render();chk(txt().includes("ひびの きろく"),"きろく画面");btn("おてつだい した").click();chk(S.chip==="おてつだい した","できたこと選択");
   const before=S.str;btn("きろくする").click();chk(S.daily.diary===true&&S.str===before+1&&S.diary.length===1,"きろく → +1");
   btn("はやく ねた").click();btn("きろくする").click();chk(S.diary.length===2&&S.str===before+1&&txt().includes("もう もらったよ"),"2件目は +1 なし");
+  // とっくんの途中で日付をまたぐ
+  S.view="growth";S.sub="menu";S.daily.done={};render();btn("すうじの とっくん").click();chk(S.sub==="quiz"&&!!S.sess,"セッション再開のための開始");
+  S.daily.d="2000-01-01";S.sess.d="2000-01-01";const rolled=dayRoll();render();chk(rolled&&S.sess===null&&S.sub==="menu"&&!!btn("すうじの とっくん"),"日付が変わったら セッションを捨てて へや に戻る（固まらない）");
+  // 音が無いときの きくだけ問題
+  S.sess={cat:"animal",d:ymd(),i:0,items:[{id:"t_listen",t:"listen",q:"",a:"🐶",d:["🐱"],opts:["🐶","🐱"],say:"わんわん と なくのは？",lv:1,g:"なきごえ",sub:null,ol:null,rev:false,chal:false}],res:[],pending:false,phase:null,msg:null,said:false,result:null};
+  S.sub="quiz";render();chk(txt().includes("わんわん と なくのは？"),"よみあげが無いときは きくだけ問題の文を出す");S.sess=null;S.sub="menu";
+  // かぞくの なまえ：いま あそんでいる なまえ を消しても復活しない
+  S.kids=["はると","あおい"];S.name="はると";S.view="settings";S.sub="kids";localStorage.removeItem("kabun-pin");render();
+  Array.from(document.querySelectorAll("#msgbox button")).find(b=>b.innerText.includes("🗑️")).click();chk(S.kids.length===1&&S.name==="あおい","けした なまえ は あそぶ なまえ からも外れる");
+  save();load();migrate();chk(S.kids.length===1&&S.kids[0]==="あおい","再読み込みで復活しない");
   // 設定：暗証番号
   localStorage.removeItem("kabun-pin");S.view="settings";S.sub="menu";render();chk(txt().includes("おうちのひと むけ"),"PINなし：設定が開く");
-  pinSet("1234");UI.unlockUntil=0;render();chk(document.querySelectorAll("#msgbox button").length===12&&txt().includes("ばんごう"),"PINあり：テンキー");
+  pinSet("1234");UI.unlockUntil=0;render();chk(document.querySelectorAll("#msgbox button").length===13&&txt().includes("ばんごう"),"PINあり：テンキー＋わすれた");
   for(const d of ["9","9","9","9"])btn(d).click();chk(txt().includes("ちがうみたい"),"まちがい番号");
   for(const d of ["1","2","3","4"])btn(d).click();chk(unlocked()&&txt().includes("おうちのひと むけ"),"正しい番号で解除");
   btn("せいせき").click();chk(txt().includes("すうじ")&&txt().includes("さいこう 5/5"),"せいせき");
-  localStorage.removeItem("kabun-pin");
+  // 暗証番号を わすれた：24時間後に消える予約
+  S.sub="menu";UI.unlockUntil=0;render();btn("わすれた").click();chk(pinResetAt()>Date.now()&&txt().includes("きえます"),"わすれた → 予約が入る");
+  localStorage.setItem("kabun-pin-reset",String(Date.now()-1));render();chk(pinGet()===""&&unlocked(),"時間がたつと 番号だけ消えてデータは残る");
+  // PIN が無いときの 全消去は 計算の確認を通す
+  S.view="settings";S.sub="backup";render();btn("はじめから").click();chk(S.sub==="pcheck"&&!!document.getElementById("pcheck"),"全消去の前に おうちのひとの かくにん");
+  document.getElementById("pcheck").value="56";btn("すすむ").click();chk(S.sub==="reset","正解で先へ進む");S.sub="menu";
+  localStorage.removeItem("kabun-pin");localStorage.removeItem("kabun-pin-reset");
 }catch(e){log("EXC",e&&e.stack||e)}
 $("log").textContent=L.join("\n");document.title="DONE "+(L.some(l=>l.startsWith("FAIL")||l.startsWith("JSERROR")||l.startsWith("EXC"))?"NG":"OK");
 });

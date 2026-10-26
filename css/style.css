@@ -59,7 +59,7 @@ button.danger{border-color:var(--hpbad);color:var(--hpbad)}
 button.sel{background:#fff6cc}
 button small,label.filebtn small{display:block;font-size:.72rem;color:var(--muted)}
 label.filebtn input{position:absolute;width:1px;height:1px;opacity:0;left:0;top:0}
-.tap{width:100%;text-align:right;border:0;background:none;padding:0;color:var(--muted);font-size:.85rem}
+.tap{width:100%;text-align:center;border:3px solid var(--winline);background:#fff6cc;padding:10px;color:var(--fg);font-size:1.1rem;border-radius:8px}
 .tap::before{display:none}
 input,textarea{font:inherit;padding:8px 12px;border:3px solid var(--winline);border-radius:6px;background:var(--win);color:var(--fg);width:100%}
 input:focus-visible,textarea:focus-visible{outline:3px solid var(--hpmid)}
@@ -74,6 +74,7 @@ textarea{min-height:90px;font-size:.72rem;resize:vertical;line-height:1.4}
 /* 成長画面 */
 .sprite.center{left:50%;top:38%;transform:translate(-50%,-50%);font-size:6rem;animation:float 2.4s ease-in-out infinite}
 @keyframes float{0%,100%{transform:translate(-50%,-50%)}50%{transform:translate(-50%,calc(-50% - 10px))}}
+.sprite.center.attack{animation:lunge .4s} /* 正解で跳ねる（.center の float より後に書いて勝たせる） */
 .sprite.evolve{animation:evolve 1.6s ease-in-out}
 @keyframes evolve{0%{filter:brightness(1)}30%{filter:brightness(4) drop-shadow(0 0 20px #fff)}60%{filter:brightness(4) drop-shadow(0 0 30px #ffe066)}100%{filter:brightness(1)}}
 .glow{position:absolute;left:50%;top:38%;width:170px;height:170px;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(rgba(255,240,150,.8),rgba(255,240,150,0) 70%)}
@@ -164,8 +165,12 @@ img.slide.kb{animation:kb 4.5s linear forwards}
 .dots small{margin-left:auto;font-size:.8rem;color:var(--muted)}
 .chal{display:inline-block;font-size:.78rem;background:var(--gold);border-radius:6px;padding:0 6px;margin-bottom:4px}
 .qtext{display:block;font-size:1.35rem;text-align:center;margin:6px 0;line-height:1.4}
-.spk{position:absolute;right:0;top:0;padding:4px 8px;font-size:1.2rem;line-height:1;border-width:2px}
+.spk{position:absolute;right:0;top:0;padding:4px 8px;font-size:1.2rem;line-height:1;border-width:2px;z-index:6}
 .spk::before{display:none}
+.spk.fld{right:8px;top:8px}
+.skip{position:absolute;left:8px;top:8px;padding:2px 8px;font-size:.75rem;color:var(--muted);background:rgba(255,255,255,.7);border-width:2px;z-index:6}
+.skip::before{display:none}
+button.rest{opacity:.6}
 .menu.ico3{grid-template-columns:1fr 1fr 1fr}
 button.opt{font-size:1.15rem;padding:10px 10px 10px 34px}
 button.opt .no{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:.8rem;color:var(--muted);border:2px solid var(--muted);border-radius:50%;width:1.4em;height:1.4em;display:grid;place-items:center;line-height:1}
@@ -193,6 +198,7 @@ button.mv.heart{border-color:var(--c-heart);background:#ffe3ee}
 .hud .bds{display:flex;gap:4px;margin-top:3px}
 .hud .bds .bd{font-size:1.1rem;padding:0 6px}
 button.mv .bd{position:absolute;right:6px;top:6px;font-size:1.1rem}
+button.mv .bd.star{font-size:1.6rem;padding:0 8px;top:4px}
 button.mv.star{box-shadow:0 0 0 3px var(--gold)}
 button.mv.star .bd.star{animation:wob 1.6s ease-in-out infinite}
 @keyframes wob{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}

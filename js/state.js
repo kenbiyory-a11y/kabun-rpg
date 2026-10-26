@@ -1,14 +1,20 @@
 // ---------- 状態（localStorage） ----------
 const SAVE_KEY="kabun5", OLD_KEYS=["kabun4"];
+const PREV_KEY="kabun5-prev";     // 全消去・読み込みの直前の退避（↩️ で戻せる）
+const BROKEN_KEY="kabun5-broken"; // 読めなかったセーブの退避（⚙️ から書き出せる）
+// 絵文字（国旗の地域表示記号を含む）の判定。render.js / voice.js で共用
+const EMOJI_RE=/[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}]/u;
 const H=()=>({n:0,best:0,miss:{},last:[]});
 const FRESH=()=>({name:"",kids:[],intro:0,ch:0,str:0,wise:0,world:0,heart:0,view:"growth",sub:"menu",line:0,hp:50,foe:null,sess:null,
   daily:{d:"",done:{},score:{},diary:false,bonus:false,bonusNet:false},cap:1,
   lv:{num:1,eng:1,flag:1,animal:1},rev:{num:[],eng:[],flag:[],animal:[]},hist:{num:H(),eng:H(),flag:H(),animal:H()},
   used:{},items:{net:0},dex:{},flags:{},custom:[],chips:null,voice:true,se:true,
   msg:null,diary:[],emo:"🌟",chip:null,memories:[],memo:"📸",part:"daily",pidx:-1,bgm:"gen1",bgmOn:true});
-function valid(o){return !!(o&&typeof o==="object"&&typeof o.ch==="number"&&typeof o.view==="string"&&typeof o.str==="number"&&typeof o.name==="string"&&Array.isArray(o.diary))}
+function valid(o){return !!(o&&typeof o==="object"&&typeof o.ch==="number"&&typeof o.view==="string"&&STATS.every(k=>typeof o[k]==="number"&&isFinite(o[k]))&&typeof o.name==="string"&&Array.isArray(o.diary))}
 function migrate(){
   const fresh=FRESH();
+  for(const k of STATS)S[k]=Math.max(0,Math.floor(Number(S[k])||0));
+  if(typeof S.ch!=="number"||!isFinite(S.ch))S.ch=0;S.ch=Math.max(0,Math.floor(S.ch));
   for(const key of ["daily","lv","rev","hist","used","items","dex","flags"])if(!S[key]||typeof S[key]!=="object"||Array.isArray(S[key]))S[key]=fresh[key];
   if(!S.daily.done||typeof S.daily.done!=="object")S.daily.done={};if(!S.daily.score||typeof S.daily.score!=="object")S.daily.score={};
   for(const c of CATS){
@@ -18,9 +24,10 @@ function migrate(){
     S.used[c]=Array.isArray(S.used[c])?S.used[c].map(x=>typeof x==="number"?legacyId(c,x):x).filter(x=>typeof x==="string"):[];
   }
   if(!Array.isArray(S.custom))S.custom=[];if(typeof S.items.net!=="number")S.items.net=0;
-  if(typeof S.intro!=="number")S.intro=0;if(S.name&&S.flags.intro===undefined)S.flags.intro=true; // すでに遊んでいる人には はじまりの おはなし を出さない
+  if(typeof S.intro!=="number")S.intro=0;
   if(!Array.isArray(S.kids))S.kids=[];S.kids=S.kids.filter(x=>typeof x==="string"&&x.trim()).map(x=>x.trim()).slice(0,KIDS_MAX);
-  if(S.name&&!S.kids.includes(S.name)&&S.kids.length<KIDS_MAX)S.kids.push(S.name);
+  // 旧セーブ（flags.intro が無い）を初めて読むとき：すでに遊んでいる人には はじまりの おはなし を出さず、いまの なまえ を かぞく に入れる（一度きり）
+  if(S.flags.intro===undefined){S.flags.intro=!!S.name;if(S.name&&!S.kids.includes(S.name)&&S.kids.length<KIDS_MAX)S.kids.push(S.name)}
   if(typeof S.voice!=="boolean")S.voice=true;if(typeof S.se!=="boolean")S.se=true;if(typeof S.cap!=="number")S.cap=1;
   if(typeof S.chip!=="string")S.chip=null;
   // おもいで（シアター）は v2 では UI から外したが、データは残す
@@ -36,16 +43,22 @@ function migrate(){
   if(!["growth","battle","diary","settings"].includes(S.view))S.view="growth";
   if(S.view==="diary"&&S.sub==="dentry"&&!S.diary[S.pidx])S.sub="menu";
   if(!["menu","dentry","backup","stats","cap","sound","pin","dev","paste","kids"].includes(S.sub))S.sub="menu";
-  if(S.sess&&(!Array.isArray(S.sess.items)||S.sess.d!==ymd()))S.sess=null;
+  if(S.sess&&(typeof S.sess!=="object"||!CATS.includes(S.sess.cat)||!Array.isArray(S.sess.items)||!Array.isArray(S.sess.res)||typeof S.sess.i!=="number"||S.sess.i<0||S.sess.i>S.sess.items.length||(S.sess.d!==ymd()&&!S.sess.result)))S.sess=null;
   if(typeof S.hp!=="number"||S.hp<=0||S.hp>maxHp())S.hp=maxHp();
   S.line=0;S.msg=null;
 }
 let S=FRESH();
-const UI={busy:false,busyText:"",exportText:null,pendingImport:null,confirm:false,draft:"",quota:"",lockUntil:0,pinBuf:"",pinNew:"",unlockUntil:0,pinFail:0,pinLockUntil:0,saveErr:false,replay:false,introSaid:false};
-function load(){for(const key of [SAVE_KEY,...OLD_KEYS]){try{const v=localStorage.getItem(key);if(v){const o=JSON.parse(v);if(valid(o)){S=Object.assign(FRESH(),o);return key}}}catch(e){}}return null}
+const UI={busy:false,busyText:"",exportText:null,pendingImport:null,confirm:false,draft:"",quota:"",lockUntil:0,pinBuf:"",pinNew:"",unlockUntil:0,pinFail:0,pinLockUntil:0,saveErr:false,replay:false,introSaid:false,sayPrefix:null,active:false,loadWarn:false,tapFn:null,doneSaid:"",pcheckUntil:0,pnext:null};
+// kabun5 → kabun4 の順に読む。kabun5 があるのに読めないときは BROKEN_KEY に退避してから古い方を読む（上書きで失わないように）
+function load(){for(const key of [SAVE_KEY,...OLD_KEYS]){let v=null;try{v=localStorage.getItem(key)}catch(e){}if(!v)continue;
+    try{const o=JSON.parse(v);if(valid(o)){S=Object.assign(FRESH(),o);return key}}catch(e){}
+    if(key===SAVE_KEY){UI.loadWarn=true;try{if(!localStorage.getItem(BROKEN_KEY))localStorage.setItem(BROKEN_KEY,v)}catch(e){}}}
+  return null}
 function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S));UI.saveErr=false}catch(e){UI.saveErr=true}}
-// 日付が変わったら きょうの分 をリセット（端末のローカル日付）
-function dayRoll(){const t=ymd();if(S.daily.d!==t){S.daily={d:t,done:{},score:{},diary:false,bonus:false,bonusNet:false};if(S.sess&&S.sess.d!==t)S.sess=null;return true}return false}
+// 全消去・読み込みの直前に、いまのセーブを「ひとつ前」として退避する
+function stashPrev(){try{const v=localStorage.getItem(SAVE_KEY);if(v)localStorage.setItem(PREV_KEY,v)}catch(e){}}
+// 日付が変わったら きょうの分 をリセット（端末のローカル日付）。採点ずみの結果画面は残す
+function dayRoll(){const t=ymd();if(S.daily.d!==t){S.daily={d:t,done:{},score:{},diary:false,bonus:false,bonusNet:false};if(S.sess&&S.sess.d!==t&&!S.sess.result)S.sess=null;return true}return false}
 const $=id=>document.getElementById(id);
 function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}

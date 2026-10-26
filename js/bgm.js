@@ -3,7 +3,9 @@
 // 曲はすべてこのファイルの中で書いたオリジナル（既存ゲームの曲は使わない）。
 // 音は必ずユーザー操作の中で始める（actx() はタップ内で呼ばれる前提。suspended のままなら bgmSync は何もしない）。
 const synth={ctx:null,waves:{},noise:null};
-function actx(){if(!synth.ctx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;try{synth.ctx=new AC()}catch(e){return null}}if(synth.ctx.state==="suspended"){try{synth.ctx.resume().catch(()=>{})}catch(e){}}return synth.ctx}
+function actx(){if(!synth.ctx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;try{synth.ctx=new AC();synth.ctx.onstatechange=()=>{if(synth.ctx&&synth.ctx.state==="running")try{bgmSync()}catch(e){}}}catch(e){return null}}
+  const st=synth.ctx.state;if(st!=="running"&&st!=="closed"){try{synth.ctx.resume().then(()=>{try{bgmSync()}catch(e){}}).catch(()=>{})}catch(e){}} // iOS の "interrupted" からも戻す
+  return synth.ctx}
 // デューティ比 duty のパルス波（フーリエ級数）
 function pulseWave(ctx,duty){const key="p"+duty;if(synth.waves[key])return synth.waves[key];const N=32;const re=new Float32Array(N),im=new Float32Array(N);for(let n=1;n<N;n++)re[n]=(2/(n*Math.PI))*Math.sin(n*Math.PI*duty);synth.waves[key]=ctx.createPeriodicWave(re,im);return synth.waves[key]}
 function noiseBuf(ctx){if(synth.noise)return synth.noise;const b=ctx.createBuffer(1,Math.floor(ctx.sampleRate*0.5),ctx.sampleRate);const d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;synth.noise=b;return b}
@@ -61,11 +63,11 @@ function compile(tune){const spb=60/tune.bpm/4;const ev=[];let total=0;
   return {ev,len:total*spb,loopT,loopIdx}}
 
 // ---------- 再生 ----------
-const bgm={cur:null,master:null,timer:null,vol:0.35};
+const bgm={cur:null,master:null,timer:null,vol:0.35,played:null};
 function bgmStop(){if(bgm.timer){clearInterval(bgm.timer);bgm.timer=null}bgm.cur=null;
   if(bgm.master){const m=bgm.master;bgm.master=null;try{m.gain.setTargetAtTime(0.0001,synth.ctx.currentTime,0.08)}catch(e){}setTimeout(()=>{try{m.disconnect()}catch(e){}},600)}}
 function bgmStart(name,onEnd){bgmStop();const ctx=actx();if(!ctx||ctx.state!=="running")return false;const tune=TUNES[name];if(!tune)return false;
-  const c=compile(tune);const m=ctx.createGain();m.gain.setValueAtTime(0.0001,ctx.currentTime);m.gain.linearRampToValueAtTime(bgm.vol,ctx.currentTime+0.3);m.connect(ctx.destination);
+  const c=compile(tune);const m=ctx.createGain();m.gain.setValueAtTime(0.0001,ctx.currentTime);m.gain.setTargetAtTime(bgm.vol,ctx.currentTime,0.1);m.connect(ctx.destination); // setTarget 同士は後勝ちなので、直後の stop / duck が効く
   bgm.master=m;bgm.cur=name;let base=ctx.currentTime+0.12,idx=0;
   const sched=()=>{if(bgm.master!==m)return;const horizon=ctx.currentTime+1.0;
     for(;;){
@@ -81,9 +83,9 @@ function bgmWanted(){if(!S||!S.bgmOn)return null;if(!S.name||UI.replay||!S.flags
   return "room"}
 function bgmSync(){const want=bgmWanted();
   if(!want){if(bgm.cur)bgmStop();return}
-  if(want==="win"){if(bgm.cur==="win"||bgm.cur==="after")return;if(bgmStart("win",()=>{bgm.cur="after"}))return;return}
+  if(want==="win"){const key="win:"+S.ch;if(bgm.cur==="win"||bgm.played===key)return;if(bgmStart("win",()=>{bgm.played=key}))return;return} // 章ごとに1回だけ
   if(bgm.cur===want)return;
-  if(!synth.ctx||synth.ctx.state!=="running"){actx();return} // まだ音を出せない（最初のタップ待ち）
+  const ctx=actx();if(!ctx||ctx.state!=="running")return; // まだ音を出せない（resume 後に onstatechange から戻ってくる）
   bgmStart(want)}
 function stopBgm(){bgmStop()}
 document.addEventListener("visibilitychange",()=>{if(document.hidden)bgmStop()});
@@ -91,5 +93,5 @@ document.addEventListener("visibilitychange",()=>{if(document.hidden)bgmStop()})
 // ---------- 効果音（同じシンセ。BGM とは独立のゲイン） ----------
 const SFX={tap:[[76,.05]],ok:[[76,.08],[84,.14]],ng:[[62,.22]],gain:[[72,.08],[76,.08],[79,.08],[84,.2]],hit:[[40,.12]],batsu:[[79,.06],[86,.06],[91,.22]],guard:[[45,.12]],evolve:[[60,.1],[64,.1],[67,.1],[72,.1],[76,.1],[79,.4]],catch:[[67,.08],[72,.08],[76,.3]],lvup:[[72,.07],[79,.07],[84,.25]]};
 let sfxGain=null;
-function sfx(n){if(!S||!S.se)return;const ctx=actx();if(!ctx)return;if(!sfxGain){sfxGain=ctx.createGain();sfxGain.gain.value=.5;sfxGain.connect(ctx.destination)}
+function sfx(n){if(!S||!S.se)return;const ctx=actx();if(!ctx||ctx.state!=="running")return;if(!sfxGain){sfxGain=ctx.createGain();sfxGain.gain.value=.5;sfxGain.connect(ctx.destination)}
   let t=ctx.currentTime;for(const [m,d] of SFX[n]||[]){note(ctx,sfxGain,(n==="ng"||n==="guard"||n==="hit")?"tri":"p50",m,t,d,.18);t+=d}}

@@ -76,6 +76,20 @@ ok(fq.filter(q=>q.t==="pick").every(q=>FLAG_CODES.has(codeOf(q.q))),"こっき�
 const fjq=fq.find(q=>q.id==="flag_f_fj");ok(fjq&&fjq.d.some(n=>["オーストラリア","ニュージーランド"].includes(n)),"lv3 は似ている国旗を はずれ に使う: "+(fjq&&fjq.d.join("/")));
 ok(poolOf("flag").length>=30+fq.length-2,"こっき の出題プールが増えた: "+poolOf("flag").length);
 
+console.log("== 4d. レビューで見つかった不具合の回帰 ==");
+S=FRESH();migrate();dayRoll();VOICE.ja=false;
+S.lv.eng=1;S.used.eng=poolOf("eng").filter(q=>q.lv===1).map(q=>q.id);const sx=buildSession("eng");
+ok([0,1,3,4].every(i=>sx.items[i]&&sx.items[i].lv===1)&&sx.items[2].lv===2,"lv1 を使い切っても lv1 の出題済みを使い、lv2 は ちょうせん枠だけ: "+sx.items.map(i=>i.lv).join(","));
+ok(!valid({name:"a",ch:0,view:"growth",str:"12",wise:1,world:1,heart:1,diary:[]}),"ステータスが文字列のセーブは valid を通らない");
+S=FRESH();migrate();S.sess={cat:"num",d:"2000-01-01",i:5,items:[],res:[],result:{ok:3,gain:3,k:"str",notes:[]}};S.daily.d="2000-01-01";dayRoll();ok(!!S.sess&&!!S.sess.result,"採点ずみの結果画面は日付が変わっても残る");
+S=FRESH();migrate();S.name="はると";S.kids=[];delete S.flags.intro;migrate();ok(S.kids[0]==="はると"&&S.flags.intro===true,"旧セーブは いまの なまえ を かぞく に入れる（一度だけ）");
+S.kids=[];migrate();ok(S.kids.length===0,"2回目以降は復活しない");
+ok(numberedOpts({t:"pick",opts:["にほん","かんこく","ちゅうごく"]})===true&&numberedOpts({t:"pick",opts:["3","2","4"]})===false&&numberedOpts({t:"pick",opts:["three","two","four"]})===false,"数字の選択肢には番号を付けない");
+ok(genNum().filter(q=>q.id.startsWith("num_sub_")).every(q=>/^(🍎|🍓|🍬|🍪|🍙|🍊)/u.test(q.q))&&genNum().find(q=>q.id==="num_add_2_1").say.includes("2つと 1つ"),"のこり は食べ物だけ、あわせて の読み上げに数が入る");
+ok(EMOJI_RE.test("🇯🇵")&&EMOJI_RE.test("🍎")&&!EMOJI_RE.test("にほん"),"国旗も絵文字として判定する");
+S.str=12;S.wise=12;S.world=12;S.heart=12;S.ch=0;S.foe=mkFoe(0);S.foe.hp=0;S.sub="menu";
+ok(!!chapterReady(),"（下準備）Lv7 で第1話が出ている");
+
 console.log("== 5. 日替わり ==");
 S=FRESH();migrate();dayRoll();S.daily.done.num=1;S.daily.d="2000-01-01";
 ok(dayRoll()===true&&!S.daily.done.num,"日付が変わると きょうの分 がリセット");

@@ -7,13 +7,17 @@ function legacyId(cat,i){return `${cat}_a${String(i+1).padStart(2,"0")}`}
 
 // すうじ の生成問題（かぞえる 1〜10／あわせて／のこり）。id に数を埋めるので、同じ数は「出題済み」扱いになる
 const GEN_EMO=["🍎","🍓","🍬","🍪","⭐","🎈","🐟","🌸","🍙","🐥"];
+const GEN_FOOD=[["🍎","りんご"],["🍓","いちご"],["🍬","あめ"],["🍪","クッキー"],["🍙","おにぎり"],["🍊","みかん"]]; // のこり（たべた）は食べ物だけ
 function genNum(){
-  const out=[];const pick=()=>GEN_EMO[Math.floor(Math.random()*GEN_EMO.length)];
-  for(let n=1;n<=10;n++){const e=pick();out.push({id:`num_cnt_${n}`,t:"pick",q:e.repeat(n),a:String(n),d:n===1?["2","3"]:[String(n-1),String(n+1)],sub:"いくつ あるかな？",lv:n<=5?1:2,g:"かぞえる",say:"いくつ あるかな？"})}
-  for(let a=1;a<=4;a++)for(let b=1;b<=a;b++){const s=a+b;const e=pick();out.push({id:`num_add_${a}_${b}`,t:"pick",q:`${e.repeat(a)} ＋ ${e.repeat(b)}`,a:String(s),d:[String(s-1),String(s+1)],sub:"あわせると いくつ？",lv:s<=5?2:3,g:"あわせて",say:"あわせると いくつ？"})}
-  for(let a=2;a<=6;a++)for(let b=1;b<a;b++){const r=a-b;const e=pick();out.push({id:`num_sub_${a}_${b}`,t:"pick",q:`${e.repeat(a)} から ${e.repeat(b)} たべた`,a:String(r),d:r===1?["2","3"]:[String(r-1),String(r+1)],sub:"のこりは いくつ？",lv:a<=4?2:3,g:"のこり",say:"のこりは いくつ？"})}
+  const out=[];const pick=()=>GEN_EMO[Math.floor(Math.random()*GEN_EMO.length)];const food=()=>GEN_FOOD[Math.floor(Math.random()*GEN_FOOD.length)];
+  for(let n=1;n<=10;n++){const e=pick();out.push({id:`num_cnt_${n}`,t:"pick",q:e.repeat(n),a:String(n),d:n===1?["2","3"]:[String(n-1),String(n+1)],sub:"いくつ あるかな？",lv:n<=5?1:2,g:"かぞえる",say:"いくつ あるかな？ かぞえてみよう"})}
+  for(let a=1;a<=4;a++)for(let b=1;b<=a;b++){const s=a+b;const [e,nm]=food();out.push({id:`num_add_${a}_${b}`,t:"pick",q:`${e.repeat(a)} ＋ ${e.repeat(b)}`,a:String(s),d:[String(s-1),String(s+1)],sub:"あわせると いくつ？",lv:s<=5?2:3,g:"あわせて",say:`${nm}が ${a}つと ${b}つ。あわせると いくつ？`})}
+  for(let a=2;a<=6;a++)for(let b=1;b<a;b++){const r=a-b;const [e,nm]=food();out.push({id:`num_sub_${a}_${b}`,t:"pick",q:`${e.repeat(a)} から ${e.repeat(b)} たべた`,a:String(r),d:r===1?["2","3"]:[String(r-1),String(r+1)],sub:"のこりは いくつ？",lv:a<=4?2:3,g:"のこり",say:`${nm}が ${a}つ。${b}つ たべたら、のこりは いくつ？`})}
   return out;
 }
+// 選択肢に番号を付けて読むか：文字の選択肢なら付ける。数字（3 / 2 / 4）や英語の数詞は番号と混ざるので付けない
+const EN_NUM=new Set(["one","two","three","four","five","six","seven","eight","nine","ten"]);
+function numberedOpts(it){if(it.t!=="pick")return false;if(it.opts.some(o=>EMOJI_RE.test(o)))return false;return !it.opts.every(o=>/^\d/.test(o)||EN_NUM.has(String(o).toLowerCase()))}
 // こっき の生成問題：COUNTRIES（js/quiz/flag.js）から「こっき→くに」と「くに→こっき」を作る。
 // 手書きの問題（a01〜a15 の こっき→くに、b01/b02/b13〜b15 の くに→こっき）と重なる国は作らない
 const FLAG_HAND_PICK=new Set(["jp","us","fr","br","it","ca","kr","gb","au","de","in","cn","es","eg","mx"]);
@@ -32,7 +36,10 @@ function genFlag(){
   return out;
 }
 // 出題できる問題（音声の無い端末では listen を外す）
-function poolOf(cat){let p=(QUIZ[cat]||[]).slice();if(cat==="num")p=p.concat(genNum());if(cat==="flag")p=p.concat(genFlag());if(!voiceOK())p=p.filter(q=>q.t!=="listen");return p}
+function poolOf(cat){let p=(QUIZ[cat]||[]).slice();if(cat==="num")p=p.concat(genNum());if(cat==="flag")p=p.concat(genFlag());
+  if(!voiceOK())p=p.filter(q=>q.t!=="listen");
+  else if(!VOICE.en)p=p.filter(q=>!(q.t==="listen"&&Array.isArray(q.say)&&q.say.some(s=>s[1]==="en"))); // 英語音声が無い端末では英語の きくだけ問題を出さない
+  return p}
 function qById(cat,id){return poolOf(cat).find(q=>q.id===id)||null}
 function qLabel(q){return q.t==="listen"?(q.sub||"（よみあげ）"):(q.q&&q.sub?`${q.q} ${q.sub}`:(q.q||q.sub||q.id))}
 
@@ -44,18 +51,21 @@ function buildSession(cat){
   const usedArr=(S.used[cat]=Array.isArray(S.used[cat])?S.used[cat]:[]);let used=new Set(usedArr);
   if(pool.length&&pool.every(q=>used.has(q.id))){usedArr.length=0;used=new Set()}
   const taken=new Set();const gcount={};
-  const take=(wantLv,allowUsed)=>{
+  // 探す順：そのレベルの未出題 → そのレベルの出題済み → 隣のレベル…（レベル1を使い切っても急に lv3 が出ないように）
+  const take=(wantLv,allowUsedAll)=>{
     const lvs=[wantLv,wantLv-1,wantLv+1,wantLv-2,wantLv+2].filter(l=>l>=1&&l<=3);
     for(const l of lvs){
-      let c=pool.filter(q=>q.lv===l&&!taken.has(q.id)&&(allowUsed||!used.has(q.id))&&(gcount[q.g]||0)<2);
-      if(!c.length)c=pool.filter(q=>q.lv===l&&!taken.has(q.id)&&(allowUsed||!used.has(q.id)));
-      if(c.length){const q=c[Math.floor(Math.random()*c.length)];taken.add(q.id);gcount[q.g]=(gcount[q.g]||0)+1;return q}
+      for(const allowUsed of (l===wantLv||allowUsedAll)?[false,true]:[false]){
+        let c=pool.filter(q=>q.lv===l&&!taken.has(q.id)&&(allowUsed||!used.has(q.id))&&(gcount[q.g]||0)<2);
+        if(!c.length)c=pool.filter(q=>q.lv===l&&!taken.has(q.id)&&(allowUsed||!used.has(q.id)));
+        if(c.length){const q=c[Math.floor(Math.random()*c.length)];taken.add(q.id);gcount[q.g]=(gcount[q.g]||0)+1;return q}
+      }
     }
-    return allowUsed?null:take(wantLv,true);
+    return allowUsedAll?null:take(wantLv,true);
   };
   const today=ymd();const rev=(S.rev&&Array.isArray(S.rev[cat]))?S.rev[cat]:[];
   let review=null;
-  for(const r of rev.filter(r=>r.due<=today).sort((a,b)=>a.due<b.due?-1:a.due>b.due?1:0)){const q=pool.find(x=>x.id===r.id);if(q){review=q;taken.add(q.id);break}}
+  for(const r of rev.filter(r=>r.due<=today).sort((a,b)=>a.due<b.due?-1:a.due>b.due?1:0)){const q=pool.find(x=>x.id===r.id);if(q){review=q;taken.add(q.id);gcount[q.g]=(gcount[q.g]||0)+1;break}}
   const q1=take(lv),q2=review||take(lv),q3=take(Math.min(3,lv+1)),q4=take(lv),q5=take(lv);
   const qs=[q1,q2,q3,q4,q5].filter(Boolean);
   while(qs.length<SESSION_N){const q=take(lv,true);if(!q)break;qs.push(q)}

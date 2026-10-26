@@ -96,8 +96,8 @@ git push -u origin main
 
 ## 注意
 
-- 写真・動画・セーブデータは端末の中（IndexedDB / localStorage）にだけ保存される。GitHub Pages には一切送られない。
-- おうちのひと向け画面の暗証番号は localStorage `kabun-pin` に別保存している（バックアップには入らない）。忘れたときはブラウザのサイトデータから `kabun-pin` だけを消す（Chrome：アドレスバーの鍵アイコン → Cookie とサイトデータ → 管理）。セーブデータは消えない。
+- 写真・動画・セーブデータは端末の中（IndexedDB / localStorage）にだけ保存される。GitHub Pages には一切送られない。全消去・読み込みの直前のセーブは `kabun5-prev` に退避され、⚙️ → バックアップ → 「ひとつ前の セーブに もどす」で戻せる。読めなくなったセーブは `kabun5-broken` に退避され、「こわれたセーブを書き出す」で取り出せる。
+- おうちのひと向け画面の暗証番号は localStorage `kabun-pin` に別保存している（バックアップには入らない）。忘れたときはロック画面の「ばんごうを わすれた」を押すと24時間後に番号だけが消える（セーブは消えない。その前に ⚙️ に入れたら取り消せる）。**ブラウザの「サイトデータを削除」はセーブ・写真・記録もすべて消えるので使わない。** PC の Chrome なら F12 → Application → Local Storage → `kabun-pin` だけを消す方法もある。
 - よみあげは端末内蔵の音声を使う。日本語音声が無い端末では 🔊 が出ない。iPhone は消音スイッチがオンだと鳴らない。
 - BGM と効果音は Web Audio で合成している（音源ファイルなし）。曲はこのリポジトリで書いたオリジナルで、既存ゲームの曲は使っていない。ブラウザの制限で最初のタップから鳴り始める。⚙️ → おと で切れる。
 - 国旗は `img/flags/*.svg`（70か国）を使う。国を増やすときは `js/quiz/flag.js` の `COUNTRIES` に1行足し、SVG を置き、`js/data.js` の `FLAG_CODES` と `sw.js` の `SHELL` に同じ国コードを追加する（出典：https://github.com/lipis/flag-icons 、MIT）。`node dev/checkquiz.js .` が抜けを見つける。
