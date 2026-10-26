@@ -50,7 +50,7 @@ const STAGES=[{ico:"🥚",name:"たまご",id:"kabun_egg"},{ico:"🐛",name:"よ
 // キャラの絵：img/chars/<id>.png（背景が透明の正方形 PNG）を置くと、その絵文字の代わりに表示される。無ければ絵文字のまま
 // 例：img/chars/kabun_egg.png、img/chars/kugaan.png。kid1 / kid2 は ⚙️ で登録した なまえ の順
 const CHARS={kabun_egg:"🥚",kabun_larva:"🐛",kabun_pupa:"🫘",kabun_adult:"🪲",kabun_king:"👑",
-  shell:"🪨",fly:"🪰",soil:"🧱",wind:"❄️",dirt:"🌀",skin:"🥥",gakeen:"🦗",hourin:"🦉",kugaan:"🐉",
+  shell:"🪨",fly:"🪰",soil:"🧱",wind:"❄️",dirt:"🌀",skin:"🥥",gakeen:"🐜",hourin:"🦉",kugaan:"🐉",
   papa:"👨",mama:"👩",kid1:"🧒",kid2:"🧒",kid3:"🧒"};
 const STAGE_CHEER=["ぷるぷる！","もぐもぐ！","ぴくっ！","やったー！","さすが おうさま！"];
 
@@ -64,7 +64,7 @@ const CHAPTERS=[
  {lv:15,bg:"snow", place:"へや",             title:"だい4わ　さむい ふゆを こえろ",              foe:{id:"wind",ico:"❄️",name:"こおりのかぜ",hp:290,dmg:8,weak:"heart"},           why:"さむい かぜも なかまと いれば へっちゃら",            win:"はるが きた！ さなぎは がんばった！"},
  {lv:18,bg:"cave", place:"へや",             title:"だい5わ　さなぎの へやを まもれ",            foe:{id:"dirt",ico:"🌀",name:"くずれるつち",hp:330,dmg:9,weak:"world",guard:"str"},why:"くずれる つちは かぜで ぱたぱた はらう",              win:"へやは ぶじ！ もうすこしで そとだ！"},
  {lv:20,bg:"cave", place:"へや",             title:"だい6わ　さなぎから はいだせ",              foe:{id:"skin",ico:"🥥",name:"さなぎのかわ",hp:360,dmg:10,weak:"str"},            why:"かわは つので やぶる",                                win:"バリバリッ！ つのが でてきた！ カブーンだ！",evolve:3},
- {lv:30,bg:"day",  place:"くさむら の おく", title:"だい7わ　ガキーンと しょうぶ",              foe:{id:"gakeen",ico:"🦗",name:"ガキーン",hp:560,dmg:12,weak:"wise",guard:"str"},   why:"ガキーンは ぴかっと ひかると めが くらむ",            win:"ガキーン「つよいな……じゅえきを わけてやる」"},
+ {lv:30,bg:"day",  place:"くさむら の おく", title:"だい7わ　ガキーンと しょうぶ",              foe:{id:"gakeen",ico:"🐜",name:"ガキーン",hp:560,dmg:12,weak:"wise",guard:"str"},   why:"つちの なかに すむ ありは ひかりが にがて。おおきな あごは つのを はじく",            win:"ガキーン「つよいな……じゅえきを わけてやる」"},
  {lv:40,bg:"night",place:"もり の おく",     title:"だい8わ　よるの もりを こえて",              foe:{id:"hourin",ico:"🦉",name:"ホウリン",hp:750,dmg:14,weak:"heart",guard:"world"},why:"ふくろうは やさしい こえで ねむくなる",                win:"ホウリンは おどろいて とんでいった！"},
  {lv:50,bg:"day",  place:"やま の ちょうじょう",title:"さいしゅうわ　もりの おうさまへ",         foe:{id:"kugaan",ico:"🐉",name:"ちょうろう クガーン",hp:900,dmg:15,weak:"wise",guard:"str",shift:true},why:"★は ばつぐんの あとで となりに うごく",win:"クガーン「みごとじゃ…… この おうかんを さずけよう」",evolve:4}
 ];

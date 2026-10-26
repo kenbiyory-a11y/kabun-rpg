@@ -13,7 +13,7 @@
 | kabun_adult.png | カブーン（せいちゅう） | 🪲 | へや・バトル |
 | kabun_king.png | キング カブーン | 👑 | へや・バトル |
 | kugaan.png | ちょうろう クガーン | 🐉 | おはなし・最終話 |
-| gakeen.png | ガキーン | 🦗 | 第7話 |
+| gakeen.png | ガキーン（あごの おおきな あり） | 🐜 | 第7話 |
 | hourin.png | ホウリン | 🦉 | 第8話 |
 | shell.png | たまごのから | 🪨 | 第1話 |
 | fly.png | コバエ | 🪰 | 第2話 |
