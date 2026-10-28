@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><title>shot</title><link rel="stylesheet" href="../css/style.css"></head>
+<body>
+<!-- 見た目の確認用：?s=egg|larva|pupa|adult|ch1|ch2|ch4|ch6 で画面を出す。headless Chrome の --screenshot で撮る -->
+<div class="console"><div class="screen"><div class="field" id="field"></div><div class="msgbox" id="msgbox"></div></div>
+<div class="nav" id="nav"><button class="nb" data-tab="growth">📈</button><button class="nb" data-tab="battle">⚔️</button><button class="nb" data-tab="diary">📖</button><button class="nb gear" data-tab="settings">⚙️</button></div></div>
+<div id="update" hidden><button id="updateBtn"></button></div>
+<script src="../vendor/jszip.min.js" defer></script>
+<script src="../js/data.js" defer></script>
+<script src="../js/quiz.js" defer></script>
+<script src="../js/quiz/num.js" defer></script>
+<script src="../js/quiz/eng.js" defer></script>
+<script src="../js/quiz/flag.js" defer></script>
+<script src="../js/quiz/animal.js" defer></script>
+<script src="../js/state.js" defer></script>
+<script src="../js/media.js" defer></script>
+<script src="../js/backup.js" defer></script>
+<script src="../js/bgm.js" defer></script>
+<script src="../js/voice.js" defer></script>
+<script src="../js/chars.js" defer></script>
+<script src="../js/render.js" defer></script>
+<script src="../js/diary.js" defer></script>
+<script src="../js/settings.js" defer></script>
+<script defer>
+window.addEventListener("DOMContentLoaded",()=>{
+  const q=new URLSearchParams(location.search).get("s")||"egg";
+  spriteHtml=(id,fallback)=>{const emoji=fallback!=null?fallback:(CHARS[id]||"");return id&&CHAR_OK[id]?`<img class="spimg" src="../img/chars/${id}.png" alt="">`:emoji}; // dev/ から見た画像の場所に直す
+  localStorage.clear();S=FRESH();migrate();dayRoll();S.flags.intro=true;S.name="カブーン";S.se=false;S.bgmOn=false;S.voice=false;
+  const setLv=(ch,st)=>{S.ch=ch;S.str=S.wise=S.world=S.heart=st};
+  if(q==="egg"){setLv(0,2)}
+  else if(q==="larva"){setLv(1,14)}
+  else if(q==="pupa"){setLv(3,30)}
+  else if(q==="adult"){setLv(6,58)}
+  else if(/^ch\d$/.test(q)){const n=+q.slice(2);setLv(n-1,[0,8,14,24,30,36,40][n]||8);S.view="battle";S.sub="menu";S.foe=mkFoe(n-1);S.hp=maxHp()}
+  const im=Object.keys(CHARS).map(id=>new Promise(r=>{const i=new Image();i.onload=()=>{CHAR_OK[id]=true;r()};i.onerror=()=>r();i.src="../img/chars/"+id+".png"}));
+  Promise.all(im).then(()=>{render();if(typer)typeFinish();document.title="READY "+q});
+});
+</script>
+</body></html>

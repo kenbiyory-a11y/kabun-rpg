@@ -47,7 +47,7 @@ JS は `<script defer>` で **index.html に書いてある順番**に読み込�
 node dev/harness.js .          # セーブ移行・セッション・採点・章の出現など、ロジックだけを node で確認
 ```
 
-画面の流れ（名前入力 → 5問 → 結果 → バトル → 進化 → きろく → 暗証番号）は `dev/smoke.html` で確認する。ローカルサーバーを起動して http://localhost:8000/dev/smoke.html を開くと、ページの下に ok / FAIL の一覧が出る（ヘッドレスなら `chrome --headless=new --dump-dom http://127.0.0.1:8000/dev/smoke.html` でも見られる）。問題データを増やしたときは、各ファイルで id の重複と「正解が はずれ に含まれていないか」を確認する。`dev/sweep.html` は全問題（生成問題込み）を実際の画面で描いて、よみあげ ON の経路でも選択肢が必ず出ることを確かめる（にせの音声合成を入れて動かす。同じく headless Chrome で `--dump-dom` し、`<title>` が DONE OK なら合格）。
+画面の流れ（名前入力 → 5問 → 結果 → バトル → 進化 → きろく → 暗証番号）は `dev/smoke.html` で確認する。ローカルサーバーを起動して http://localhost:8000/dev/smoke.html を開くと、ページの下に ok / FAIL の一覧が出る（ヘッドレスなら `chrome --headless=new --dump-dom http://127.0.0.1:8000/dev/smoke.html` でも見られる）。問題データを増やしたときは、各ファイルで id の重複と「正解が はずれ に含まれていないか」を確認する。`dev/shot.html?s=egg|larva|pupa|adult|ch1〜ch6` は見た目の確認用（その画面だけを出す。headless Chrome の `--screenshot` で撮る）。`dev/sweep.html` は全問題（生成問題込み）を実際の画面で描いて、よみあげ ON の経路でも選択肢が必ず出ることを確かめる（にせの音声合成を入れて動かす。同じく headless Chrome で `--dump-dom` し、`<title>` が DONE OK なら合格）。
 
 ## ローカルで動かす
 

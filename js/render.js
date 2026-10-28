@@ -30,14 +30,19 @@ function board(){
 function kabunHtml(idx){const st=STAGES[idx];return spriteHtml(st.id,st.ico)}
 function fieldBattle(showFoe){
   const f=$("field");f.innerHTML="";const c=CHAPTERS[Math.min(S.ch,CHAPTERS.length-1)];
-  f.className="field "+(S.ch>=CHAPTERS.length?"day":c.bg);
+  const inRoom=S.ch<CHAPTERS.length&&c.place==="へや"; // 第1〜6話は虫かごの中で起きる
+  f.className="field "+(S.ch>=CHAPTERS.length?"day":inRoom?"cage "+c.bg:c.bg);
+  if(inRoom)cageDeco(f);
   const me=el("div","sprite me",kabunHtml(stageIdx()));me.id="spMe";f.append(me);
   f.append(hud("me","カブーン","Lv"+level(),S.hp,maxHp()));
   if(showFoe&&S.foe){const foe=el("div","sprite foe",spriteHtml(S.foe.id,S.foe.ico));foe.id="spFoe";f.append(foe);f.append(hud("foe",S.foe.name,"",S.foe.hp,S.foe.max,S.foe))}
 }
+// 虫かごの飾り（きのえだ・はっぱ・ゼリー）
+function cageDeco(f){f.append(el("span","deco log","🪵"),el("span","deco leaf","🍃"),el("span","deco jelly","🍮"))}
 function fieldGrowth(idx,evolving,bg){
-  const f=$("field");f.innerHTML="";f.className="field "+(bg||"day");
-  f.append(el("div","glow"));
+  const f=$("field");f.innerHTML="";const cage=!bg&&idx<3; // たまご・ようちゅう・さなぎ は虫かごの中。せいちゅう からは そと
+  f.className="field "+(bg||(cage?"cage":"day"));
+  f.append(el("div","glow"));if(cage)cageDeco(f);
   const sp=el("div","sprite center"+(evolving?" evolve":""),kabunHtml(idx));sp.id="spMe";sp.style.fontSize=Math.min(6,4.2+level()*0.08)+"rem";f.append(sp);
   const path=el("div","path");
   STAGES.forEach((st,i)=>{if(i)path.append(el("i","","→"));path.append(el("span",i<idx?"done":i===idx?"now":"",st.ico))});

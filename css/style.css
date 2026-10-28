@@ -17,6 +17,28 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-
 .field.cave{background:linear-gradient(#5a4a3a 0 62%,#7a5a3a 62% 100%)}
 .field.snow{background:linear-gradient(#dfeefb 0 62%,#f6fbff 62% 100%)}
 .field.diary{background:linear-gradient(#ffe9c7 0 62%,#f7c98a 62% 100%)}
+/* 虫かご：たまご〜さなぎ の せいちょう画面と、へや で起きる かべ（第1〜6話）。上に みどりの あみの ふた、左右に とうめいな かべ、下に つち */
+.field.cage{background:
+  linear-gradient(115deg,rgba(255,255,255,.42) 0 7%,rgba(255,255,255,0) 7.5% 60%,rgba(255,255,255,.25) 60% 64%,rgba(255,255,255,0) 64.5%),
+  linear-gradient(#eaf5f9 0,#d9ebf2 60%,#c9dde6 62%,#7a5230 62%,#5a3a1e 78%,#3f2a15 100%);
+  box-shadow:inset 8px 0 0 rgba(255,255,255,.55),inset -8px 0 0 rgba(255,255,255,.55),inset 14px 0 0 rgba(120,160,120,.35),inset -14px 0 0 rgba(120,160,120,.35)}
+.field.cage::before{content:"";position:absolute;left:0;right:0;top:0;height:30px;z-index:0;
+  background:repeating-linear-gradient(90deg,#2f6b3a 0 3px,transparent 3px 11px),repeating-linear-gradient(0deg,#2f6b3a 0 3px,transparent 3px 11px),#5fae63;
+  border-bottom:5px solid #2a5a33;box-shadow:0 3px 0 rgba(0,0,0,.15)}
+.field.cage::after{content:"";position:absolute;left:0;right:0;bottom:0;height:38%;pointer-events:none;
+  background:radial-gradient(circle at 12% 30%,rgba(255,255,255,.14) 0 2px,transparent 3px),radial-gradient(circle at 48% 70%,rgba(0,0,0,.25) 0 3px,transparent 4px),radial-gradient(circle at 78% 40%,rgba(255,255,255,.12) 0 2px,transparent 3px),radial-gradient(circle at 30% 85%,rgba(0,0,0,.22) 0 2px,transparent 3px),radial-gradient(circle at 88% 80%,rgba(0,0,0,.22) 0 3px,transparent 4px),radial-gradient(circle at 62% 20%,rgba(255,255,255,.1) 0 2px,transparent 3px);
+  background-size:90px 70px}
+.field.cage .glow{background:radial-gradient(rgba(255,250,200,.55),rgba(255,250,200,0) 70%)}
+.field.cage .deco{position:absolute;z-index:1;font-size:1.9rem;line-height:1;filter:drop-shadow(0 2px 0 rgba(0,0,0,.25))}
+.field.cage .deco.log{left:30%;bottom:50px;font-size:2.2rem;transform:rotate(-12deg)}
+.field.cage .deco.leaf{left:41%;bottom:74px;font-size:1.5rem}
+.field.cage .deco.jelly{left:58%;bottom:48px;font-size:1.6rem}
+.field.cage .path i{color:#fff;opacity:.85}
+.field.cage.snow{background:
+  linear-gradient(115deg,rgba(255,255,255,.5) 0 7%,rgba(255,255,255,0) 7.5% 60%,rgba(255,255,255,.3) 60% 64%,rgba(255,255,255,0) 64.5%),
+  linear-gradient(#f4f9ff 0,#dde9f6 60%,#cfdde9 62%,#8a7a6a 62%,#6a5a4a 78%,#4a3c2c 100%)}
+.field.cage.snow::after{background-image:radial-gradient(circle at 20% 20%,#fff 0 2px,transparent 3px),radial-gradient(circle at 60% 50%,#fff 0 2px,transparent 3px),radial-gradient(circle at 85% 25%,#fff 0 1.5px,transparent 2.5px),radial-gradient(circle at 40% 80%,#fff 0 1.5px,transparent 2.5px);background-size:80px 60px;height:100%;opacity:.7}
+/* 虫かごは cave/snow より後に書いて、へや の かべ でも虫かごが勝つようにする */
 .field.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;padding:8px;overflow-y:auto;align-content:start;background:#2b2f23}
 .field.grid .tm{position:relative;aspect-ratio:1;max-width:100%;border:2px solid #fff;border-radius:6px;overflow:hidden;cursor:pointer;background:#000}
 .field.grid .tm img{width:100%;height:100%;object-fit:cover;display:block}
