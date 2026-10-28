@@ -109,7 +109,20 @@ try{
   document.getElementById("pcheck").value="56";btn("すすむ").click();chk(S.sub==="reset","正解で先へ進む");S.sub="menu";
   localStorage.removeItem("kabun-pin");localStorage.removeItem("kabun-pin-reset");
   // --- そと：せいちゅう Lv30 で くさむら、ガキーンを倒すと かわ が ひらく ---
-  S.view="growth";S.sub="menu";S.ch=6;S.str=S.wise=S.world=S.heart=58;S.foe=null;S.daily.explore=null;S.explore=null;UI.instantWalk=true;UI.unlockUntil=0;save();render();
+  // --- はじめて そとに出た よる：演出 → クガーンの しけん（5ターンで まける）→ せかいを まわれ ---
+  S.view="growth";S.sub="menu";S.ch=6;S.str=S.wise=S.world=S.heart=58;S.foe=null;S.daily.explore=null;S.explore=null;delete S.flags.outIntro;UI.instantWalk=true;UI.unlockUntil=0;save();
+  S.view="battle";S.sub="menu";render();if(typer)typeNode.click();chk(S.sub==="exit"&&txt().includes("はじめて そとに でた"),"はじめて そとに出ると 演出が始まる");
+  {let g=0;while(S.sub==="exit"&&g++<10){if(typer)typeNode.click();(btn("つぎへ")||btn("……！")).click()}}
+  chk(S.sub==="fight"&&S.foe&&S.foe.trial&&S.foe.name.includes("クガーン")&&$("field").classList.contains("night"),"クガーンと きょうせい バトル（よる）");
+  for(let t=1;t<=5;t++){const b=document.querySelector("#msgbox button.mv.star")||document.querySelector("#msgbox button.mv");b.click();if(typer)typeNode.click();
+    if(t<5){chk(S.foe.hp===S.foe.max-t&&S.hp>0&&txt().includes("びくとも"),`${t}ターン目：ほとんど きかない`);btn("つぎへ").click()}}
+  chk(S.hp===0&&S.sub==="turn"&&txt().includes("ふきとばされた"),"5ターン目に ふきとばされる");btn("つぎへ").click();if(typer)typeNode.click();
+  chk(S.sub==="lose"&&txt().includes("ころがった"),"まけ の場面");btn("つぎへ").click();if(typer)typeNode.click();btn("つぎへ").click();if(typer)typeNode.click();
+  chk(txt().includes("せかいを まわって ちからを つけてこい"),"せかいを まわって ちからを つけろ");btn("わかった").click();
+  chk(S.flags.outIntro===true&&S.sub==="menu"&&S.foe===null&&S.hp===maxHp()&&txt().includes("どこへ いく"),"演出のあと かんばんへ（HP 全快、ぬし なし）");
+  S.view="growth";render();S.view="battle";render();chk(S.sub==="menu"&&txt().includes("どこへ いく"),"演出は 二度と出ない");
+  // --- そと：せいちゅう Lv30 で くさむら、ガキーンを倒すと かわ が ひらく ---
+  S.view="growth";S.sub="menu";S.ch=6;S.str=S.wise=S.world=S.heart=58;S.foe=null;S.daily.explore=null;S.explore=null;S.flags.outIntro=true;UI.instantWalk=true;UI.unlockUntil=0;save();render();
   chk(stageIdx()===3&&document.querySelector('.nav .nb[data-tab="battle"]').innerText.includes("そと"),"せいちゅうは バトルタブが「そと」");
   S.view="battle";S.sub="menu";render();chk(txt().includes("どこへ いく")&&btn("くさむら")&&!btn("くさむら").disabled&&btn("かわ").disabled&&btn("かわ").innerText.includes("ガキーン"),"かんばん：くさむら だけ ひらき、かわ は ガキーン待ち");
   btn("くさむら").click();chk(S.sub==="map"&&S.explore&&S.explore.area==="grass"&&S.daily.explore==="grass"&&document.querySelectorAll("#field .spot").length===6&&!!document.getElementById("spWalk"),"たんけん開始：スポット5＋🪧、カブーンが立つ");

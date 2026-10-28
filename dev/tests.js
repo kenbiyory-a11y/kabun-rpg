@@ -134,6 +134,15 @@ S.view="battle";S.sub="map";{const i=S.explore.spots.findIndex(s=>s.k==="creatur
  S.explore.spots[i].done=false;S.items.net=NET_MAX;S.view="battle";S.sub="map";arriveSpot(i);ok(S.items.net===NET_MAX&&S.msg.includes("いっぱい"),"あみ は上限を超えない");
  S.explore.spots[i].done=false;S.view="growth";S.sub="menu";arriveSpot(i);ok(!S.explore.spots[i].done&&S.sub==="menu","地図にいないときは 到着しても何も起きない")}
 S.daily.explore="grass";S.daily.d="2000-01-01";S.explore.d="2000-01-01";dayRoll();ok(S.daily.explore===null&&S.explore===null,"日付が変わると たんけん は消える（翌日また 1回）");
+// クガーンの しけん：ダメージは 1、5ターン目に ふきとばされる
+S=FRESH();migrate();S.ch=6;S.str=S.wise=S.world=S.heart=58;S.view="battle";startTrial();
+ok(S.sub==="fight"&&S.foe&&S.foe.trial&&S.foe.id==="kugaan"&&S.foe.ch===S.ch&&S.hp===maxHp(),"しけん 開始：クガーン、ふつうの バトル画面");
+{let t=0;while(t<TRIAL_TURNS-1){t++;trialAttack("wise");ok(S.foe.hp===S.foe.max-t&&S.hp>0&&S.sub==="turn"&&S.msg.includes("びくとも"),`${t}ターン目：ダメージ 1、カブーンは まだ たっている（HP ${S.hp}）`)}
+ trialAttack("str");ok(S.hp===0&&S.msg.includes("ふきとばされた")&&S.foe.hp>=S.foe.max-TRIAL_TURNS,"5ターン目：おうさまの いちげき で HP 0")}
+ok(TRIAL_END.some(t=>t.includes("せかいを まわって ちからを つけてこい")),"まけたあと「せかいを まわって ちからを つけてこい」");
+save();load();migrate();ok(S.foe&&S.foe.trial&&S.foe.id==="kugaan","再読み込みしても しけん の foe は捨てない");
+S=FRESH();S.ch=7;migrate();ok(S.flags.outIntro===true,"すでに ガキーンを倒した旧セーブには 演出を出さない");
+S=FRESH();S.ch=6;migrate();ok(S.flags.outIntro===undefined,"せいちゅうに なったばかりなら 演出が出る");
 
 console.log("== 5. 日替わり ==");
 S=FRESH();migrate();dayRoll();S.daily.done.num=1;S.daily.d="2000-01-01";

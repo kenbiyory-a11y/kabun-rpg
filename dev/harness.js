@@ -7,7 +7,7 @@ const ctx={console,Date,Math,JSON,Object,Array,String,Number,Boolean,Set,Map,Pro
   document:{addEventListener(){},getElementById(){return null},querySelectorAll(){return []}},
   navigator:{},matchMedia:()=>({matches:true}),setTimeout,clearTimeout,setInterval,clearInterval,
   Audio:function(){},URL:{createObjectURL(){return ""},revokeObjectURL(){}},
-  sfx(){},render(){},requestAnimationFrame(cb){cb()}}; // 画面と音は読み込まないので空のスタブ
+  sfx(){},render(){},playFx(){},typeText(){},requestAnimationFrame(cb){cb()}}; // 画面と音は読み込まないので空のスタブ
 ctx.window=ctx;ctx.globalThis=ctx;
 vm.createContext(ctx);
 function loadFile(rel){const p=path.join(ROOT,rel);if(!fs.existsSync(p)){console.log("  (skip, missing)",rel);return false}vm.runInContext(fs.readFileSync(p,"utf8"),ctx,{filename:rel});return true}

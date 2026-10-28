@@ -68,6 +68,7 @@ function arriveSpot(i){if(!(S.view==="battle"&&S.sub==="map"))return;const ex=S.
   S.msg=t;S.sub="spot";save();render();
 }
 function renderOut(msg,menu,tapBtn){
+  if(!S.flags.outIntro){if(S.sub!=="exit"){S.sub="exit";S.line=0}return renderExit(msg,menu,tapBtn)} // はじめて そとに出た よる の演出（一度だけ）
   if(S.sub==="map"||S.sub==="spot"){
     const a=S.explore&&areaOf(S.explore.area);
     if(!a||S.explore.d!==ymd()){S.explore=null;S.sub="menu";return renderOut(msg,menu,tapBtn)}
@@ -110,4 +111,43 @@ function renderDex(msg,menu){
   if(got.length){const list=el("div","diary");for(const z of got){const row=el("div","has");row.innerHTML=`<span class="ico">${z.ico}</span><span><b>${esc(z.n)}</b>${z.rare?" ✨":""}　<small>${esc(z.fact)}</small></span>`;row.onclick=()=>{say(z.say||z.fact);sfx("tap")};list.append(row)}msg.append(list)}
   else msg.append(el("div","note",stageIdx()>=3?"そとを たんけんして いきものを みつけよう":"せいちゅうに なったら そとで いきものを さがせるよ"));
   menu.className="menu one";const b=el("button","wide","もどる");b.onclick=()=>{S.sub="menu";save();render()};menu.append(b);
+}
+
+// ---------- はじめて そとに出た よる：ちょうろう クガーン の「しけん」 ----------
+// どう がんばっても ダメージは 1 しか入らず、5ターン目に おうさまの いちげき で ふきとばされる。そのあと「せかいを まわって ちからを つけてこい」。
+// 一度だけ（S.flags.outIntro）。S.sub="exit"（場面、S.line がページ）→ startTrial() で S.foe.trial=true の ふつうの バトル画面 → まけ の場面は renderTrialEnd
+const EXIT_SCENES=[
+ {bg:"night",ico:"🌙",char:"kabun_adult",t:"よる。かごの ふたが あいた。\nカブーンは はじめて そとに でた！"},
+ {bg:"night",ico:"🍃",char:"kabun_adult",t:"つきの ひかり。くさの におい。\nカブーンは おおきく いきを すった。"},
+ {bg:"night",ico:"🐉",char:"kugaan",t:"……！？ おおきな かげが おりてきた！"},
+ {bg:"night",ico:"🐉",char:"kugaan",t:"ちょうろう クガーン『おまえが あたらしい カブトムシか。\nわしの つよさを みせてやろう。かかってこい！』"},
+];
+const TRIAL_TURNS=5;
+const TRIAL_END=[
+ "カブーンは ふきとばされて、くさむらに ころがった……。",
+ "クガーン『まだまだじゃな。だが、よい めを しておる』",
+ "クガーン『せかいを まわって ちからを つけてこい。\nくさむら、かわ、そら、うみ…… ぬしたちに かてたら、\nもりの おくで まっておるぞ』",
+];
+function renderExit(msg,menu,tapBtn){
+  const i=Math.min(S.line||0,EXIT_SCENES.length-1);const sc=EXIT_SCENES[i];
+  fieldScene(sc.bg,sc.ico,sc);
+  typeText(msg,sc.t,()=>{msg.append(el("span","cur","▼"))});
+  if(UI.exitSaid!==i&&say(sc.t.replace(/\n/g," ")))UI.exitSaid=i;
+  const last=i>=EXIT_SCENES.length-1;
+  tapBtn(last?"▶ ……！":"▶ つぎへ",()=>{if(!last){S.line=i+1;save();render();return}startTrial()});
+}
+function startTrial(){const f=mkFoe(CHAPTERS.findIndex(c=>c.foe.id==="kugaan"));f.ch=S.ch;f.trial=true;f.turn=0;f.src="trial";f.shift=false;S.foe=f;S.hp=maxHp();S.line=0;
+  S.msg="ちょうろう クガーンの しけん！\n★の ボタンを おしてみよう";S.sub="fight";sfx("tap");say("ちょうろう クガーンの しけん！ ほしの ボタンを おしてみよう");save();render()}
+// しけん の1ターン（render.js の attack から呼ばれる）
+function trialAttack(k){const f=S.foe;const m=moveOf(k);const mult=multOf(k,f);f.turn=(f.turn||0)+1;f.hp=Math.max(1,f.hp-1);
+  let t=`カブーンの ${m.n}！`;t+=mult>1?"\n★ ばつぐん！！ ……でも クガーンは びくとも しない！":"\n……クガーンは びくとも しない！";
+  if(f.turn>=TRIAL_TURNS){S.hp=0;t+="\nクガーン『みごとな きあいじゃ。だが……』\nクガーンの おうさまの いちげき！！ カブーンは ふきとばされた！"}
+  else{S.hp=Math.max(1,S.hp-f.dmg);t+=`\nクガーンの はんげき！ カブーンに ${f.dmg}の ダメージ！`}
+  S.msg=t;S.sub="turn";say(f.turn>=TRIAL_TURNS?"ふきとばされた！":"びくとも しない！");save();render();playFx(k,m.n,mult,true)}
+function renderTrialEnd(msg,menu,tapBtn){
+  fieldBattle(true);const i=Math.min(S.line||0,TRIAL_END.length-1);const t=TRIAL_END[i];
+  typeText(msg,t,()=>{msg.append(el("span","cur","▼"))});if(UI.trialSaid!==i&&say(t.replace(/\n/g," ")))UI.trialSaid=i;
+  const last=i>=TRIAL_END.length-1;
+  tapBtn(last?"▶ わかった！":"▶ つぎへ",()=>{if(!last){S.line=i+1;save();render();return}
+    S.flags.outIntro=true;S.foe=null;S.hp=maxHp();S.line=0;S.sub="menu";S.msg=null;sfx("ok");save();render()});
 }

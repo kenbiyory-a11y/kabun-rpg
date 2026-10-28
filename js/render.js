@@ -31,7 +31,7 @@ function kabunHtml(idx){const st=STAGES[idx];return spriteHtml(st.id,st.ico)}
 function fieldBattle(showFoe){
   const f=$("field");f.innerHTML="";f.onclick=null;delete f.dataset.map;const c=CHAPTERS[Math.min(S.ch,CHAPTERS.length-1)];
   const inRoom=S.ch<CHAPTERS.length&&c.place==="へや"; // 第1〜6話は虫かごの中で起きる
-  f.className="field "+(S.ch>=CHAPTERS.length?"day":inRoom?"cage "+c.bg:c.bg);
+  f.className="field "+(S.foe&&S.foe.trial?"night":S.ch>=CHAPTERS.length?"day":inRoom?"cage "+c.bg:c.bg);
   if(inRoom)cageDeco(f);
   const me=el("div","sprite me",kabunHtml(stageIdx()));me.id="spMe";f.append(me);
   f.append(hud("me","カブーン","Lv"+level(),S.hp,maxHp()));
@@ -232,6 +232,7 @@ function renderBattle(msg,menu,tapBtn){
     tapBtn("▶ つぎへ",()=>{if(S.foe.hp<=0){S.line=0;S.sub="win"}else if(S.hp<=0){S.sub="lose"}else{S.msg=null;S.sub="fight"}save();render()});return;
   }
   if(S.sub==="lose"){
+    if(S.foe.trial)return renderTrialEnd(msg,menu,tapBtn);
     fieldBattle(true);const t=`カブーンは めが まわった……。\nきょうは ここまで。でも ${S.foe.name}の きずは そのまま！\nまた ちょうせん しよう`;
     typeText(msg,t,()=>{msg.append(el("span","cur","▼"))});say(t.replace(/\n/g," "));
     tapBtn("▶ もどる",()=>{S.hp=maxHp();S.sub="menu";S.msg=null;save();render()});return;
@@ -256,7 +257,7 @@ function renderBattle(msg,menu,tapBtn){
 function clearChapter(){S.ch++;S.foe=null;S.line=0;S.sub="menu";S.hp=maxHp();S.msg=null}
 // いまの章の ぬし と戦い始める（へや の「ちょうせん」ボタンと、そと の 🪧 から）
 function startFight(){if(!chapterReady())return render();if(!S.foe||S.foe.ch!==S.ch)S.foe=mkFoe(S.ch);S.hp=maxHp();S.msg=`${S.foe.name} が あらわれた！\n★の ボタンを おしてみよう`;S.sub="fight";S.line=0;sfx("tap");say(`${S.foe.name}が あらわれた！ ほしの ボタンを おしてみよう`);save();render()}
-function attack(k){const f=S.foe;if(!f)return render();const m=moveOf(k);const mult=multOf(k,f);const dmg=Math.max(1,Math.floor(power(k)*mult));
+function attack(k){const f=S.foe;if(!f)return render();if(f.trial)return trialAttack(k);const m=moveOf(k);const mult=multOf(k,f);const dmg=Math.max(1,Math.floor(power(k)*mult));
   f.hp=Math.max(0,f.hp-dmg);let t=`カブーンの ${m.n}！`;
   if(mult>1){t+=`\n★ ばつぐん！！ ${f.name}に ${dmg}の ダメージ！`;const c=CHAPTERS[f.ch];if(c&&c.why&&!f.whySaid&&!f.shift){f.whySaid=true;t+=`\n${c.why}`}}
   else if(mult<1)t+=`\n🛡️ まもられた！ ${f.name}に ${dmg}の ダメージ`;
