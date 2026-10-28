@@ -55,7 +55,7 @@ ok(Math.ceil(f5.max/Math.floor(power("world")*1.5))===5&&Math.ceil(f5.max/power(
 S.ch=6;S.str=58;S.wise=58;S.world=58;S.heart=58;
 ok(stageIdx()===3&&moveOf("str").n==="かぶとタックル"&&power("str")===80,"せいちゅう Lv30：ステータス58 → かぶとタックル 威力80");
 ok(level()===30&&chapterReady().foe.name==="ガキーン","Lv30 → ガキーン");
-S.ch=9;ok(stageIdx()===4&&chapterReady()===null,"全章クリアで キング、かべ なし");
+S.ch=CHAPTERS.length;ok(stageIdx()===4&&chapterReady()===null,"全章クリアで キング、かべ なし");
 S.str=130;ok(moveOf("str").n==="おうさまのつの","キングで おうさまのつの");
 
 console.log("== 4b. 国旗の画像化 ==");
@@ -97,6 +97,38 @@ voiceSet("Microsoft Nanami Online (Natural) - Japanese (Japan)");ok(pickVoice("j
 voiceSet("そんざいしない こえ");ok(pickVoice("ja").name.startsWith("Microsoft Haruka"),"端末に無い声が選ばれていたら自動に戻る");
 ok(voiceLabel(VOICE.list[1])==="Nanami (Natural)"&&voiceLabel(VOICE.list[0])==="Haruka","表示名を短くする: "+voiceLabel(VOICE.list[1]));
 voiceSet("");VOICE.list=[];VOICE.ja=false;
+
+console.log("== 4f. そと（エリア・ぬし・たんけん） ==");
+ok(CHAPTERS.length===11&&CHAPTERS[7].foe.name==="ケローン"&&CHAPTERS[7].lv===35&&CHAPTERS[9].foe.name==="サメーン"&&CHAPTERS[9].lv===45&&CHAPTERS[10].evolve===4,"11章：Lv35 ケローン、Lv45 サメーン、最終話は クガーン");
+ok(AREAS.map(a=>a.id).join(",")==="grass,river,sky,sea,forest"&&AREAS.every(a=>areaBossIdx(a)>=6),"5エリアに ぬし が1体ずつ");
+S=FRESH();migrate();S.ch=6;S.str=S.wise=S.world=S.heart=58;
+ok(stageIdx()===3&&areaOpen(AREAS[0])&&!areaOpen(AREAS[1])&&bossHere(AREAS[0])&&!bossHere(AREAS[1]),"せいちゅう Lv30：くさむら だけ ひらき、ガキーン が出ている");
+S.ch=7;ok(areaOpen(AREAS[1])&&!areaOpen(AREAS[2])&&!bossHere(AREAS[1]),"ガキーンを倒すと かわ が ひらく（ケローンは Lv35 まで出ない）");
+S.str=S.wise=S.world=S.heart=68;ok(level()===35&&bossHere(AREAS[1])&&!bossHere(AREAS[0]),"Lv35 で かわ に ケローン");
+S.ch=11;ok(stageIdx()===4&&AREAS.every(areaOpen)&&chapterReady()===null,"全部倒すと キングで どこでも ひらく");
+S.ch=1;ok(!areaOpen(AREAS[0]),"ようちゅう は そとに 出られない");
+// ケローン／サメーン の強さ：★連打 5ターン、ふつう 8ターン、反撃は 8ターン以上もつ
+S.ch=7;S.str=S.wise=S.world=S.heart=68;{const f=mkFoe(7);const st=Math.floor(power("world")*multOf("world",f)),nm=Math.floor(power("str")*multOf("str",f)),gd=Math.floor(power("heart")*multOf("heart",f));
+ ok(Math.ceil(f.max/st)===5&&Math.ceil(f.max/nm)===8&&gd<nm&&Math.ceil(maxHp()/f.dmg)>=8,`ケローン HP${f.max}：★${Math.ceil(f.max/st)}ターン、ふつう${Math.ceil(f.max/nm)}ターン、🛡️こころ、反撃 ${Math.ceil(maxHp()/f.dmg)}ターン`)}
+S.ch=9;S.str=S.wise=S.world=S.heart=88;{const f=mkFoe(9);const st=Math.floor(power("str")*multOf("str",f)),nm=Math.floor(power("world")*multOf("world",f));
+ ok(level()===45&&Math.ceil(f.max/st)===5&&Math.ceil(f.max/nm)===8&&f.guard==="wise"&&Math.ceil(maxHp()/f.dmg)>=8,`サメーン HP${f.max}：★${Math.ceil(f.max/st)}ターン、ふつう${Math.ceil(f.max/nm)}ターン、🛡️ちえ`)}
+// 旧セーブの章番号：7以下はそのまま、8（ホウリンまで）→9、9（全部）→11
+for(const [from,to] of [[0,0],[6,6],[7,7],[8,9],[9,11]]){S=FRESH();S.ch=from;S.str=S.wise=S.world=S.heart=98;if(from>=7)S.foe={ch:from,hp:10,max:100};delete S.flags.ch11;migrate();ok(S.ch===to&&(from<7||S.foe===null||S.foe.ch===to),`章番号の移行 ${from} → ${S.ch}`+(from>=7?`（foe ${S.foe?S.foe.ch:"なし"}）`:""))}
+S=FRESH();S.ch=8;migrate();migrate();ok(S.ch===9,"移行は一度だけ");
+// たんけん：スポット生成と ずかん
+S=FRESH();migrate();dayRoll();S.ch=6;S.str=S.wise=S.world=S.heart=58;
+{const sp=genSpots(AREAS[0]);const ks=sp.map(s=>s.k).sort().join(",");
+ ok(sp.length===5&&ks==="creature,creature,creature,look,net"&&sp.every(s=>s.x>=4&&s.x<=96&&s.y>=58&&s.y<=90)&&new Set(sp.filter(s=>s.z).map(s=>s.z)).size===3,"スポットは いきもの3＋あみ1＋ながめる1、地面の帯の中、いきもの は重複なし: "+ks);
+ ok(sp.filter(s=>s.z).every(s=>ZUKAN.find(z=>z.id===s.z&&z.area==="grass")),"いきもの は そのエリアの ずかん から")}
+ok(ZUKAN.length===25&&AREAS.every(a=>zukanOf(a).length===5&&zukanOf(a).filter(z=>z.rare).length===1),"ずかん は 5エリア × 5匹（✨ 1匹ずつ）");
+S.explore={area:"grass",d:ymd(),spots:genSpots(AREAS[0]),pos:{x:8,y:88},n:0};syncBoss(AREAS[0]);
+ok(S.explore.spots.some(s=>s.k==="boss"&&s.id==="gakeen"),"ぬし が出ていれば 🪧 が足される");
+S.ch=7;syncBoss(AREAS[0]);ok(!S.explore.spots.some(s=>s.k==="boss"),"倒したら 🪧 は消える");
+{const i=S.explore.spots.findIndex(s=>s.k==="creature");const z=S.explore.spots[i].z;UI.instantWalk=true;arriveSpot(i);
+ ok(S.explore.spots[i].done&&S.dex[z]&&S.dex[z].n===1&&S.sub==="spot"&&S.msg.includes("ずかんに のった"),"いきもの を みつけると ずかん に のる");
+ S.explore.spots[i].done=false;arriveSpot(i);ok(S.dex[z].n===2&&!S.msg.includes("ずかんに のった"),"2回目は かずだけ 増える")}
+{const i=S.explore.spots.findIndex(s=>s.k==="net");const before=S.items.net;arriveSpot(i);ok(S.items.net===before+1,"あみ のスポットで あみ +1")}
+S.daily.explore="grass";S.daily.d="2000-01-01";S.explore.d="2000-01-01";dayRoll();ok(S.daily.explore===null&&S.explore===null,"日付が変わると たんけん は消える（翌日また 1回）");
 
 console.log("== 5. 日替わり ==");
 S=FRESH();migrate();dayRoll();S.daily.done.num=1;S.daily.d="2000-01-01";

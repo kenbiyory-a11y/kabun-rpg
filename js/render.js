@@ -29,7 +29,7 @@ function board(){
 }
 function kabunHtml(idx){const st=STAGES[idx];return spriteHtml(st.id,st.ico)}
 function fieldBattle(showFoe){
-  const f=$("field");f.innerHTML="";const c=CHAPTERS[Math.min(S.ch,CHAPTERS.length-1)];
+  const f=$("field");f.innerHTML="";f.onclick=null;delete f.dataset.map;const c=CHAPTERS[Math.min(S.ch,CHAPTERS.length-1)];
   const inRoom=S.ch<CHAPTERS.length&&c.place==="へや"; // 第1〜6話は虫かごの中で起きる
   f.className="field "+(S.ch>=CHAPTERS.length?"day":inRoom?"cage "+c.bg:c.bg);
   if(inRoom)cageDeco(f);
@@ -40,7 +40,7 @@ function fieldBattle(showFoe){
 // 虫かごの飾り（きのえだ・はっぱ・ゼリー）
 function cageDeco(f){f.append(el("span","deco log","🪵"),el("span","deco leaf","🍃"),el("span","deco jelly","🍮"))}
 function fieldGrowth(idx,evolving,bg){
-  const f=$("field");f.innerHTML="";const cage=!bg&&idx<3; // たまご・ようちゅう・さなぎ は虫かごの中。せいちゅう からは そと
+  const f=$("field");f.innerHTML="";f.onclick=null;delete f.dataset.map;const cage=!bg&&idx<3; // たまご・ようちゅう・さなぎ は虫かごの中。せいちゅう からは そと
   f.className="field "+(bg||(cage?"cage":"day"));
   f.append(el("div","glow"));if(cage)cageDeco(f);
   const sp=el("div","sprite center"+(evolving?" evolve":""),kabunHtml(idx));sp.id="spMe";sp.style.fontSize=Math.min(6,4.2+level()*0.08)+"rem";f.append(sp);
@@ -53,7 +53,7 @@ function filebtn(html,accept,multiple,onFiles){const lab=el("label","filebtn",ht
 function renderNav(){
   const ready=!!chapterReady();
   document.querySelectorAll(".nav .nb").forEach(b=>{const t=b.dataset.tab;b.classList.toggle("on",t===S.view);b.disabled=!S.name&&!["settings","growth"].includes(t);
-    if(t==="battle")b.innerHTML=`⚔️ バトル${ready&&S.view!=="battle"?' <span class="bang">！</span>':""}`;
+    if(t==="battle")b.innerHTML=`${stageIdx()>=3?"🌳 そと":"⚔️ バトル"}${ready&&S.view!=="battle"?' <span class="bang">！</span>':""}`;
     b.onclick=()=>{if(S.view===t&&!UI.replay)return;S.view=t;S.sub="menu";S.msg=null;S.line=0;UI.confirm=false;UI.pendingImport=null;UI.exportText=null;UI.replay=false;UI.introSaid=false;UI.sayPrefix=null;sayStop();save();render()}});
 }
 
@@ -77,7 +77,7 @@ function renderMain(){
 }
 
 // 📖 はじまりの おはなし：初回だけ（UI.replay で読み返し）。タップで1枚ずつ、途中で なまえ を えらぶ
-function fieldScene(bg,ico,sc){const f=$("field");f.innerHTML="";f.className="field "+bg;f.append(el("div","glow"));
+function fieldScene(bg,ico,sc){const f=$("field");f.innerHTML="";f.onclick=null;delete f.dataset.map;f.className="field "+bg;f.append(el("div","glow"));
   if(sc&&sc.family){const row=el("div","famrow");const kids=Math.max(1,Math.min(KIDS_MAX,(S.kids||[]).length||2));
     const ids=["papa","mama",...Array.from({length:kids},(_,i)=>"kid"+(i+1))];
     ids.forEach(id=>row.append(el("div","sprite fam",spriteHtml(id))));f.append(row);return}
@@ -202,10 +202,12 @@ function resultScreen(msg,menu,idx){const s=S.sess;const r=s.result;const k=r.k;
 
 // ⚔️ バトル：かべ（章）。レベルで現れ、倒すと章が進む。負けあり・損失なし
 function renderBattle(msg,menu,tapBtn){
-  if(S.ch>=CHAPTERS.length){fieldGrowth(4,false);typeText(msg,`👑 キング カブーン！\n${S.name}と カブーンは ぜんぶの かべを のりこえた！\nそとの せかいは じゅんびちゅう。もうすこし まっててね`);menu.className="menu one";return}
   const c=CHAPTERS[S.ch];
   // 倒したあとに画面を離れても、勝ちの場面から再開する（章の確定を取りこぼさない）
   if(S.foe&&S.foe.ch===S.ch&&S.foe.hp<=0&&!["turn","win","evolve"].includes(S.sub)){S.sub="win";S.line=0}
+  // せいちゅう以降：戦っていないときは そと（outside.js）。ぬし は そとの 🪧 から始まる
+  const fighting=S.foe&&S.foe.ch===S.ch&&["fight","turn","lose","win","evolve"].includes(S.sub);
+  if(stageIdx()>=3&&!fighting)return renderOut(msg,menu,tapBtn);
   if(S.sub==="menu"){
     if(S.hp<=0)S.hp=maxHp();
     fieldBattle(false);
@@ -213,7 +215,7 @@ function renderBattle(msg,menu,tapBtn){
     const hurt=S.foe&&S.foe.ch===S.ch&&S.foe.hp<S.foe.max;
     msg.innerHTML=`<span class="big">${c.foe.ico}</span><div class="ctr big2">${esc(c.title)}</div><div class="ctr note">${esc(c.place)}${hurt?"　かべの きずは そのまま！":""}</div>`;
     menu.className="menu one";const b=el("button","wide",`▶ ${c.foe.name} に ちょうせん！`);
-    b.onclick=()=>{if(!S.foe||S.foe.ch!==S.ch)S.foe=mkFoe(S.ch);S.hp=maxHp();S.msg=`${S.foe.name} が あらわれた！\n★の ボタンを おしてみよう`;S.sub="fight";S.line=0;sfx("tap");say(`${S.foe.name}が あらわれた！ ほしの ボタンを おしてみよう`);save();render()};
+    b.onclick=startFight;
     menu.append(b);return;
   }
   if(!S.foe||S.foe.ch!==S.ch){S.sub="menu";return renderMain()}
@@ -243,7 +245,7 @@ function renderBattle(msg,menu,tapBtn){
     const from=stageIdx(),to=c.evolve;
     if(S.line===0){fieldGrowth(from,true);sfx("evolve");const t="おや……？ カブーンの ようすが……！";typeText(msg,t,()=>{msg.append(el("span","cur","▼"))});say(t);tapBtn("▶ つぎへ",()=>{S.line=1;save();render()})}
     else{fieldGrowth(to,true);const mv=STATS.map(k=>`${STAT_ICO[k]} ${esc(moveAt(k,to,S[k]).n)}`).join("　");
-      let extra="";if(to===3)extra='<div class="note2">🌳 そとへ でられるように なった！（そとは じゅんびちゅう）</div>';if(to===4)extra='<div class="note2">👑 おうかんには とき と うみ と そら を こえる ちからが ある……（とびらは じゅんびちゅう）</div>';
+      let extra="";if(to===3)extra='<div class="note2">🌳 そとへ でられるように なった！ 「そと」の タブで くさむらを たんけんしよう</div>';if(to===4)extra='<div class="note2">👑 おうかんには とき と うみ と そら を こえる ちからが ある……（とびらは じゅんびちゅう）</div>';
       msg.innerHTML=`🎉 おめでとう！<br>カブーンは「<b>${STAGES[to].name}</b>」に せいちょうした！<div class="note2">✨ あたらしい わざ 4つ！<br>${mv}</div>${extra}`;
       if(S.line===1){S.line=2;say(`おめでとう！ カブーンは ${STAGES[to].name}に せいちょうした！ あたらしい わざが 4つ！`)}
       menu.className="menu one";const b=el("button","wide","▶ すすむ");b.onclick=()=>{clearChapter();save();render()};menu.append(b)}
@@ -252,6 +254,8 @@ function renderBattle(msg,menu,tapBtn){
   S.sub="menu";renderMain();
 }
 function clearChapter(){S.ch++;S.foe=null;S.line=0;S.sub="menu";S.hp=maxHp();S.msg=null}
+// いまの章の ぬし と戦い始める（へや の「ちょうせん」ボタンと、そと の 🪧 から）
+function startFight(){if(!chapterReady())return render();if(!S.foe||S.foe.ch!==S.ch)S.foe=mkFoe(S.ch);S.hp=maxHp();S.msg=`${S.foe.name} が あらわれた！\n★の ボタンを おしてみよう`;S.sub="fight";S.line=0;sfx("tap");say(`${S.foe.name}が あらわれた！ ほしの ボタンを おしてみよう`);save();render()}
 function attack(k){const f=S.foe;if(!f)return render();const m=moveOf(k);const mult=multOf(k,f);const dmg=Math.max(1,Math.floor(power(k)*mult));
   f.hp=Math.max(0,f.hp-dmg);let t=`カブーンの ${m.n}！`;
   if(mult>1){t+=`\n★ ばつぐん！！ ${f.name}に ${dmg}の ダメージ！`;const c=CHAPTERS[f.ch];if(c&&c.why&&!f.whySaid&&!f.shift){f.whySaid=true;t+=`\n${c.why}`}}

@@ -2,6 +2,7 @@
 function byDateDesc(arr){return arr.map((d,i)=>i).sort((a,b)=>parseDate(arr[b].date)-parseDate(arr[a].date)||b-a)}
 function renderDiary(msg,menu){
   if(S.sub==="dentry")return renderDailyEntry(msg,menu);
+  if(S.sub==="dex")return renderDex(msg,menu);
   fieldGrowth(stageIdx(),false,"diary");
   const list=el("div","diary");
   if(!S.diary.length)list.append(el("div","empty","まだ きろくが ないよ。できるように なったことを のこそう！"));
@@ -24,7 +25,9 @@ function renderDiary(msg,menu){
     S.msg=m;UI.draft="";S.chip=null;save();render()};
   inp.addEventListener("keydown",e=>{if(e.key==="Enter")add.click()});
   const story=el("button","wide","📖 はじまりの おはなしを みる");story.onclick=()=>{UI.replay=true;S.intro=0;UI.introSaid=false;sfx("tap");render()};
-  menu.append(emo,chips,inp,add,story);
+  const all=(typeof ZUKAN==="undefined"?[]:ZUKAN).filter(z=>!z.hidden);const got=all.filter(z=>S.dex&&S.dex[z.id]).length;
+  const dex=el("button","wide",`📗 ずかん<small>みつけた いきもの ${got} / ${all.length}</small>`);dex.onclick=()=>{S.sub="dex";S.msg=null;sfx("tap");save();render()};
+  menu.append(emo,chips,inp,add,dex,story);
 }
 function renderDailyEntry(msg,menu){
   const d=S.diary[S.pidx];if(!d){S.sub="menu";return renderDiary(msg,menu)}

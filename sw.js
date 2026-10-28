@@ -5,7 +5,7 @@
  * 更新のしかた：ファイルを変えたら VERSION を変える（例：2026-10-19-1 → 2026-10-19-2）。
  * 古いキャッシュは activate 時に消え、開いている画面には「さいよみこみ」ボタンが出る。
  */
-const VERSION = "2026-10-28-4";
+const VERSION = "2026-10-28-5";
 const CACHE = "kabun-app-" + VERSION;
 const FONT_CACHE = "kabun-fonts";
 
@@ -23,6 +23,8 @@ const SHELL = [
   "./js/quiz/animal.js",
   "./js/quiz/pref.js",
   "./js/quiz/trip.js",
+  "./js/zukan.js",
+  "./js/outside.js",
   "./img/pref/01.svg",
   "./img/pref/02.svg",
   "./img/pref/03.svg",

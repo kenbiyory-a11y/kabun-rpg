@@ -11,7 +11,7 @@ function stripPic(s){return String(s).replace(PIC_RE,"")}
 function picFail(im){try{im.replaceWith(document.createTextNode(im.dataset.fb||"🖼️"))}catch(e){}}
 const H=()=>({n:0,best:0,miss:{},last:[]});
 const FRESH=()=>({name:"",kids:[],intro:0,ch:0,str:0,wise:0,world:0,heart:0,view:"growth",sub:"menu",line:0,hp:50,foe:null,sess:null,
-  daily:{d:"",done:{},score:{},diary:false,bonus:false,bonusNet:false},cap:1,
+  daily:{d:"",done:{},score:{},diary:false,bonus:false,bonusNet:false,explore:null},cap:1,explore:null,
   lv:{num:1,eng:1,flag:1,animal:1},rev:{num:[],eng:[],flag:[],animal:[]},hist:{num:H(),eng:H(),flag:H(),animal:H()},
   used:{},items:{net:0},dex:{},flags:{},custom:[],chips:null,voice:true,se:true,
   msg:null,diary:[],emo:"🌟",chip:null,memories:[],memo:"📸",part:"daily",pidx:-1,bgm:"gen1",bgmOn:true});
@@ -41,9 +41,13 @@ function migrate(){
   if(typeof S.memo!=="string")S.memo="📸";if(typeof S.bgm!=="string")S.bgm="gen1";if(typeof S.bgmOn!=="boolean")S.bgmOn=true;S.part="daily";
   // 旧：1問ごとのクイズ状態は捨てる。戦っていた かべ のHPは S.foe に引き継ぐ
   delete S.quiz;delete S.ans;
+  // 2026-10-28：第8話 ケローン と 第10話 サメーン を足して 9章 → 11章にした。旧セーブの章番号を一度だけ直す（7 以下はそのまま）
+  if(!S.flags.ch11){S.flags.ch11=true;const mv=n=>n<=7?n:n===8?9:11;if(typeof S.ch==="number")S.ch=mv(S.ch);if(S.foe&&typeof S.foe.ch==="number")S.foe.ch=mv(S.foe.ch)}
   if(S.ch>CHAPTERS.length)S.ch=CHAPTERS.length;
+  if(S.daily.explore!==undefined&&typeof S.daily.explore!=="string")S.daily.explore=null;
+  if(S.explore&&(typeof S.explore!=="object"||!Array.isArray(S.explore.spots)||!S.explore.area))S.explore=null;
   if(typeof S.foehp==="number"&&S.ch<CHAPTERS.length&&S.foehp>0){S.foe=mkFoe(S.ch);S.foe.hp=Math.min(S.foe.max,S.foehp)}delete S.foehp;
-  if(S.foe&&(typeof S.foe!=="object"||S.foe.ch!==S.ch||typeof S.foe.hp!=="number"))S.foe=null;
+  if(S.foe&&(typeof S.foe!=="object"||S.foe.ch!==S.ch||typeof S.foe.hp!=="number"||S.ch>=CHAPTERS.length))S.foe=null;
   if(S.foe){const base=mkFoe(S.ch);for(const key of Object.keys(base))if(S.foe[key]===undefined)S.foe[key]=base[key]}
   if(!["growth","battle","diary","settings"].includes(S.view))S.view="growth";
   if(S.view==="diary"&&S.sub==="dentry"&&!S.diary[S.pidx])S.sub="menu";
@@ -63,7 +67,7 @@ function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S));UI.saveErr=
 // 全消去・読み込みの直前に、いまのセーブを「ひとつ前」として退避する
 function stashPrev(){try{const v=localStorage.getItem(SAVE_KEY);if(v)localStorage.setItem(PREV_KEY,v)}catch(e){}}
 // 日付が変わったら きょうの分 をリセット（端末のローカル日付）。採点ずみの結果画面は残す
-function dayRoll(){const t=ymd();if(S.daily.d!==t){S.daily={d:t,done:{},score:{},diary:false,bonus:false,bonusNet:false};if(S.sess&&S.sess.d!==t&&!S.sess.result)S.sess=null;return true}return false}
+function dayRoll(){const t=ymd();if(S.daily.d!==t){S.daily={d:t,done:{},score:{},diary:false,bonus:false,bonusNet:false,explore:null};if(S.sess&&S.sess.d!==t&&!S.sess.result)S.sess=null;if(S.explore&&S.explore.d!==t)S.explore=null;return true}return false}
 const $=id=>document.getElementById(id);
 function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}

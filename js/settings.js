@@ -123,7 +123,7 @@ function renderSettings(msg,menu){
   if(S.sub==="dev"){
     msg.append(el("div","note","ためすためのボタンです。ステータスや章が実際に変わります。"));
     const mk=(t,fn)=>{const b=el("button","wide",t);b.onclick=()=>{fn();save();render()};menu.append(b)};
-    mk("🔁 きょうの とっくんを もどす",()=>{S.daily={d:ymd(),done:{},score:{},diary:false,bonus:false,bonusNet:false};S.sess=null;S.msg="きょうの分を もどしました"});
+    mk("🔁 きょうの とっくんを もどす",()=>{S.daily={d:ymd(),done:{},score:{},diary:false,bonus:false,bonusNet:false,explore:null};S.sess=null;S.explore=null;S.msg="きょうの分を もどしました"});
     mk("⬆️ ぜんぶの ちから +10",()=>{const b=snapshot();STATS.forEach(k=>S[k]+=10);S.msg=["+10 しました",...gainNotes(b)].join("\n")});
     mk("🪲 レベル 20 ぶんに する",()=>{const b=snapshot();STATS.forEach(k=>S[k]=Math.max(S[k],38));S.msg=["レベル 20 ぶんに しました（かべ は順に倒す必要があります）",...gainNotes(b)].join("\n")});
     mk("👑 レベル 50 ぶんに する",()=>{const b=snapshot();STATS.forEach(k=>S[k]=Math.max(S[k],98));S.msg=["レベル 50 ぶんに しました",...gainNotes(b)].join("\n")});

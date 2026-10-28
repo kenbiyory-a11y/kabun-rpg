@@ -51,7 +51,7 @@ const STAGES=[{ico:"🥚",name:"たまご",id:"kabun_egg"},{ico:"🐛",name:"よ
 // キャラの絵：img/chars/<id>.png（背景が透明の正方形 PNG）を置くと、その絵文字の代わりに表示される。無ければ絵文字のまま
 // 例：img/chars/kabun_egg.png、img/chars/kugaan.png。kid1 / kid2 は ⚙️ で登録した なまえ の順
 const CHARS={kabun_egg:"🥚",kabun_larva:"🐛",kabun_pupa:"🫘",kabun_adult:"🪲",kabun_king:"👑",
-  shell:"🪨",fly:"🪰",soil:"🧱",wind:"❄️",dirt:"🌀",skin:"🥥",gakeen:"🐜",hourin:"🦉",kugaan:"🐉",
+  shell:"🪨",fly:"🪰",soil:"🧱",wind:"❄️",dirt:"🌀",skin:"🥥",gakeen:"🐜",keroon:"🐸",hourin:"🦉",sameen:"🦈",kugaan:"🐉",
   papa:"👨",mama:"👩",kid1:"🧒",kid2:"🧒",kid3:"🧒"};
 const STAGE_CHEER=["ぷるぷる！","もぐもぐ！","ぴくっ！","やったー！","さすが おうさま！"];
 
@@ -65,10 +65,28 @@ const CHAPTERS=[
  {lv:15,bg:"snow", place:"へや",             title:"だい4わ　さむい ふゆを こえろ",              foe:{id:"wind",ico:"❄️",name:"こおりのかぜ",hp:290,dmg:8,weak:"heart"},           why:"さむい かぜも なかまと いれば へっちゃら",            win:"はるが きた！ さなぎは がんばった！"},
  {lv:18,bg:"cave", place:"へや",             title:"だい5わ　さなぎの へやを まもれ",            foe:{id:"dirt",ico:"🌀",name:"くずれるつち",hp:330,dmg:9,weak:"world",guard:"str"},why:"くずれる つちは かぜで ぱたぱた はらう",              win:"へやは ぶじ！ もうすこしで そとだ！"},
  {lv:20,bg:"cave", place:"へや",             title:"だい6わ　さなぎから はいだせ",              foe:{id:"skin",ico:"🥥",name:"さなぎのかわ",hp:360,dmg:10,weak:"str"},            why:"かわは つので やぶる",                                win:"バリバリッ！ つのが でてきた！ カブーンだ！",evolve:3},
- {lv:30,bg:"day",  place:"くさむら の おく", title:"だい7わ　ガキーンと しょうぶ",              foe:{id:"gakeen",ico:"🐜",name:"ガキーン",hp:560,dmg:12,weak:"wise",guard:"str"},   why:"つちの なかに すむ ありは ひかりが にがて。おおきな あごは つのを はじく",            win:"ガキーン「つよいな……じゅえきを わけてやる」"},
- {lv:40,bg:"night",place:"もり の おく",     title:"だい8わ　よるの もりを こえて",              foe:{id:"hourin",ico:"🦉",name:"ホウリン",hp:750,dmg:14,weak:"heart",guard:"world"},why:"ふくろうは やさしい こえで ねむくなる",                win:"ホウリンは おどろいて とんでいった！"},
- {lv:50,bg:"day",  place:"やま の ちょうじょう",title:"さいしゅうわ　もりの おうさまへ",         foe:{id:"kugaan",ico:"🐉",name:"ちょうろう クガーン",hp:900,dmg:15,weak:"wise",guard:"str",shift:true},why:"★は ばつぐんの あとで となりに うごく",win:"クガーン「みごとじゃ…… この おうかんを さずけよう」",evolve:4}
+ // ---- ここから そと：エリアの ぬし（area は AREAS の id。倒すと つぎの エリアが ひらく）----
+ {lv:30,bg:"day",  area:"grass", place:"くさむら の おく", title:"だい7わ　ガキーンと しょうぶ",         foe:{id:"gakeen",ico:"🐜",name:"ガキーン",hp:560,dmg:12,weak:"wise",guard:"str"},   why:"つちの なかに すむ ありは ひかりが にがて。おおきな あごは つのを はじく",            win:"ガキーン「つよいな……じゅえきを わけてやる」"},
+ {lv:35,bg:"river",area:"river", place:"かわ の ほとり",   title:"だい8わ　かわの ぬし ケローン",         foe:{id:"keroon",ico:"🐸",name:"ケローン",hp:650,dmg:13,weak:"world",guard:"heart"}, why:"かえるの ながい したは はやく うごけば あたらない。みずの なかでは やさしい こえが とどかない",win:"ケローン「はやいなあ…… かわを わたって いいよ」"},
+ {lv:40,bg:"night",area:"sky",   place:"よるの そら",      title:"だい9わ　よるの そらを こえて",         foe:{id:"hourin",ico:"🦉",name:"ホウリン",hp:750,dmg:14,weak:"heart",guard:"world"},why:"ふくろうは やさしい こえで ねむくなる。かぜは つばさで うけながす",win:"ホウリンは おどろいて とんでいった！"},
+ {lv:45,bg:"sea",  area:"sea",   place:"うみ の おき",     title:"だい10わ　うみの ぬし サメーン",        foe:{id:"sameen",ico:"🦈",name:"サメーン",hp:840,dmg:14,weak:"str",guard:"wise"},   why:"さめは はなの さきが よわい。つので こづけ！ うみの なかは ひかりが とどかない",win:"サメーン「つよいな…… うみは おまえの ものだ」"},
+ {lv:50,bg:"forest",area:"forest",place:"もり の おく",    title:"さいしゅうわ　もりの おうさまへ",      foe:{id:"kugaan",ico:"🐉",name:"ちょうろう クガーン",hp:900,dmg:15,weak:"wise",guard:"str",shift:true},why:"★は ばつぐんの あとで となりに うごく",win:"クガーン「みごとじゃ…… この おうかんを さずけよう」",evolve:4}
 ];
+// そと のエリア（せいちゅう から）。順番どおりに ひらく：くさむら は最初から、あとは ひとつ前のエリアの ぬし を倒すと ひらく
+// ground は歩ける帯（field の高さに対する %）。bg は css の .field.<bg>
+const AREAS=[
+ {id:"grass", n:"くさむら",ico:"🌾",bg:"day",   ground:[58,90],look:"🌿 くさの なかで むしの こえが きこえる"},
+ {id:"river", n:"かわ",    ico:"🏞️",bg:"river", ground:[74,92],look:"💧 みずに カブーンが うつってる。りっぱな つの！"},
+ {id:"sky",   n:"そら",    ico:"🌙",bg:"night", ground:[60,90],look:"⭐ ほしが いっぱい。おおきな つきが でている"},
+ {id:"sea",   n:"うみ",    ico:"🌊",bg:"sea",   ground:[76,92],look:"🐚 なみの おとが ざざーん。かいがらが おちている"},
+ {id:"forest",n:"もり",    ico:"🌳",bg:"forest",ground:[62,90],look:"🍄 おおきな きの したに きのこが はえている"}
+];
+function areaOf(id){return AREAS.find(a=>a.id===id)||null}
+function areaBossIdx(a){return CHAPTERS.findIndex(c=>c.area===a.id)}
+// ひらいているか：せいちゅう以降で、最初のエリアか、ひとつ前のエリアの ぬし を倒している
+function areaOpen(a){const i=AREAS.indexOf(a);if(i<0||stageIdx()<3)return false;if(i===0)return true;return S.ch>areaBossIdx(AREAS[i-1])}
+// このエリアに いま ぬし が出ているか（レベル到達ずみで、まだ倒していない）
+function bossHere(a){const c=chapterReady();return !!(c&&c.area===a.id)}
 function maxHp(){return Math.min(120,50+2*level())}
 function mkFoe(i){const c=CHAPTERS[i];const hp=Math.round(c.foe.hp*PACE);
   return {ch:i,id:c.foe.id||null,ico:c.foe.ico,alt:c.foe.alt||null,name:c.foe.name,hp,max:hp,dmg:c.foe.dmg,weak:c.foe.weak||null,guard:c.foe.guard||null,shift:!!c.foe.shift,src:"story",whySaid:false}}

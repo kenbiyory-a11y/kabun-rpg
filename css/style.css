@@ -15,6 +15,26 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-
 .field{position:relative;height:250px;background:linear-gradient(var(--sky) 0 62%,var(--ground) 62% 100%);overflow:hidden}
 .field.night{background:linear-gradient(#2d3a5a 0 62%,#3b5a3a 62% 100%)}
 .field.cave{background:linear-gradient(#5a4a3a 0 62%,#7a5a3a 62% 100%)}
+/* そと のエリア背景 */
+.field.river{background:linear-gradient(var(--sky) 0 46%,#7cc8ee 46% 70%,#3f9bd4 70% 73%,#9fd27a 73% 100%)}
+.field.sea{background:linear-gradient(#bfe3f7 0 50%,#3a9ad8 50% 74%,#f3e4b4 74% 100%)}
+.field.forest{background:linear-gradient(#2f5a35 0 30%,#3b6b3f 30% 62%,#5a4326 62% 100%)}
+/* そと：たんけんの地図。タップした ところへ 歩く。スポットは ふわふわ、しらべたら うすく */
+.field.map{cursor:pointer;touch-action:manipulation}
+.field.map .spot{position:absolute;transform:translate(-50%,-50%);font-size:1.9rem;line-height:1;cursor:pointer;filter:drop-shadow(0 3px 0 rgba(0,0,0,.25));animation:float2 2.4s ease-in-out infinite;z-index:2}
+.field.map .spot.done{opacity:.45;animation:none}
+.field.map .spot.boss{font-size:2.8rem;z-index:3}
+.field.map .spot.boss img.spimg{height:1.15em}
+@keyframes float2{0%,100%{transform:translate(-50%,-50%)}50%{transform:translate(-50%,calc(-50% - 6px))}}
+.sprite.walker{position:absolute;font-size:3.4rem;line-height:1;transform:translate(-50%,-85%);transition:left .6s linear,top .6s linear;z-index:4}
+.sprite.walker.flip{transform:translate(-50%,-85%) scaleX(-1)}
+.sprite.walker.walk{animation:walkbob .3s ease-in-out infinite}
+@keyframes walkbob{0%,100%{margin-top:0}50%{margin-top:-6px}}
+/* ずかん */
+.dexrow{display:flex;gap:4px;align-items:center;margin-top:4px;font-size:1.3rem;line-height:1.2}
+.dexrow .dexa{font-size:.85rem;min-width:88px}
+.dexrow .dz{opacity:.45}.dexrow .dz.on{opacity:1}
+button.dim{opacity:.55}
 .field.snow{background:linear-gradient(#dfeefb 0 62%,#f6fbff 62% 100%)}
 .field.diary{background:linear-gradient(#ffe9c7 0 62%,#f7c98a 62% 100%)}
 /* 虫かご：たまご〜さなぎ の せいちょう画面と、へや で起きる かべ（第1〜6話）。上に みどりの あみの ふた、左右に とうめいな かべ、下に つち */
@@ -169,7 +189,7 @@ img.slide.kb{animation:kb 4.5s linear forwards}
 #theater button::before{display:none}
 #theater button:focus-visible{outline-color:var(--gold)}
 .tcount{font-size:.85rem;color:#ccc;font-variant-numeric:tabular-nums}
-@media (prefers-reduced-motion:reduce){.sprite.hit,.sprite.attack,.sprite.center,.sprite.evolve{animation:none}.cur{animation:none}img.slide.kb{animation:none}}
+@media (prefers-reduced-motion:reduce){.sprite.hit,.sprite.attack,.sprite.center,.sprite.evolve,.field.map .spot,.sprite.walker.walk{animation:none}.sprite.walker{transition:none}.cur{animation:none}img.slide.kb{animation:none}}
 /* PWA 更新のおしらせ */
 .update{position:fixed;left:16px;right:16px;bottom:16px;max-width:488px;margin:0 auto;z-index:60;background:var(--win);border:3px solid var(--winline);border-radius:8px;padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;font-size:.95rem;box-shadow:4px 4px 0 var(--winline)}
 .update[hidden]{display:none}

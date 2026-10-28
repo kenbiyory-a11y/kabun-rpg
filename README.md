@@ -20,6 +20,8 @@ js/quiz/flag.js        問題データ：せかい（旧 こっき。手書き70
 js/quiz/animal.js      問題データ：しぜん（旧 いきもの。120問。にんげんのからだ・どうぶつ・こんちゅう を追加）
 js/quiz/pref.js        問題データ：せかい に足す 日本の都道府県 141問（47県 × 形・名所・名物。形は img/pref/NN.svg）
 js/quiz/trip.js        問題データ：せかい に足す ドイツ・シンガポール・ドバイ 36問（写真は img/photo/、無ければ絵文字）
+js/zukan.js            ずかん の生き物（5エリア × 5匹。追記専用、id は変えない）
+js/outside.js          そと：🪧 かんばん（エリア選択）、タップで歩く たんけん、スポット、📗 ずかん 画面
 js/state.js            セーブデータ S（localStorage "kabun5"、旧 "kabun4" から自動移行）、UI 状態、共通ヘルパー
 js/media.js            写真・動画・音楽の保存（IndexedDB "kabun-photos"）
 js/backup.js           バックアップの書き出し・読み込み（json / zip）
@@ -102,6 +104,7 @@ git push -u origin main
 - おうちのひと向け画面の暗証番号は localStorage `kabun-pin` に別保存している（バックアップには入らない）。忘れたときはロック画面の「ばんごうを わすれた」を押すと24時間後に番号だけが消える（セーブは消えない。その前に ⚙️ に入れたら取り消せる）。**ブラウザの「サイトデータを削除」はセーブ・写真・記録もすべて消えるので使わない。** PC の Chrome なら F12 → Application → Local Storage → `kabun-pin` だけを消す方法もある。
 - よみあげは端末内蔵の音声を使う。日本語音声が無い端末では 🔊 が出ない。iPhone は消音スイッチがオンだと鳴らない。声は ⚙️ → おと → 「こえを えらぶ」でその端末に入っている日本語の声から選べる（localStorage `kabun-voice-ja`、バックアップには入らない。選んでいなければ端末内蔵の声を優先）。
 - BGM と効果音は Web Audio で合成している（音源ファイルなし）。曲はこのリポジトリで書いたオリジナルで、既存ゲームの曲は使っていない。ブラウザの制限で最初のタップから鳴り始める。⚙️ → おと で切れる。
+- そと（せいちゅう から）：バトルタブが「🌳 そと」になり、🪧 かんばん で エリア（くさむら → かわ → そら → うみ → もり）を選ぶ。くさむら は最初から、あとは ひとつ前の エリアの ぬし を倒すと ひらく。1日 1エリアだけ たんけんでき、地図を タップすると カブーンが そこへ歩く。スポット（いきもの 3・むしとりあみ 1・ながめる 1）を しらべると 📗 ずかん に のる。ぬし（Lv30 ガキーン、Lv35 ケローン、Lv40 ホウリン、Lv45 サメーン、Lv50 クガーン）は そのエリアの 地図の 右はしに出て、歩いて行くと バトルになる。
 - 問題の文や選択肢に `[img:pref/32.svg]` / `[img:photo/de_neuschwanstein.jpg|🏰]` と書くと画像で出る（`rich()` が `<img class="pic">` にする。`|` の後ろは画像が無いときの絵文字）。都道府県の形は img/pref/（出典：地球地図日本・国土地理院、img/pref/README.md）、旅の写真は img/photo/（Wikimedia Commons の CC0 写真。出典は img/photo/CREDITS.md。家族の写真に差し替えてよい）。
 - 国旗は `img/flags/*.svg`（70か国）を使う。国を増やすときは `js/quiz/flag.js` の `COUNTRIES` に1行足し、SVG を置き、`js/data.js` の `FLAG_CODES` と `sw.js` の `SHELL` に同じ国コードを追加する（出典：https://github.com/lipis/flag-icons 、MIT）。`node dev/checkquiz.js .` が抜けを見つける。
 - Service Worker がキャッシュするのはアプリ本体とフォントだけ。ユーザーのデータにはさわらない。

@@ -14,6 +14,7 @@
 <script src="../js/quiz/animal.js" defer></script>
 <script src="../js/quiz/pref.js" defer></script>
 <script src="../js/quiz/trip.js" defer></script>
+<script src="../js/zukan.js" defer></script>
 <script src="../js/state.js" defer></script>
 <script src="../js/media.js" defer></script>
 <script src="../js/backup.js" defer></script>
@@ -21,6 +22,7 @@
 <script src="../js/voice.js" defer></script>
 <script src="../js/chars.js" defer></script>
 <script src="../js/render.js" defer></script>
+<script src="../js/outside.js" defer></script>
 <script src="../js/diary.js" defer></script>
 <script src="../js/settings.js" defer></script>
 <script defer>
@@ -36,7 +38,10 @@ window.addEventListener("DOMContentLoaded",()=>{
   else if(q==="adult"){setLv(6,58)}
   else if(q.startsWith("q:")){const id=q.slice(2);const qq=poolOf("flag").concat(poolOf("num"),poolOf("eng"),poolOf("animal")).find(x=>x.id===id);if(!qq)document.title="NOQ";
     const it=Object.assign({},qq,{opts:[qq.a,...qq.d]});S.sess={cat:id.split("_")[0],d:ymd(),i:0,items:[it,it,it,it,it],res:[],lv:1};S.sub="quiz";S.view="growth";UI.lockUntil=0}
-  else if(/^ch\d$/.test(q)){const n=+q.slice(2);setLv(n-1,[0,8,14,24,30,36,40][n]||8);S.view="battle";S.sub="menu";S.foe=mkFoe(n-1);S.hp=maxHp()}
+  else if(q==="kanban"){setLv(7,68);S.view="battle";S.sub="menu"}
+  else if(q.startsWith("map:")){const a=areaOf(q.slice(4));const chOf={grass:6,river:7,sky:8,sea:9,forest:10}[a.id];setLv(chOf,[58,68,78,88,98][AREAS.indexOf(a)]);
+    S.explore={area:a.id,d:ymd(),spots:genSpots(a),pos:{x:8,y:a.ground[1]-2},n:0};S.daily.explore=a.id;S.view="battle";S.sub="map"}
+  else if(/^ch\d+$/.test(q)){const n=+q.slice(2);setLv(n-1,[0,8,14,24,30,36,40,58,68,78,88,98][n]||8);S.view="battle";S.sub="menu";S.foe=mkFoe(n-1);S.hp=maxHp();if(stageIdx()>=3)S.sub="fight"}
   const im=Object.keys(CHARS).map(id=>new Promise(r=>{const i=new Image();i.onload=()=>{CHAR_OK[id]=true;r()};i.onerror=()=>r();i.src="../img/chars/"+id+".png"}));
   Promise.all(im).then(()=>{render();if(typer)typeFinish();document.title="READY "+q});
 });
