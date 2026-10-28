@@ -156,7 +156,7 @@ function quizScreen(msg,menu,idx,tapBtn){
   else{const emojiQ=!hasKana(it.q);qhtml=(emojiQ||it.sub)?`<span class="big">${rich(it.q)}</span><span class="ctr">${esc(it.sub||(s.cat==="flag"?"この こっきは どこの くに？":""))}</span>`:`<span class="qtext">${rich(it.q)}</span>`}
   if(s.pending)qhtml+='<div class="note2">こたえは これだよ。おしてみて！</div>';
   msg.innerHTML=dots+tags+qhtml;
-  if(canHear)msg.append(spkBtn(null,"spk")).onclick=()=>sayQ(it);
+  if(canHear){const sb=spkBtn(null,"spk");sb.onclick=()=>sayQ(it);msg.append(sb)} // append() は何も返さないので、先にボタンを作ってから置く
   if(!s.said&&sayQ(it))s.said=true;
   const iconOpts=it.t==="ico"||it.t==="listen"||it.opts.every(o=>EMOJI_RE.test(o)&&!hasKana(o));
   const numbered=!iconOpts&&numberedOpts(it);

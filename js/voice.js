@@ -7,7 +7,16 @@ function loadVoices(){try{VOICE.list=(window.speechSynthesis&&speechSynthesis.ge
 if("speechSynthesis" in window){loadVoices();try{speechSynthesis.onvoiceschanged=()=>{const had=VOICE.ja;loadVoices();if(!had&&VOICE.ja&&typeof render==="function"&&S&&S.sub==="menu")render()}}catch(e){}}
 function voiceOK(){return !!(S&&S.voice&&("speechSynthesis" in window)&&VOICE.ja)}
 function canSpeak(){try{if(navigator.userActivation)return navigator.userActivation.hasBeenActive}catch(e){}return !!UI.active}
-function pickVoice(lang){const c=VOICE.list.filter(v=>String(v.lang||"").replace("_","-").toLowerCase().startsWith(lang));return c.find(v=>v.localService)||c[0]||null}
+// 声の選択（日本語だけ）。端末によって入っている声が違うので、セーブではなく端末の localStorage に入れる
+const VOICE_KEY="kabun-voice-ja";
+function voiceGet(){try{return localStorage.getItem(VOICE_KEY)||""}catch(e){return ""}}
+function voiceSet(name){try{if(name)localStorage.setItem(VOICE_KEY,name);else localStorage.removeItem(VOICE_KEY)}catch(e){}}
+function voicesOf(lang){return VOICE.list.filter(v=>String(v.lang||"").replace("_","-").toLowerCase().startsWith(lang))}
+function pickVoice(lang){const c=voicesOf(lang);
+  if(lang==="ja"){const want=voiceGet();const hit=want&&c.find(v=>v.name===want);if(hit)return hit}
+  return c.find(v=>v.localService)||c[0]||null}
+// 表示用の短い名前（"Microsoft Nanami Online (Natural)" → "Nanami (Natural)"）
+function voiceLabel(v){return String(v.name||"").replace(/^Microsoft\s+/,"").replace(/\s+Online/,"").replace(/\s+-\s+Japanese.*$/,"").trim()||"(なまえなし)"}
 // parts：文字列（日本語）か [[文, "ja"|"en"], …]。話し始められたら true
 function say(parts){
   if(!voiceOK()||!canSpeak())return false;const segs=typeof parts==="string"?[[parts,"ja"]]:(Array.isArray(parts)?parts:[]);

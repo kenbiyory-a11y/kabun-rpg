@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><title>sweep</title><link rel="stylesheet" href="../css/style.css"></head>
+<body>
+<!-- 全問題を実際の画面で描いて、選択肢が必ず出ることを確かめる（よみあげ ON の経路も、にせの音声で通す）。
+     使い方：python -m http.server 8000 を立てて、headless Chrome で --dump-dom http://127.0.0.1:8000/dev/sweep.html → ログの pre と title を見る -->
+<div class="console"><div class="screen"><div class="field" id="field"></div><div class="msgbox" id="msgbox"></div></div>
+<div class="nav" id="nav"><button class="nb" data-tab="growth">📈</button><button class="nb" data-tab="battle">⚔️</button><button class="nb" data-tab="diary">📖</button><button class="nb gear" data-tab="settings">⚙️</button></div></div>
+<div id="update" hidden><button id="updateBtn"></button></div>
+<pre id="log"></pre>
+<script>
+// にせの speechSynthesis：日本語と英語の声が1つずつある端末のふり。speak は何もしない（onstart/onend も呼ばない）
+(function(){const voices=[{name:"Fake JA",lang:"ja-JP",localService:true,default:true},{name:"Fake EN",lang:"en-US",localService:true,default:false}];
+  const ss={getVoices:()=>voices,speak(u){ss.spoken.push(u.text)},cancel(){},pause(){},resume(){},speaking:false,pending:false,paused:false,onvoiceschanged:null,spoken:[]};
+  Object.defineProperty(window,"speechSynthesis",{value:ss,configurable:true});
+  try{Object.defineProperty(navigator,"userActivation",{value:{hasBeenActive:true,isActive:true},configurable:true})}catch(e){} // headless でも「操作ずみ」にする
+  window.SpeechSynthesisUtterance=function(t){this.text=String(t);this.voice=null;this.lang="";this.rate=1;this.pitch=1;this.onstart=null;this.onend=null;this.onerror=null};
+})();
+</script>
+<script src="../vendor/jszip.min.js" defer></script>
+<script src="../js/data.js" defer></script>
+<script src="../js/quiz.js" defer></script>
+<script src="../js/quiz/num.js" defer></script>
+<script src="../js/quiz/eng.js" defer></script>
+<script src="../js/quiz/flag.js" defer></script>
+<script src="../js/quiz/animal.js" defer></script>
+<script src="../js/state.js" defer></script>
+<script src="../js/media.js" defer></script>
+<script src="../js/backup.js" defer></script>
+<script src="../js/bgm.js" defer></script>
+<script src="../js/voice.js" defer></script>
+<script src="../js/chars.js" defer></script>
+<script src="../js/render.js" defer></script>
+<script src="../js/diary.js" defer></script>
+<script src="../js/settings.js" defer></script>
+<script defer>
+window.addEventListener("DOMContentLoaded",()=>{
+const L=[];const log=(...a)=>L.push(a.join(" "));let fails=0;
+window.onerror=(m,src,line)=>{log("JSERROR",m,src,line);fails++};
+const chk=(c,m)=>{if(!c)fails++;log(c?"ok:":"FAIL:",m)};
+const optText=b=>{const c=b.cloneNode(true);const n=c.querySelector(".no");if(n)n.remove();return c.textContent.trim()};
+try{
+  $("msgbox").addEventListener("click",msgboxTap);UI.active=true;
+  localStorage.clear();S=FRESH();migrate();dayRoll();S.flags.intro=true;S.name="カブーン";S.se=false;S.bgmOn=false;S.voice=true;S.view="growth";S.sub="menu";
+  chk(voiceOK()===true,"にせの声で voiceOK");
+  log("viewport "+innerWidth+"x"+innerHeight+" body overflow="+getComputedStyle(document.body).overflow);
+  const seen={};let worst=0,worstQ="";
+  for(const cat of CATS){
+    seen[cat]=new Set();const pool=poolOf(cat).length;let rounds=0;
+    while(seen[cat].size<pool&&rounds<60){rounds++;
+      S.daily.done[cat]=0;S.sess=null;S.sub="menu";S.lv[cat]=1+(rounds%3); // lv1〜3 を順にまわす
+      S.sess=buildSession(cat);S.sub="quiz";
+      if(!S.sess||S.sess.items.length!==5){log("FAIL: "+cat+" round "+rounds+" セッションが組めない");fails++;break}
+      let dup=0;
+      for(let i=0;i<5;i++){
+        const it=S.sess.items[i];if(seen[cat].has(it.id))dup++;seen[cat].add(it.id);
+        UI.lockUntil=0;S.sess.i=i;S.sess.phase=null;S.sess.pending=false;S.sess.said=false;
+        let err=null;try{render()}catch(e){err=e}
+        const opts=Array.from(document.querySelectorAll("#msgbox button.opt"));
+        const okN=!err&&opts.length===it.opts.length&&opts.length>=2&&opts.every(b=>!b.disabled);
+        if(!okN){fails++;log(`FAIL: ${cat} ${it.id} t=${it.t} lv=${it.lv} 選択肢 ${opts.length}/${it.opts.length}${err?" ERR "+(err&&err.stack||err):""}`)}
+        const hasRight=opts.some(b=>optText(b)===it.a||b.textContent.trim()===it.a||(b.querySelector("img.flag")&&!hasKana(it.a)));
+        if(!hasRight){fails++;log(`FAIL: ${cat} ${it.id} 正解のボタンが無い a=${it.a} opts=${opts.map(optText).join("|")}`)}
+        if(!S.sess.said){fails++;log(`FAIL: ${cat} ${it.id} よみあげが呼ばれない`)}
+        // 見える範囲：menu の下端が画面のどこまで来るか（スクロールできるので失敗にはしないが、いちばん大きいものを記録）
+        const r=$("msgbox").querySelector(".menu").getBoundingClientRect();if(r.bottom>worst){worst=r.bottom;worstQ=cat+" "+it.id}
+        // まちがえる → 正解ボタンだけ押せる → after
+        const wrongBtn=opts.find(b=>optText(b)!==it.a&&!(b.querySelector("img.flag")));
+        if(wrongBtn&&opts.length>=2){wrongBtn.click();const o2=Array.from(document.querySelectorAll("#msgbox button.opt"));
+          const live=o2.filter(b=>!b.disabled);
+          if(!(S.sess.pending&&live.length===1&&live[0].classList.contains("right"))){fails++;log(`FAIL: ${cat} ${it.id} まちがい後：押せるのは正解1つのはず（${live.length}）`)}
+          live[0]&&live[0].click();
+          if(!(S.sess.phase==="after"&&S.sess.res[i]===false)){fails++;log(`FAIL: ${cat} ${it.id} 正解タップで after にならない phase=${S.sess.phase} pending=${S.sess.pending} res=${JSON.stringify(S.sess.res)} i=${i} a=${it.a} clicked=${optText(live[0])}`)}
+          const nb=Array.from(document.querySelectorAll("#msgbox button")).find(b=>b.innerText.includes("つぎへ"));
+          if(!nb){fails++;log(`FAIL: ${cat} ${it.id} つぎへ が無い`)}
+        }
+        S.sess.res.length=i+1;S.sess.res[i]=false; // 次の問題のために「i 問目まで答えた」状態にそろえる
+      }
+    }
+    log(`ok: ${cat} ${seen[cat].size}/${pool} 問を描画（${rounds} セッション）`);
+    chk(seen[cat].size===pool,`${cat} 全問を描けた`);
+  }
+  log("menu の下端の最大 "+Math.round(worst)+"px（"+worstQ+"）、innerHeight "+innerHeight+"、ページ高さ "+document.scrollingElement.scrollHeight);
+  // 800ms ロックの経路：ロック中は disabled、時間がたつと押せる
+  S.daily.done.num=0;S.sess=buildSession("num");S.sub="quiz";UI.lockUntil=Date.now()+100000;render();
+  chk(document.querySelectorAll("#msgbox button.opt:disabled").length===S.sess.items[0].opts.length,"ロック中は押せない（見えてはいる）");
+  chk(Array.from(document.querySelectorAll("#msgbox button.opt")).every(b=>getComputedStyle(b).display!=="none"&&getComputedStyle(b).visibility!=="hidden"&&parseFloat(getComputedStyle(b).opacity)>0.3),"ロック中の選択肢も見える");
+  // ⚙️ → おと → こえを えらぶ
+  S.sess=null;S.sub="menu";S.view="settings";S.sub="sound";render();
+  const pick=Array.from(document.querySelectorAll("#msgbox button")).find(b=>b.innerText.includes("こえを えらぶ"));chk(!!pick&&!pick.disabled&&pick.innerText.includes("Fake JA"),"おと に こえを えらぶ（いまの こえ：Fake JA）");
+  pick.click();chk(S.sub==="voicepick","こえを えらぶ 画面");
+  const vb=Array.from(document.querySelectorAll("#msgbox button")).filter(b=>b.innerText.includes("Fake JA"));chk(vb.length===1&&!Array.from(document.querySelectorAll("#msgbox button")).some(b=>b.innerText.includes("Fake EN")),"日本語の声だけ並ぶ");
+  speechSynthesis.spoken.length=0;vb[0].click();chk(voiceGet()==="Fake JA"&&speechSynthesis.spoken.join("|").includes("こんにちは")&&pickVoice("ja").name==="Fake JA","選ぶと保存されて ためしに よむ");
+  chk(!localStorage.getItem("kabun5").includes("Fake JA"),"選んだ声は セーブに入らない");
+  Array.from(document.querySelectorAll("#msgbox button")).find(b=>b.innerText.includes("じどう")).click();chk(voiceGet()===""&&S.sub==="voicepick","じどう に戻せる");
+  Array.from(document.querySelectorAll("#msgbox button")).find(b=>b.innerText.includes("もどる")).click();chk(S.sub==="sound","もどる で おと に戻る");
+  S.view="growth";S.sub="menu";
+  S.daily.done.num=0;S.sess=buildSession("num");S.sub="quiz";UI.lockUntil=Date.now()+150;render();
+  setTimeout(()=>{chk(document.querySelectorAll("#msgbox button.opt:disabled").length===0,"ロックが解けると押せる");finish()},400);
+}catch(e){log("EXC",e&&e.stack||e);fails++;finish()}
+function finish(){$("log").textContent=L.join("\n");document.title="DONE "+(fails?"NG":"OK")}
+});
+</script>
+</body></html>

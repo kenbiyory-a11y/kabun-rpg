@@ -93,7 +93,18 @@ function renderSettings(msg,menu){
     const t=el("button","",`${S.se?"✅":"⬜"} こうかおん<small>正解音・ばつぐん音など</small>`);t.onclick=()=>{S.se=!S.se;save();if(S.se)sfx("ok");render()};
     const b=el("button","",`${S.bgmOn?"✅":"⬜"} BGM<small>ゲームボーイふうの オリジナル曲（へや／バトル／かち）。読み上げ中は小さくなる</small>`);b.onclick=()=>{S.bgmOn=!S.bgmOn;save();if(!S.bgmOn)bgmStop();render()};
     const test=el("button","wide","🔊 ためしに よむ");test.disabled=!voiceOK();test.onclick=()=>say([["こんにちは、カブーンです","ja"],["Hello","en"]]);
-    menu.append(v,t,b,test);back();return;
+    const cur=pickVoice("ja");const pick=el("button","",`🗣️ こえを えらぶ<small>いまの こえ：${cur?voiceLabel(cur):"なし"}（この端末の日本語の声 ${voicesOf("ja").length}こ）</small>`);pick.disabled=!VOICE.ja;pick.onclick=()=>{S.sub="voicepick";save();render()};
+    menu.append(v,t,b,test,pick);back();return;
+  }
+  if(S.sub==="voicepick"){
+    const list=voicesOf("ja");const want=voiceGet();const cur=pickVoice("ja");
+    msg.append(el("div","note","この端末に入っている日本語の声です。おしてみて、いちばん聞きやすい声を選んでください。選んだ声はこの端末だけで使われます（バックアップには入りません）。「ネット」の声は通信がないと鳴らないことがあります。"));
+    menu.className="menu one";
+    const auto=el("button",want?"":"sel",`${want?"⬜":"✅"} じどう<small>この端末の声から自動で選ぶ</small>`);auto.onclick=()=>{voiceSet("");save();render();say("こんにちは、カブーンです")};menu.append(auto);
+    list.forEach(vv=>{const on=want===vv.name;const b=el("button",on?"sel":"",`${on?"✅":"⬜"} ${esc(voiceLabel(vv))}<small>${vv.localService?"この端末の声":"ネットの声"}${!want&&cur===vv?"（いま つかっている声）":""}</small>`);
+      b.onclick=()=>{voiceSet(vv.name);save();render();say("こんにちは、カブーンです。きょうも とっくん しようね")};menu.append(b)});
+    if(!list.length)menu.append(el("div","note","日本語の声が見つかりません。端末の設定で日本語の音声を追加してください。"));
+    const bk=el("button","wide","もどる");bk.onclick=()=>{S.sub="sound";save();render()};menu.append(bk);return;
   }
   if(S.sub==="pin"){
     const cur=pinGet();

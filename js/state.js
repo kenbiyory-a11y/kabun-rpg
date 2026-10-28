@@ -42,7 +42,7 @@ function migrate(){
   if(S.foe){const base=mkFoe(S.ch);for(const key of Object.keys(base))if(S.foe[key]===undefined)S.foe[key]=base[key]}
   if(!["growth","battle","diary","settings"].includes(S.view))S.view="growth";
   if(S.view==="diary"&&S.sub==="dentry"&&!S.diary[S.pidx])S.sub="menu";
-  if(!["menu","dentry","backup","stats","cap","sound","pin","dev","paste","kids"].includes(S.sub))S.sub="menu";
+  if(!["menu","dentry","backup","stats","cap","sound","pin","dev","paste","kids","voicepick"].includes(S.sub))S.sub="menu";
   if(S.sess&&(typeof S.sess!=="object"||!CATS.includes(S.sess.cat)||!Array.isArray(S.sess.items)||!Array.isArray(S.sess.res)||typeof S.sess.i!=="number"||S.sess.i<0||S.sess.i>S.sess.items.length||(S.sess.d!==ymd()&&!S.sess.result)))S.sess=null;
   if(typeof S.hp!=="number"||S.hp<=0||S.hp>maxHp())S.hp=maxHp();
   S.line=0;S.msg=null;

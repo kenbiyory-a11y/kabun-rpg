@@ -90,6 +90,14 @@ ok(EMOJI_RE.test("🇯🇵")&&EMOJI_RE.test("🍎")&&!EMOJI_RE.test("にほん")
 S.str=12;S.wise=12;S.world=12;S.heart=12;S.ch=0;S.foe=mkFoe(0);S.foe.hp=0;S.sub="menu";
 ok(!!chapterReady(),"（下準備）Lv7 で第1話が出ている");
 
+console.log("== 4e. こえ の選択 ==");
+VOICE.list=[{name:"Microsoft Haruka - Japanese (Japan)",lang:"ja-JP",localService:true},{name:"Microsoft Nanami Online (Natural) - Japanese (Japan)",lang:"ja-JP",localService:false},{name:"Google US English",lang:"en-US",localService:false}];
+voiceSet("");ok(pickVoice("ja").name.startsWith("Microsoft Haruka"),"選んでいなければ端末内の声を先に使う");
+voiceSet("Microsoft Nanami Online (Natural) - Japanese (Japan)");ok(pickVoice("ja").name.includes("Nanami")&&__store["kabun-voice-ja"]&&!JSON.stringify(S).includes("Nanami"),"選んだ声を使う（端末の localStorage に入り、セーブには入らない）");
+voiceSet("そんざいしない こえ");ok(pickVoice("ja").name.startsWith("Microsoft Haruka"),"端末に無い声が選ばれていたら自動に戻る");
+ok(voiceLabel(VOICE.list[1])==="Nanami (Natural)"&&voiceLabel(VOICE.list[0])==="Haruka","表示名を短くする: "+voiceLabel(VOICE.list[1]));
+voiceSet("");VOICE.list=[];VOICE.ja=false;
+
 console.log("== 5. 日替わり ==");
 S=FRESH();migrate();dayRoll();S.daily.done.num=1;S.daily.d="2000-01-01";
 ok(dayRoll()===true&&!S.daily.done.num,"日付が変わると きょうの分 がリセット");
