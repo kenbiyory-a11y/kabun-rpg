@@ -5,7 +5,8 @@ const STAT_OF={num:"str",eng:"wise",flag:"world",animal:"heart"};
 const STAT_NAME={str:"ちから",wise:"ちえ",world:"はやさ",heart:"こころ"};
 const STAT_ICO={str:"💪",wise:"💡",world:"💨",heart:"💗"};
 const STAT_WAY={str:"つの",wise:"ひかり",world:"かぜ",heart:"こえ"};
-const CAT={num:{n:"すうじ",ico:"🔢"},eng:{n:"えいご",ico:"🔤"},flag:{n:"こっき",ico:"🚩"},animal:{n:"いきもの",ico:"🐾"}};
+// 分野の表示名（2026-10-28 に すうじ・えいご・こっき・いきもの から広げた。キー num/eng/flag/animal と STATS の対応は変えない）
+const CAT={num:{n:"かず",ico:"🔢"},eng:{n:"ことば",ico:"🔤"},flag:{n:"せかい",ico:"🌍"},animal:{n:"しぜん",ico:"🌿"}};
 const CATS=Object.keys(CAT);
 
 // とっくん：1セッション5問。正解数 → 上昇（満点は「5 ＋ おまけ 2」）

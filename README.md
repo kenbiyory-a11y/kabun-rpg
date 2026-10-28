@@ -14,10 +14,10 @@ sw.js                  Service Worker（アプリ本体をキャッシュして�
 css/style.css          見た目ぜんぶ
 js/data.js             ステータス・技・相性・進化段階・章（かべ）・はじまりの おはなし（INTRO / PLAYERS）・各種定数
 js/quiz.js             クイズの器と 5問セッションの組み立て・採点・復習箱・段階式難易度
-js/quiz/num.js         問題データ：すうじ（30問。かぞえる・あわせて・のこり は quiz.js が自動生成）
-js/quiz/eng.js         問題データ：えいご（30問）
-js/quiz/flag.js        問題データ：こっき（手書き30問 ＋ 70か国の表 COUNTRIES。表から quiz.js が こっき→くに／くに→こっき を自動生成）
-js/quiz/animal.js      問題データ：いきもの（30問）
+js/quiz/num.js         問題データ：かず（旧 すうじ。70問 ＋ かぞえる・あわせて・のこり は quiz.js が自動生成）
+js/quiz/eng.js         問題データ：ことば（旧 えいご。えいご60問 ＋ ひらがな10問）
+js/quiz/flag.js        問題データ：せかい（旧 こっき。手書き70問 ＋ 70か国の表 COUNTRIES。表から quiz.js が こっき→くに／くに→こっき を自動生成）
+js/quiz/animal.js      問題データ：しぜん（旧 いきもの。70問）
 js/state.js            セーブデータ S（localStorage "kabun5"、旧 "kabun4" から自動移行）、UI 状態、共通ヘルパー
 js/media.js            写真・動画・音楽の保存（IndexedDB "kabun-photos"）
 js/backup.js           バックアップの書き出し・読み込み（json / zip）
