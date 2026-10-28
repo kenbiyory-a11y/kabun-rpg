@@ -4,6 +4,11 @@ const PREV_KEY="kabun5-prev";     // 全消去・読み込みの直前の退避�
 const BROKEN_KEY="kabun5-broken"; // 読めなかったセーブの退避（⚙️ から書き出せる）
 // 絵文字（国旗の地域表示記号を含む）の判定。render.js / voice.js で共用
 const EMOJI_RE=/[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}]/u;
+// 画像トークン [img:pref/32.svg] / [img:photo/x.jpg|🏰]（| の後ろは画像が無いときの絵文字）。q や選択肢に書くと rich() が <img> にする
+const PIC_RE=/\[img:([\w\/.-]+)(?:\|([^\]]*))?\]/g;
+function isPic(s){return EMOJI_RE.test(String(s))||/\[img:/.test(String(s))}
+function stripPic(s){return String(s).replace(PIC_RE,"")}
+function picFail(im){try{im.replaceWith(document.createTextNode(im.dataset.fb||"🖼️"))}catch(e){}}
 const H=()=>({n:0,best:0,miss:{},last:[]});
 const FRESH=()=>({name:"",kids:[],intro:0,ch:0,str:0,wise:0,world:0,heart:0,view:"growth",sub:"menu",line:0,hp:50,foe:null,sess:null,
   daily:{d:"",done:{},score:{},diary:false,bonus:false,bonusNet:false},cap:1,
@@ -64,7 +69,7 @@ function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 // esc に加えて、国旗の絵文字（地域表示記号2文字）を同梱 SVG の <img> に置き換える（画像が無い国はそのまま）
 const FLAG_RE=/[\u{1F1E6}-\u{1F1FF}]{2}/gu;
-function rich(s){return esc(s).replace(FLAG_RE,m=>{const code=Array.from(m).map(c=>String.fromCharCode(c.codePointAt(0)-0x1F1E6+97)).join("");return FLAG_CODES.has(code)?`<img class="flag" src="./img/flags/${code}.svg" alt="${code}">`:m})}
+function rich(s){return esc(s).replace(PIC_RE,(m,p,fb)=>`<img class="pic" src="./img/${p}" alt="" data-fb="${fb||"🖼️"}" onerror="picFail(this)">`).replace(FLAG_RE,m=>{const code=Array.from(m).map(c=>String.fromCharCode(c.codePointAt(0)-0x1F1E6+97)).join("");return FLAG_CODES.has(code)?`<img class="flag" src="./img/flags/${code}.svg" alt="${code}">`:m})}
 // 進化段階：倒した章の evolve から求める（S.ch は戻さないので不可逆）
 function stageIdx(){let s=0;for(let i=0;i<S.ch&&i<CHAPTERS.length;i++)if(CHAPTERS[i].evolve!=null)s=CHAPTERS[i].evolve;return Math.min(s,STAGES.length-1)}
 function statSum(){return STATS.reduce((a,k)=>a+S[k],0)}

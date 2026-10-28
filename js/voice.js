@@ -38,10 +38,10 @@ function sayQ(it){
   const segs=[];
   if(it.chal)segs.push(["ちょっと むずかしいよ。","ja"]);
   if(it.say)segs.push(...(typeof it.say==="string"?[[it.say,"ja"]]:it.say));
-  else if(it.sub)segs.push([it.sub,"ja"]);else if(it.t!=="ico"&&!EMOJI_RE.test(it.q))segs.push([it.q,"ja"]);
-  if(it.t==="pick"&&!it.opts.some(o=>EMOJI_RE.test(o))){
+  else if(it.sub)segs.push([it.sub,"ja"]);else if(it.t!=="ico"&&!isPic(it.q))segs.push([it.q,"ja"]);
+  if(it.t==="pick"&&!it.opts.some(o=>isPic(o))){
     const numbered=numberedOpts(it);const nums=it.opts.every(o=>/^\d/.test(o));
     if(!nums)it.opts.forEach((o,i)=>{if(numbered)segs.push([`${i+1}ばん、`,"ja"]);segs.push([o,it.ol==="en"?"en":"ja"])})}
   return say(segs);
 }
-function sayAns(it,after){const segs=after?[["そう、","ja"]]:[["せいかい！","ja"]];if(!EMOJI_RE.test(it.a))segs.push([it.a,it.ol==="en"?"en":"ja"]);return say(segs)}
+function sayAns(it,after){const segs=after?[["そう、","ja"]]:[["せいかい！","ja"]];if(!isPic(it.a))segs.push([it.a,it.ol==="en"?"en":"ja"]);return say(segs)}

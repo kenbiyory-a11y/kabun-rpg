@@ -23,6 +23,8 @@
 <script src="../js/quiz/eng.js" defer></script>
 <script src="../js/quiz/flag.js" defer></script>
 <script src="../js/quiz/animal.js" defer></script>
+<script src="../js/quiz/pref.js" defer></script>
+<script src="../js/quiz/trip.js" defer></script>
 <script src="../js/state.js" defer></script>
 <script src="../js/media.js" defer></script>
 <script src="../js/backup.js" defer></script>
@@ -46,7 +48,7 @@ try{
   const seen={};let worst=0,worstQ="";
   for(const cat of CATS){
     seen[cat]=new Set();const pool=poolOf(cat).length;let rounds=0;
-    while(seen[cat].size<pool&&rounds<60){rounds++;
+    while(seen[cat].size<pool&&rounds<150){rounds++;
       S.daily.done[cat]=0;S.sess=null;S.sub="menu";S.lv[cat]=1+(rounds%3); // lv1〜3 を順にまわす
       S.sess=buildSession(cat);S.sub="quiz";
       if(!S.sess||S.sess.items.length!==5){log("FAIL: "+cat+" round "+rounds+" セッションが組めない");fails++;break}

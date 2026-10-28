@@ -12,6 +12,8 @@
 <script src="../js/quiz/eng.js" defer></script>
 <script src="../js/quiz/flag.js" defer></script>
 <script src="../js/quiz/animal.js" defer></script>
+<script src="../js/quiz/pref.js" defer></script>
+<script src="../js/quiz/trip.js" defer></script>
 <script src="../js/state.js" defer></script>
 <script src="../js/media.js" defer></script>
 <script src="../js/backup.js" defer></script>
@@ -24,6 +26,7 @@
 <script defer>
 window.addEventListener("DOMContentLoaded",()=>{
   const q=new URLSearchParams(location.search).get("s")||"egg";
+  const _rich=rich;rich=s=>_rich(s).replace(/src="\.\/img\//g,'src="../img/'); // dev/ から見た画像の場所に直す
   spriteHtml=(id,fallback)=>{const emoji=fallback!=null?fallback:(CHARS[id]||"");return id&&CHAR_OK[id]?`<img class="spimg" src="../img/chars/${id}.png" alt="">`:emoji}; // dev/ から見た画像の場所に直す
   localStorage.clear();S=FRESH();migrate();dayRoll();S.flags.intro=true;S.name="カブーン";S.se=false;S.bgmOn=false;S.voice=false;
   const setLv=(ch,st)=>{S.ch=ch;S.str=S.wise=S.world=S.heart=st};
@@ -31,6 +34,8 @@ window.addEventListener("DOMContentLoaded",()=>{
   else if(q==="larva"){setLv(1,14)}
   else if(q==="pupa"){setLv(3,30)}
   else if(q==="adult"){setLv(6,58)}
+  else if(q.startsWith("q:")){const id=q.slice(2);const qq=poolOf("flag").concat(poolOf("num"),poolOf("eng"),poolOf("animal")).find(x=>x.id===id);if(!qq)document.title="NOQ";
+    const it=Object.assign({},qq,{opts:[qq.a,...qq.d]});S.sess={cat:id.split("_")[0],d:ymd(),i:0,items:[it,it,it,it,it],res:[],lv:1};S.sub="quiz";S.view="growth";UI.lockUntil=0}
   else if(/^ch\d$/.test(q)){const n=+q.slice(2);setLv(n-1,[0,8,14,24,30,36,40][n]||8);S.view="battle";S.sub="menu";S.foe=mkFoe(n-1);S.hp=maxHp()}
   const im=Object.keys(CHARS).map(id=>new Promise(r=>{const i=new Image();i.onload=()=>{CHAR_OK[id]=true;r()};i.onerror=()=>r();i.src="../img/chars/"+id+".png"}));
   Promise.all(im).then(()=>{render();if(typer)typeFinish();document.title="READY "+q});

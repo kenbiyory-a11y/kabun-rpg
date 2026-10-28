@@ -9,7 +9,7 @@ function typeText(node,text,done){
 function typeFinish(){if(!typer)return false;clearInterval(typer);typer=null;if(typeNode)typeNode.textContent=typeFull;typeDoneCb&&typeDoneCb();return true}
 // msgbox のどこを押しても「文を全部出す → つぎへ」になる（ボタンや入力欄の上は除く）。app.js と dev/smoke.html が #msgbox に付ける
 function msgboxTap(e){if(e.target&&e.target.closest&&e.target.closest("button,input,label,a,textarea"))return;if(typeFinish())return;if(UI.tapFn){const fn=UI.tapFn;fn()}}
-function hasKana(s){return /[ぁ-んァ-ヶa-zA-Z0-9０-９]/.test(String(s))}
+function hasKana(s){return /[ぁ-んァ-ヶa-zA-Z0-9０-９]/.test(stripPic(s))} // 画像トークンの中の英字は数えない
 function sayText(it){return typeof it.say==="string"?it.say:(Array.isArray(it.say)?it.say.map(p=>p[0]).join(""):(it.sub||it.q||""))}
 function spkBtn(parts,cls){const b=el("button",cls||"spk","🔊");b.setAttribute("aria-label","もういちど きく");b.onclick=()=>say(parts);return b}
 function badge(kind,k){return `<span class="bd ${kind}">${kind==="star"?"★":"🛡️"}${STAT_ICO[k]}</span>`}
@@ -163,7 +163,7 @@ function quizScreen(msg,menu,idx,tapBtn){
   msg.innerHTML=dots+tags+qhtml;
   if(canHear){const sb=spkBtn(null,"spk");sb.onclick=()=>sayQ(it);msg.append(sb)} // append() は何も返さないので、先にボタンを作ってから置く
   if(!s.said&&sayQ(it))s.said=true;
-  const iconOpts=it.t==="ico"||it.t==="listen"||it.opts.every(o=>EMOJI_RE.test(o)&&!hasKana(o));
+  const iconOpts=it.t==="ico"||it.t==="listen"||it.opts.every(o=>isPic(o)&&!hasKana(o));
   const numbered=!iconOpts&&numberedOpts(it);
   menu.className="menu "+(iconOpts?"ico3":(it.opts.length===2?"":"one"));
   const locked=!s.pending&&Date.now()<(UI.lockUntil||0);
@@ -174,7 +174,7 @@ function quizScreen(msg,menu,idx,tapBtn){
   if(locked)setTimeout(()=>{if(S.sess===s&&S.sub==="quiz"&&!s.phase&&!s.pending)document.querySelectorAll("button.opt").forEach(x=>{x.disabled=false;x.classList.add("live")})},Math.max(0,UI.lockUntil-Date.now()));
 }
 function answerQ(o){const s=S.sess;if(!s)return render();const it=s.items[s.i];if(!it)return render();
-  const emojiAns=EMOJI_RE.test(it.a)&&!hasKana(it.a);
+  const emojiAns=isPic(it.a)&&!hasKana(it.a);
   if(s.pending){if(o!==it.a)return;s.res.push(false);s.pending=false;s.phase="after";s.msg=emojiAns?"そう、これ！":`そう、「${it.a}」！`;sfx("tap");sayAns(it,true);save();render();return}
   if(o===it.a){s.res.push(true);s.phase="after";s.msg=`せいかい！ ${STAGE_CHEER[stageIdx()]}`;sfx("ok");sayAns(it,false);save();render();const sp=$("spMe");sp&&sp.classList.add("attack")}
   else{s.pending=true;sfx("ng");say("こたえは これだよ");save();render()}

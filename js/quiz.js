@@ -17,7 +17,7 @@ function genNum(){
 }
 // 選択肢に番号を付けて読むか：文字の選択肢なら付ける。数字（3 / 2 / 4）や英語の数詞は番号と混ざるので付けない
 const EN_NUM=new Set(["one","two","three","four","five","six","seven","eight","nine","ten"]);
-function numberedOpts(it){if(it.t!=="pick")return false;if(it.opts.some(o=>EMOJI_RE.test(o)))return false;return !it.opts.every(o=>/^\d/.test(o)||EN_NUM.has(String(o).toLowerCase()))}
+function numberedOpts(it){if(it.t!=="pick")return false;if(it.opts.some(o=>isPic(o)))return false;return !it.opts.every(o=>/^\d/.test(o)||EN_NUM.has(String(o).toLowerCase()))}
 // こっき の生成問題：COUNTRIES（js/quiz/flag.js）から「こっき→くに」と「くに→こっき」を作る。
 // 手書きの問題（a01〜a15 の こっき→くに、b01/b02/b13〜b15 の くに→こっき）と重なる国は作らない
 const FLAG_HAND_PICK=new Set(["jp","us","fr","br","it","ca","kr","gb","au","de","in","cn","es","eg","mx"]);

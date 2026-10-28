@@ -10,5 +10,5 @@ const ctx={console,Date,Math,JSON,Object,Array,String,Number,Boolean,Set,Map,Pro
 ctx.window=ctx;ctx.globalThis=ctx;
 vm.createContext(ctx);
 function loadFile(rel){const p=path.join(ROOT,rel);if(!fs.existsSync(p)){console.log("  (skip, missing)",rel);return false}vm.runInContext(fs.readFileSync(p,"utf8"),ctx,{filename:rel});return true}
-["js/data.js","js/quiz.js","js/quiz/num.js","js/quiz/eng.js","js/quiz/flag.js","js/quiz/animal.js","js/state.js","js/voice.js"].forEach(loadFile);
+["js/data.js","js/quiz.js","js/quiz/num.js","js/quiz/eng.js","js/quiz/flag.js","js/quiz/animal.js","js/quiz/pref.js","js/quiz/trip.js","js/state.js","js/voice.js"].forEach(loadFile);
 vm.runInContext(fs.readFileSync(path.join(__dirname,"tests.js"),"utf8"),ctx,{filename:"tests.js"});

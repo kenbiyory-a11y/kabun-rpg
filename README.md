@@ -14,10 +14,12 @@ sw.js                  Service Worker（アプリ本体をキャッシュして�
 css/style.css          見た目ぜんぶ
 js/data.js             ステータス・技・相性・進化段階・章（かべ）・はじまりの おはなし（INTRO / PLAYERS）・各種定数
 js/quiz.js             クイズの器と 5問セッションの組み立て・採点・復習箱・段階式難易度
-js/quiz/num.js         問題データ：かず（旧 すうじ。70問 ＋ かぞえる・あわせて・のこり は quiz.js が自動生成）
-js/quiz/eng.js         問題データ：ことば（旧 えいご。えいご60問 ＋ ひらがな10問）
+js/quiz/num.js         問題データ：かず（旧 すうじ。100問 ＋ かぞえる・あわせて・のこり は quiz.js が自動生成）
+js/quiz/eng.js         問題データ：ことば（旧 えいご。えいご60問 ＋ ひらがな10問 ＋ ことわざ20問）
 js/quiz/flag.js        問題データ：せかい（旧 こっき。手書き70問 ＋ 70か国の表 COUNTRIES。表から quiz.js が こっき→くに／くに→こっき を自動生成）
-js/quiz/animal.js      問題データ：しぜん（旧 いきもの。70問）
+js/quiz/animal.js      問題データ：しぜん（旧 いきもの。120問。にんげんのからだ・どうぶつ・こんちゅう を追加）
+js/quiz/pref.js        問題データ：せかい に足す 日本の都道府県 141問（47県 × 形・名所・名物。形は img/pref/NN.svg）
+js/quiz/trip.js        問題データ：せかい に足す ドイツ・シンガポール・ドバイ 36問（写真は img/photo/、無ければ絵文字）
 js/state.js            セーブデータ S（localStorage "kabun5"、旧 "kabun4" から自動移行）、UI 状態、共通ヘルパー
 js/media.js            写真・動画・音楽の保存（IndexedDB "kabun-photos"）
 js/backup.js           バックアップの書き出し・読み込み（json / zip）
@@ -100,6 +102,7 @@ git push -u origin main
 - おうちのひと向け画面の暗証番号は localStorage `kabun-pin` に別保存している（バックアップには入らない）。忘れたときはロック画面の「ばんごうを わすれた」を押すと24時間後に番号だけが消える（セーブは消えない。その前に ⚙️ に入れたら取り消せる）。**ブラウザの「サイトデータを削除」はセーブ・写真・記録もすべて消えるので使わない。** PC の Chrome なら F12 → Application → Local Storage → `kabun-pin` だけを消す方法もある。
 - よみあげは端末内蔵の音声を使う。日本語音声が無い端末では 🔊 が出ない。iPhone は消音スイッチがオンだと鳴らない。声は ⚙️ → おと → 「こえを えらぶ」でその端末に入っている日本語の声から選べる（localStorage `kabun-voice-ja`、バックアップには入らない。選んでいなければ端末内蔵の声を優先）。
 - BGM と効果音は Web Audio で合成している（音源ファイルなし）。曲はこのリポジトリで書いたオリジナルで、既存ゲームの曲は使っていない。ブラウザの制限で最初のタップから鳴り始める。⚙️ → おと で切れる。
+- 問題の文や選択肢に `[img:pref/32.svg]` / `[img:photo/de_neuschwanstein.jpg|🏰]` と書くと画像で出る（`rich()` が `<img class="pic">` にする。`|` の後ろは画像が無いときの絵文字）。都道府県の形は img/pref/（出典：地球地図日本・国土地理院、img/pref/README.md）、旅の写真は img/photo/（Wikimedia Commons の CC0 写真。出典は img/photo/CREDITS.md。家族の写真に差し替えてよい）。
 - 国旗は `img/flags/*.svg`（70か国）を使う。国を増やすときは `js/quiz/flag.js` の `COUNTRIES` に1行足し、SVG を置き、`js/data.js` の `FLAG_CODES` と `sw.js` の `SHELL` に同じ国コードを追加する（出典：https://github.com/lipis/flag-icons 、MIT）。`node dev/checkquiz.js .` が抜けを見つける。
 - Service Worker がキャッシュするのはアプリ本体とフォントだけ。ユーザーのデータにはさわらない。
 - フォント（DotGothic16）は Google Fonts から取得し、一度取れたらキャッシュされる。初回がオフラインのときは端末のフォントで表示される。
