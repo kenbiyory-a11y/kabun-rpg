@@ -54,7 +54,7 @@ function renderNav(){
   const ready=!!chapterReady();
   document.querySelectorAll(".nav .nb").forEach(b=>{const t=b.dataset.tab;b.classList.toggle("on",t===S.view);b.disabled=!S.name&&!["settings","growth"].includes(t);
     if(t==="battle")b.innerHTML=`${stageIdx()>=3?"🌳 そと":"⚔️ バトル"}${ready&&S.view!=="battle"?' <span class="bang">！</span>':""}`;
-    b.onclick=()=>{if(S.view===t&&!UI.replay)return;S.view=t;S.sub="menu";S.msg=null;S.line=0;UI.confirm=false;UI.pendingImport=null;UI.exportText=null;UI.replay=false;UI.introSaid=false;UI.sayPrefix=null;sayStop();save();render()}});
+    b.onclick=()=>{if(S.view===t&&!UI.replay)return;S.view=t;S.sub="menu";UI.walking=false;S.msg=null;S.line=0;UI.confirm=false;UI.pendingImport=null;UI.exportText=null;UI.replay=false;UI.introSaid=false;UI.sayPrefix=null;sayStop();save();render()}});
 }
 
 // ---------- がめん ----------

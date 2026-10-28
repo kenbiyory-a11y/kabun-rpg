@@ -115,6 +115,9 @@ S.ch=9;S.str=S.wise=S.world=S.heart=88;{const f=mkFoe(9);const st=Math.floor(pow
 // 旧セーブの章番号：7以下はそのまま、8（ホウリンまで）→9、9（全部）→11
 for(const [from,to] of [[0,0],[6,6],[7,7],[8,9],[9,11]]){S=FRESH();S.ch=from;S.str=S.wise=S.world=S.heart=98;if(from>=7)S.foe={ch:from,hp:10,max:100};delete S.flags.ch11;migrate();ok(S.ch===to&&(from<7||S.foe===null||S.foe.ch===to),`章番号の移行 ${from} → ${S.ch}`+(from>=7?`（foe ${S.foe?S.foe.ch:"なし"}）`:""))}
 S=FRESH();S.ch=8;migrate();migrate();ok(S.ch===9,"移行は一度だけ");
+S=FRESH();S.ch=7;S.str=S.wise=S.world=S.heart=98;S.foe=Object.assign(mkFoe(8),{ch:7,hp:100});delete S.flags.ch11;migrate();ok(S.ch===7&&S.foe===null,"旧 第8話（ホウリン）と戦いかけのセーブ：章は 7 のまま、ぬし が ケローンに変わるので戦いかけは捨てる");
+S=FRESH();S.ch=7;S.str=S.wise=S.world=S.heart=98;S.foe=Object.assign(mkFoe(7),{hp:100});migrate();ok(S.foe&&S.foe.id==="keroon"&&S.foe.hp===100,"いまの章の ぬし なら 戦いかけは残る");
+S=FRESH();migrate();S.explore={area:"grass",d:ymd(),spots:[]};migrate();ok(S.explore===null,"pos の無い たんけん データは捨てる");
 // たんけん：スポット生成と ずかん
 S=FRESH();migrate();dayRoll();S.ch=6;S.str=S.wise=S.world=S.heart=58;
 {const sp=genSpots(AREAS[0]);const ks=sp.map(s=>s.k).sort().join(",");
@@ -124,10 +127,12 @@ ok(ZUKAN.length===25&&AREAS.every(a=>zukanOf(a).length===5&&zukanOf(a).filter(z=
 S.explore={area:"grass",d:ymd(),spots:genSpots(AREAS[0]),pos:{x:8,y:88},n:0};syncBoss(AREAS[0]);
 ok(S.explore.spots.some(s=>s.k==="boss"&&s.id==="gakeen"),"ぬし が出ていれば 🪧 が足される");
 S.ch=7;syncBoss(AREAS[0]);ok(!S.explore.spots.some(s=>s.k==="boss"),"倒したら 🪧 は消える");
-{const i=S.explore.spots.findIndex(s=>s.k==="creature");const z=S.explore.spots[i].z;UI.instantWalk=true;arriveSpot(i);
+S.view="battle";S.sub="map";{const i=S.explore.spots.findIndex(s=>s.k==="creature");const z=S.explore.spots[i].z;UI.instantWalk=true;arriveSpot(i);
  ok(S.explore.spots[i].done&&S.dex[z]&&S.dex[z].n===1&&S.sub==="spot"&&S.msg.includes("ずかんに のった"),"いきもの を みつけると ずかん に のる");
- S.explore.spots[i].done=false;arriveSpot(i);ok(S.dex[z].n===2&&!S.msg.includes("ずかんに のった"),"2回目は かずだけ 増える")}
-{const i=S.explore.spots.findIndex(s=>s.k==="net");const before=S.items.net;arriveSpot(i);ok(S.items.net===before+1,"あみ のスポットで あみ +1")}
+ S.explore.spots[i].done=false;S.sub="map";arriveSpot(i);ok(S.dex[z].n===2&&!S.msg.includes("ずかんに のった"),"2回目は かずだけ 増える")}
+{const i=S.explore.spots.findIndex(s=>s.k==="net");const before=S.items.net;S.view="battle";S.sub="map";arriveSpot(i);ok(S.items.net===before+1,"あみ のスポットで あみ +1");
+ S.explore.spots[i].done=false;S.items.net=NET_MAX;S.view="battle";S.sub="map";arriveSpot(i);ok(S.items.net===NET_MAX&&S.msg.includes("いっぱい"),"あみ は上限を超えない");
+ S.explore.spots[i].done=false;S.view="growth";S.sub="menu";arriveSpot(i);ok(!S.explore.spots[i].done&&S.sub==="menu","地図にいないときは 到着しても何も起きない")}
 S.daily.explore="grass";S.daily.d="2000-01-01";S.explore.d="2000-01-01";dayRoll();ok(S.daily.explore===null&&S.explore===null,"日付が変わると たんけん は消える（翌日また 1回）");
 
 console.log("== 5. 日替わり ==");

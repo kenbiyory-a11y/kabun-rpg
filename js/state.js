@@ -44,8 +44,9 @@ function migrate(){
   // 2026-10-28：第8話 ケローン と 第10話 サメーン を足して 9章 → 11章にした。旧セーブの章番号を一度だけ直す（7 以下はそのまま）
   if(!S.flags.ch11){S.flags.ch11=true;const mv=n=>n<=7?n:n===8?9:11;if(typeof S.ch==="number")S.ch=mv(S.ch);if(S.foe&&typeof S.foe.ch==="number")S.foe.ch=mv(S.foe.ch)}
   if(S.ch>CHAPTERS.length)S.ch=CHAPTERS.length;
+  if(S.foe&&typeof S.foe==="object"&&CHAPTERS[S.ch]&&S.foe.id!==CHAPTERS[S.ch].foe.id)S.foe=null; // 章番号を直した結果 ぬし が入れ替わったら、戦いかけは捨てる
   if(S.daily.explore!==undefined&&typeof S.daily.explore!=="string")S.daily.explore=null;
-  if(S.explore&&(typeof S.explore!=="object"||!Array.isArray(S.explore.spots)||!S.explore.area))S.explore=null;
+  if(S.explore&&(typeof S.explore!=="object"||!Array.isArray(S.explore.spots)||!S.explore.area||!S.explore.pos||typeof S.explore.pos.x!=="number"||typeof S.explore.pos.y!=="number"))S.explore=null;
   if(typeof S.foehp==="number"&&S.ch<CHAPTERS.length&&S.foehp>0){S.foe=mkFoe(S.ch);S.foe.hp=Math.min(S.foe.max,S.foehp)}delete S.foehp;
   if(S.foe&&(typeof S.foe!=="object"||S.foe.ch!==S.ch||typeof S.foe.hp!=="number"||S.ch>=CHAPTERS.length))S.foe=null;
   if(S.foe){const base=mkFoe(S.ch);for(const key of Object.keys(base))if(S.foe[key]===undefined)S.foe[key]=base[key]}

@@ -35,7 +35,7 @@ function walkTo(x,y,cb){
   if(dur===0){if(sp){sp.style.transitionDuration="0s";sp.style.left=x+"%";sp.style.top=y+"%"}cb&&cb();return}
   UI.walking=true;sp.classList.add("walk");sp.style.transitionDuration=dur+"s";
   requestAnimationFrame(()=>{sp.style.left=x+"%";sp.style.top=y+"%"});
-  let done=false;const fin=()=>{if(done)return;done=true;UI.walking=false;sp.classList.remove("walk");sp.removeEventListener("transitionend",fin);cb&&cb()};
+  let done=false;const fin=()=>{if(done)return;done=true;UI.walking=false;sp.classList.remove("walk");sp.removeEventListener("transitionend",fin);if(S.view==="battle"&&S.sub==="map"&&S.explore)cb&&cb()}; // 歩いている間に タブを移ったら 到着は なかったことに
   sp.addEventListener("transitionend",fin);setTimeout(fin,dur*1000+80);
 }
 // 地図を描く。同じ日・同じエリアなら 作り直さない（歩行中の位置を壊さない）。スポットだけ毎回そろえる
@@ -55,7 +55,7 @@ function fieldMap(a){
     f.append(e)});
 }
 // スポットに着いた
-function arriveSpot(i){const ex=S.explore;if(!ex)return;const s=ex.spots[i];if(!s)return;const a=areaOf(ex.area);
+function arriveSpot(i){if(!(S.view==="battle"&&S.sub==="map"))return;const ex=S.explore;if(!ex)return;const s=ex.spots[i];if(!s)return;const a=areaOf(ex.area);
   if(s.k==="boss"){if(bossHere(a))startFight();return}
   if(s.done)return;s.done=true;ex.n=(ex.n||0)+1;
   let t="";
@@ -63,7 +63,7 @@ function arriveSpot(i){const ex=S.explore;if(!ex)return;const s=ex.spots[i];if(!
     if(z){const first=!S.dex[z.id];S.dex[z.id]=first?{d:ymd(),n:1}:Object.assign({},S.dex[z.id],{n:(S.dex[z.id].n||0)+1});
       t=`${z.ico} ${z.n}を みつけた！${z.rare?"　✨ レア！":""}\n${z.fact}${first?"\n📗 ずかんに のった！":""}`;sfx(first?"ok":"tap");say(z.say||`${z.n}を みつけた！ ${z.fact}`)}
     else{t=a.look;sfx("tap")}}
-  else if(s.k==="net"){S.items.net=(S.items.net||0)+1;t=`✨ むしとりあみを みつけた！\nいま ${S.items.net}こ。いつか やくに たつよ`;sfx("ok");say("むしとりあみを みつけた！")}
+  else if(s.k==="net"){const full=(S.items.net||0)>=NET_MAX;if(!full)S.items.net=(S.items.net||0)+1;t=full?"✨ むしとりあみを みつけた！ でも もう いっぱい（"+NET_MAX+"こ）。また こんど":`✨ むしとりあみを みつけた！\nいま ${S.items.net}こ。いつか やくに たつよ`;sfx("ok");say("むしとりあみを みつけた！")}
   else{t=a.look;sfx("tap");say(String(a.look).replace(/^\S+\s/,""))}
   S.msg=t;S.sub="spot";save();render();
 }
