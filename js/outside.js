@@ -65,7 +65,7 @@ function walkTo(x,y,cb){
 function fieldMap(a){
   const f=$("field");const key="map:"+a.id+":"+S.explore.d;
   if(f.dataset.map!==key||!$("spWalk")){
-    f.innerHTML="";f.className="field map "+a.bg;f.dataset.map=key;
+    f.innerHTML="";f.className="field map "+a.bg+" a-"+a.id;f.dataset.map=key; // a-<エリア> が 背景の イラスト（img/bg/<エリア>.svg）
     const sp=el("div","sprite walker",kabunHtml(stageIdx()));sp.id="spWalk";f.append(sp);
     f.onclick=e=>{if(!(S.view==="battle"&&S.sub==="map"&&S.explore))return;if(UI.walking)return;if(e.target&&e.target.closest&&e.target.closest(".spot"))return;
       const r=f.getBoundingClientRect();if(!r.width)return;walkTo((e.clientX-r.left)/r.width*100,(e.clientY-r.top)/r.height*100)};

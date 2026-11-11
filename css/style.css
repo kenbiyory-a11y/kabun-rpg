@@ -20,13 +20,13 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-
 .field.sea{background:linear-gradient(#bfe3f7 0 50%,#3a9ad8 50% 74%,#f3e4b4 74% 100%)}
 .field.forest{background:linear-gradient(#2f5a35 0 30%,#3b6b3f 30% 62%,#5a4326 62% 100%)}
 /* そと：せかいちず（どこへ いく？）。まんなかに カブーン、まわりに エリア */
-.field.world{height:340px;background:
-  radial-gradient(ellipse 36% 34% at 8% 32%,#7cc8ee 0 58%,transparent 60%),
-  radial-gradient(ellipse 40% 30% at 50% 0%,#2d3a5a 0 58%,transparent 60%),
-  radial-gradient(ellipse 36% 34% at 92% 32%,#3a9ad8 0 58%,transparent 60%),
-  radial-gradient(ellipse 36% 34% at 90% 88%,#2f6b3a 0 58%,transparent 60%),
-  radial-gradient(ellipse 36% 34% at 10% 88%,#c9e58f 0 58%,transparent 60%),
-  #9fd27a}
+.field.world{height:340px;background:#9fd27a url("../img/bg/world.svg") center/100% 100% no-repeat}
+/* エリアの 背景イラスト（dev/mkbg.py が作る SVG。たんけんの地図と、その エリアの ぬし・うらボス戦） */
+.field.a-grass{background:#a8dd72 url("../img/bg/grass.svg") center bottom/cover no-repeat}
+.field.a-river{background:#7fbf55 url("../img/bg/river.svg") center bottom/cover no-repeat}
+.field.a-sky{background:#274a35 url("../img/bg/sky.svg") center bottom/cover no-repeat}
+.field.a-sea{background:#e9cf8a url("../img/bg/sea.svg") center bottom/cover no-repeat}
+.field.a-forest{background:#553b20 url("../img/bg/forest.svg") center bottom/cover no-repeat}
 .wpath{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .wpath line{stroke:#f6ebc4;stroke-width:7;stroke-linecap:round;stroke-dasharray:2 12;vector-effect:non-scaling-stroke}
 .whome{position:absolute;transform:translate(-50%,-50%);font-size:2.2rem;line-height:1;filter:drop-shadow(0 3px 0 rgba(0,0,0,.25))}

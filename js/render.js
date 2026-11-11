@@ -32,7 +32,8 @@ function fieldBattle(showFoe){
   const f=$("field");f.innerHTML="";f.onclick=null;delete f.dataset.map;const c=CHAPTERS[Math.min(S.ch,CHAPTERS.length-1)];
   const ua=S.foe&&S.foe.ura&&uraOf(S.foe.ura)?areaOf(uraOf(S.foe.ura).area):null; // うらボス は その エリアの 背景で
   const inRoom=!ua&&S.ch<CHAPTERS.length&&c.place==="へや"; // 第1〜6話は虫かごの中で起きる
-  f.className="field "+(ua?ua.bg:S.foe&&S.foe.trial?"night":S.ch>=CHAPTERS.length?"day":inRoom?"cage "+c.bg:c.bg);
+  const ba=ua?ua.id:(S.foe&&!S.foe.trial&&S.ch<CHAPTERS.length&&c.area)||null; // そと の ぬし・うらボス は その エリアの イラストの 上で たたかう
+  f.className="field "+(ua?ua.bg:S.foe&&S.foe.trial?"night":S.ch>=CHAPTERS.length?"day":inRoom?"cage "+c.bg:c.bg)+(ba?" a-"+ba:"");
   if(inRoom)cageDeco(f);
   const me=el("div","sprite me",kabunHtml(stageIdx()));me.id="spMe";f.append(me);
   f.append(hud("me","カブーン","Lv"+level(),S.hp,maxHp()));
