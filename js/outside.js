@@ -1,6 +1,6 @@
 // ---------- そと：せいちゅう になったら 外へ。🪧 かんばん で エリアを えらび、タップした ところへ 歩いて スポットを しらべる（1日 1エリア） ----------
 // 状態：S.explore={area,d,spots:[{k,x,y,cover,z,flee,ico,done}],pos:{x,y},n}（その日だけ。日付が変わると消える）。S.daily.explore＝きょう たんけんした エリア id。
-// 画面：S.view="battle" のまま、S.sub が "menu"→かんばん、"map"→たんけん、"spot"→できごと、"enc"→かげが でた、"mg"→ミニゲーム、"caught"→つかまえた。ぬし・うらボス は "fight" 以降（render.js の renderBattle）。
+// 画面：S.view="battle" のまま、S.sub が "menu"→せかいちず（どこへ いく？ カブーンが まんなか、まわりに エリア。fieldWorld）、"map"→たんけん、"spot"→できごと、"enc"→かげが でた、"mg"→ミニゲーム、"caught"→つかまえた。ぬし・うらボス は "fight" 以降（render.js の renderBattle）。
 // エリアの解放：くさむら は最初から、あとは ひとつ前の エリアの ぬし を倒すと（data.js の areaOpen）。
 // スポット（2026-11-11〜）：いきもの 3（まだ つかまえていない ものだけ。ダブりなし）＋ むしとりあみ 1 ＋ ながめる 1。
 //   いきもの の スポットは 半分（FLEE_RATE）が「にげていった」。のこりは かげ が出て ミニゲーム（minigame.js、画面いっぱい）。かつと つかまえて しゃしんと せつめい、ずかんへ。
@@ -70,7 +70,7 @@ function fieldMap(a){
     f.onclick=e=>{if(!(S.view==="battle"&&S.sub==="map"&&S.explore))return;if(UI.walking)return;if(e.target&&e.target.closest&&e.target.closest(".spot"))return;
       const r=f.getBoundingClientRect();if(!r.width)return;walkTo((e.clientX-r.left)/r.width*100,(e.clientY-r.top)/r.height*100)};
   }
-  const sp=$("spWalk");sp.style.left=S.explore.pos.x+"%";sp.style.top=S.explore.pos.y+"%";
+  const sp=$("spWalk");sp.style.left=S.explore.pos.x+"%";sp.style.top=S.explore.pos.y+"%";if(!UI.walking){const h=kabunHtml(stageIdx());if(sp.dataset.h!==h){sp.dataset.h=h;sp.innerHTML=h}}
   f.querySelectorAll(".spot").forEach(e=>e.remove());
   S.explore.spots.forEach((s,i)=>{const big=s.k==="boss"||s.k==="ura";
     const e=el("div","spot "+s.k+(s.done?" done":"")+(UI.enc&&UI.enc.i===i?" rustle":""),big?spriteHtml(s.id,s.ico):(s.done&&s.ico?s.ico:s.cover));
@@ -172,23 +172,41 @@ function renderOut(msg,menu,tapBtn){
     menu.className="menu one";const b=el("button","wide","🪧 かんばんに もどる");b.onclick=()=>{S.sub="menu";S.msg=null;save();render()};menu.append(b);
     return;
   }
-  // 🪧 かんばん
-  fieldGrowth(stageIdx(),false,"day");
+  // 🗺️ せかいちず（どこへ いく？）：カブーンが まんなか、まわりに 5つの エリア。タップすると あるいて いく
+  fieldWorld();
   const today=S.daily.explore||null;const king=S.ch>=CHAPTERS.length;
-  msg.innerHTML=`<span class="big">🪧</span><div class="ctr big2">どこへ いく？</div>`+(king?`<div class="ctr note">👑 ぜんぶの ぬしを のりこえた！ どこでも たんけんできる</div>`:"")+(today?`<div class="ctr note">きょうは ${esc(areaOf(today)?areaOf(today).n:"")} を たんけんちゅう</div>`:`<div class="ctr note">1にち 1かい、すきな ところを たんけんできる</div>`);
+  msg.innerHTML=`<div class="ctr big2">🗺️ どこへ いく？</div><div class="ctr note">ちずの ばしょを タップしてね。`+(today?`きょうは ${esc(areaOf(today)?areaOf(today).n:"")} を たんけんちゅう`:"1にち 1かい、すきな ところを たんけんできる")+`</div>`+(king?`<div class="ctr note">👑 ぜんぶの ぬしを のりこえた！</div>`:"")+(S.msg?`<div class="note2">${esc(S.msg)}</div>`:"");
   menu.className="menu one";
-  AREAS.forEach((a,i)=>{const open=areaOpen(a);const busy=!!today&&today!==a.id;const boss=open&&bossHere(a);const c=CHAPTERS[S.ch];
-    const all=zukanOf(a).length,got=all-zLeft(a).length;const prog=`つかまえた ${got} / ${all}${S.flags["comp_"+a.id]?" 🏅":""}`;
-    let sub="";
-    if(!open){const prev=AREAS[i-1];const bc=prev&&CHAPTERS[areaBossIdx(prev)];sub=bc?`🔒 ${bc.foe.name}に かったら ひらく`:"🔒"}
-    else if(boss)sub=`${c.foe.ico} ${c.foe.name}が まっている！`;
-    else if(busy)sub=`また あした（${prog}）`;
-    else sub=(today===a.id?"たんけんの つづき":"たんけんに いく")+`（${prog}）`+(uraHere(a)?"　❗ おおきな かげ":"");
-    const b=el("button",open&&(!busy||boss)?"":"dim",`${a.ico} ${esc(a.n)}${boss?' <span class="bang">！</span>':""}<small>${esc(sub)}</small>`);
-    b.disabled=!open||(busy&&!boss);
-    b.onclick=()=>{if(busy&&boss){startFight();return}enterArea(a)};
-    menu.append(b)});
 }
+// ---- せかいちず ----
+const WORLD_POS={grass:[19,78],river:[15,36],sky:[50,15],sea:[85,36],forest:[81,78]};const WORLD_HOME=[50,58];
+function areaState(a){const open=areaOpen(a);const today=S.daily.explore||null;const busy=!!today&&today!==a.id;const boss=open&&bossHere(a);return {open,busy,boss,ura:open&&uraHere(a),today:today===a.id}}
+function fieldWorld(){
+  const f=$("field");
+  if(f.dataset.map!=="world"||!$("spWorld")){
+    f.innerHTML="";f.onclick=null;f.className="field world";f.dataset.map="world";
+    f.insertAdjacentHTML("beforeend",`<svg class="wpath" viewBox="0 0 100 100" preserveAspectRatio="none">${AREAS.map(a=>{const [x,y]=WORLD_POS[a.id];return `<line x1="${WORLD_HOME[0]}" y1="${WORLD_HOME[1]}" x2="${x}" y2="${y}"/>`}).join("")}</svg>`);
+    const home=el("div","whome","🏠");home.style.left=WORLD_HOME[0]+"%";home.style.top=(WORLD_HOME[1]-13)+"%";f.append(home);
+    const sp=el("div","sprite walker",kabunHtml(stageIdx()));sp.id="spWorld";sp.style.left=WORLD_HOME[0]+"%";sp.style.top=(WORLD_HOME[1]+8)+"%";f.append(sp);
+  }
+  if(!UI.walking){const sp=$("spWorld");const h=kabunHtml(stageIdx());if(sp.dataset.h!==h){sp.dataset.h=h;sp.innerHTML=h}} // 絵が あとから 読みこまれたら 差し替える
+  f.querySelectorAll(".wnode").forEach(e=>e.remove());
+  AREAS.forEach(a=>{const st=areaState(a);const [x,y]=WORLD_POS[a.id];const all=zukanOf(a).length,got=all-zLeft(a).length;
+    const b=el("button","wnode "+a.id+(st.open?"":" locked")+(st.busy&&!st.boss?" busy":"")+(st.today?" today":"")+(st.open&&(!st.busy||st.boss)?" go":""),
+      `<span class="wico">${st.open?a.ico:"🔒"}</span><span class="wname">${esc(a.n)}</span>`+(st.open?`<span class="wsub">${got} / ${all}${S.flags["comp_"+a.id]?" 🏅":""}</span>`:"")+(st.boss?'<span class="bang">！</span>':st.ura?'<span class="bang ura">❗</span>':""));
+    b.dataset.area=a.id;b.style.left=x+"%";b.style.top=y+"%";b.setAttribute("aria-label",a.n);b.onclick=ev=>{ev.stopPropagation();worldTap(a)};f.append(b)});
+}
+function worldTap(a){if(UI.walking||!(S.view==="battle"&&S.sub==="menu"))return;const st=areaState(a);const i=AREAS.indexOf(a);
+  if(!st.open){const prev=AREAS[i-1];const bc=prev&&CHAPTERS[areaBossIdx(prev)];S.msg=bc?`🔒 ${a.n}は まだ いけない。${bc.foe.name}に かったら ひらくよ`:`🔒 ${a.n}は まだ いけない`;sfx("tap");say(S.msg.replace("🔒 ",""));save();render();return}
+  if(st.busy&&!st.boss){S.msg=`${a.n}は また あした。きょうは ${areaOf(S.daily.explore).n}を たんけんちゅう`;sfx("tap");say(S.msg);save();render();return}
+  S.msg=null;sfx("tap");worldWalk(a,()=>{if(st.busy&&st.boss)startFight();else enterArea(a)})}
+// まんなか から その エリアへ あるく（着いたら cb）。UI.instantWalk のときは すぐ
+function worldWalk(a,cb){const sp=$("spWorld");const [x,y]=WORLD_POS[a.id];
+  if(UI.instantWalk||!sp||(typeof matchMedia==="function"&&matchMedia("(prefers-reduced-motion: reduce)").matches)){cb();return}
+  UI.walking=true;sp.classList.add("walk");sp.classList.toggle("flip",x<WORLD_HOME[0]);sp.style.transitionDuration="0.7s";
+  requestAnimationFrame(()=>{sp.style.left=x+"%";sp.style.top=(y+4)+"%"});
+  let done=false;const fin=()=>{if(done)return;done=true;UI.walking=false;sp.removeEventListener("transitionend",fin);if(S.view==="battle"&&S.sub==="menu")cb()};
+  sp.addEventListener("transitionend",fin);setTimeout(fin,820)}
 // つかまえた！（いきもの／うらボス）：しゃしん と せつめい
 function renderCaught(msg,menu,tapBtn){
   const z=zById(UI.caught);const u=z?null:uraOf(UI.caught);

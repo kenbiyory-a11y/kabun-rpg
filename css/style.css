@@ -19,6 +19,29 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-
 .field.river{background:linear-gradient(var(--sky) 0 46%,#7cc8ee 46% 70%,#3f9bd4 70% 73%,#9fd27a 73% 100%)}
 .field.sea{background:linear-gradient(#bfe3f7 0 50%,#3a9ad8 50% 74%,#f3e4b4 74% 100%)}
 .field.forest{background:linear-gradient(#2f5a35 0 30%,#3b6b3f 30% 62%,#5a4326 62% 100%)}
+/* そと：せかいちず（どこへ いく？）。まんなかに カブーン、まわりに エリア */
+.field.world{height:340px;background:
+  radial-gradient(ellipse 36% 34% at 8% 32%,#7cc8ee 0 58%,transparent 60%),
+  radial-gradient(ellipse 40% 30% at 50% 0%,#2d3a5a 0 58%,transparent 60%),
+  radial-gradient(ellipse 36% 34% at 92% 32%,#3a9ad8 0 58%,transparent 60%),
+  radial-gradient(ellipse 36% 34% at 90% 88%,#2f6b3a 0 58%,transparent 60%),
+  radial-gradient(ellipse 36% 34% at 10% 88%,#c9e58f 0 58%,transparent 60%),
+  #9fd27a}
+.wpath{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.wpath line{stroke:#f6ebc4;stroke-width:7;stroke-linecap:round;stroke-dasharray:2 12;vector-effect:non-scaling-stroke}
+.whome{position:absolute;transform:translate(-50%,-50%);font-size:2.2rem;line-height:1;filter:drop-shadow(0 3px 0 rgba(0,0,0,.25))}
+.field.world .sprite.walker{font-size:3rem;transition:left .7s linear,top .7s linear}
+.wnode{position:absolute;transform:translate(-50%,-50%);width:92px;padding:5px 2px 4px;border-radius:14px;background:var(--win);border:3px solid var(--winline);box-shadow:3px 3px 0 var(--winline);display:grid;justify-items:center;gap:0;text-align:center;z-index:3;line-height:1.15}
+.wnode::before{display:none}
+.wnode .wico{font-size:2rem;line-height:1.1}
+.wnode .wname{font-size:.85rem;font-weight:700}
+.wnode .wsub{font-size:.7rem;color:var(--muted)}
+.wnode .bang{position:absolute;top:-10px;right:-8px}
+.wnode .bang.ura{background:#7a2fd0}
+.wnode.go{animation:float2 2.4s ease-in-out infinite}
+.wnode.today{border-color:#d9a400;box-shadow:3px 3px 0 #d9a400}
+.wnode.locked{background:#dcd9c8;opacity:.85}
+.wnode.busy{opacity:.6}
 /* そと：たんけんの地図。タップした ところへ 歩く。スポットは ふわふわ、しらべたら うすく */
 .field.map{cursor:pointer;touch-action:manipulation}
 .field.map .spot{position:absolute;transform:translate(-50%,-50%);font-size:1.9rem;line-height:1;cursor:pointer;filter:drop-shadow(0 3px 0 rgba(0,0,0,.25));animation:float2 2.4s ease-in-out infinite;z-index:2}
@@ -265,7 +288,7 @@ img.slide.kb{animation:kb 4.5s linear forwards}
 #theater button::before{display:none}
 #theater button:focus-visible{outline-color:var(--gold)}
 .tcount{font-size:.85rem;color:#ccc;font-variant-numeric:tabular-nums}
-@media (prefers-reduced-motion:reduce){.sprite.hit,.sprite.attack,.sprite.center,.sprite.evolve,.field.map .spot,.sprite.walker.walk,.encsil,.field.map .spot.rustle{animation:none}.sprite.walker{transition:none}.cur{animation:none}img.slide.kb{animation:none}}
+@media (prefers-reduced-motion:reduce){.sprite.hit,.sprite.attack,.sprite.center,.sprite.evolve,.field.map .spot,.sprite.walker.walk,.encsil,.field.map .spot.rustle,.wnode.go{animation:none}.sprite.walker{transition:none}.cur{animation:none}img.slide.kb{animation:none}}
 /* PWA 更新のおしらせ */
 .update{position:fixed;left:16px;right:16px;bottom:16px;max-width:488px;margin:0 auto;z-index:60;background:var(--win);border:3px solid var(--winline);border-radius:8px;padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;font-size:.95rem;box-shadow:4px 4px 0 var(--winline)}
 .update[hidden]{display:none}
