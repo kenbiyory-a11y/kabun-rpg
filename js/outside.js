@@ -93,9 +93,21 @@ function arriveSpot(i){if(!(S.view==="battle"&&S.sub==="map"))return;const ex=S.
   S.msg=t;S.sub="spot";save();render();
 }
 // ミニゲームの かたづけ（render のたびに呼ぶ。うごいている タイマーを 止める）
-function mgCleanup(){if(UI.enc&&UI.enc.stop){try{UI.enc.stop()}catch(e){}UI.enc.stop=null}}
+function mgCleanup(){if(UI.enc&&UI.enc.stop){try{UI.enc.stop()}catch(e){}UI.enc.stop=null}const o=$("mgfull");if(o)o.remove()}
+// ミニゲームの まど（画面いっぱい）を 開いて ゲームを はじめる。戻り値は かたづけ関数
+function mgOpen(g,z){const old=$("mgfull");if(old)old.remove();
+  const o=el("div","mgfull");o.id="mgfull";const win=el("div","mgwin");o.append(win);
+  win.append(el("div","mghead",`<span class="mgwho">${zSilHtml(z)}</span><span class="mgtitle"><b>${esc(g.n)}</b><small>${esc(g.how)}</small></span>`));
+  const box=el("div","mgarena");box.id="mgbox";const foot=el("div","mgfoot");win.append(box,foot);
+  const quit=el("button","mgquit","やめる");quit.onclick=()=>{if(UI.enc&&UI.enc.over)return;UI.enc=null;S.sub="map";sfx("tap");render()};win.append(quit);
+  document.body.append(o);
+  const st={dead:false,timers:[]};
+  const later=(fn,ms)=>{if(UI.instantWalk){if(!st.dead)fn();return}st.timers.push(setTimeout(()=>{if(!st.dead)fn()},ms))};
+  let stop2=null;try{stop2=g.start({box,foot,z,done:encResult,later})}catch(e){console.error(e);stop2=null}
+  return ()=>{st.dead=true;st.timers.forEach(clearTimeout);if(typeof stop2==="function"){try{stop2()}catch(e){}}}}
 // ミニゲームの 結果。すこし まってから 反映（○× の 見た目を 見せる）
 function encResult(win){const e=UI.enc;if(!e||e.over)return;e.over=true;e.win=!!win;sfx(win?"ok":"ng");
+  const mo=$("mgfull");const w=mo&&mo.querySelector(".mgwin");if(w)w.append(el("div","mgresult "+(win?"win":"lose"),win?"🥅 やったー！":"💨 にげちゃった"));
   if(UI.instantWalk)return applyEnc();setTimeout(()=>{if(UI.enc===e)applyEnc()},800)}
 function applyEnc(){const e=UI.enc;if(!e)return;mgCleanup();UI.enc=null;const ex=S.explore;const s=ex&&ex.spots[e.i];const z=zById(e.z);
   if(!s||!z||!(S.view==="battle")){S.sub="map";return render()}
@@ -135,10 +147,10 @@ function renderOut(msg,menu,tapBtn){
       go.onclick=()=>{UI.enc.game=pickMinigame(z).id;UI.enc.over=false;S.sub="mg";sfx("tap");render()};
       const no=el("button","wide","そっと しておく");no.onclick=()=>{UI.enc=null;S.sub="map";sfx("tap");render()};
       menu.append(go,no);return}
-    if(S.sub==="mg"){const z=zById(UI.enc.z);const g=MINIGAMES.find(x=>x.id===UI.enc.game)||MINIGAMES[1];
-      const box=el("div","mg");box.id="mgbox";msg.append(box);menu.className="menu one";
-      if(UI.enc.over){box.append(el("div","mgq","……"));return} // 結果まち の あいだに 描きなおされた
-      UI.enc.stop=g.start(box,z,encResult);if(UI.mgSaid!==UI.enc)if(say(g.how))UI.mgSaid=UI.enc;
+    if(S.sub==="mg"){const z=zById(UI.enc.z);const g=MINIGAMES.find(x=>x.id===UI.enc.game)||MINIGAMES[0];
+      msg.innerHTML=`<div class="ctr big2">🎮 ${esc(g.n)}</div><div class="ctr note">${esc(g.how)}</div>`;menu.className="menu one";
+      if(UI.enc.over)return; // 結果まち の あいだに 描きなおされた
+      UI.enc.stop=mgOpen(g,z);if(UI.mgSaid!==UI.enc)if(say(g.how))UI.mgSaid=UI.enc;
       return}
     const boss=S.explore.spots.find(s=>s.k==="boss");const ura=S.explore.spots.find(s=>s.k==="ura");const c=CHAPTERS[S.ch];
     const all=zukanOf(a).length,got=all-zLeft(a).length;

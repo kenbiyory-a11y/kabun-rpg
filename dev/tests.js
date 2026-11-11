@@ -136,7 +136,8 @@ syncBoss(AREAS[0]);ok(S.explore.spots.filter(s=>s.k==="ura").length===1,"うら�
 UI.instantWalk=true;S.view="battle";S.sub="map";S.items.net=2;
 {const cs=S.explore.spots.map((s,i)=>[s,i]).filter(([s])=>s.k==="creature");cs.forEach(([s])=>s.flee=false);
  const [s0,i0]=cs[0];arriveSpot(i0);ok(S.sub==="enc"&&UI.enc&&UI.enc.z===s0.z&&!s0.done&&S.seen[s0.z]===true&&!S.dex[s0.z],"かげ が出る（まだ ずかん には のらない。であった しるし だけ）");
- const g=pickMinigame(zById(s0.z));ok(MINIGAMES.length===5&&!!g&&MINIGAMES.filter(x=>x.ok(zById(s0.z))).length>=4,"ミニゲームは 5種類、しゃしん が無くても 4種類は あそべる");
+ const g=pickMinigame(zById(s0.z));ok(MINIGAMES.length===8&&!!g&&MINIGAMES.filter(x=>x.ok(zById(s0.z))).length>=7&&new Set(MINIGAMES.map(x=>x.id)).size===8&&MINIGAMES.every(x=>x.n&&x.how&&x.w>0&&typeof x.start==="function"),"ミニゲームは 8種類、しゃしん が無くても 7種類は あそべる");
+ {const cnt={};for(let r=0;r<400;r++){const x=pickMinigame(zById(s0.z)).id;cnt[x]=(cnt[x]||0)+1}ok(Object.keys(cnt).length>=7&&cnt.memory>cnt.count&&cnt.shell>cnt.odd,"くじびき：ぜんぶ出る。しんけいすいじゃく などが 多め "+JSON.stringify(cnt))}
  UI.mgForce="count";ok(pickMinigame(zById(s0.z)).id==="count","テスト用に ゲームを 固定できる");UI.mgForce=null;
  S.sub="mg";encResult(true);ok(S.sub==="caught"&&UI.caught===s0.z&&S.dex[s0.z]&&S.items.net===1&&s0.done&&UI.enc===null,"かつと つかまえる：ずかん に のり、あみ -1");
  S.sub="map";const [s1,i1]=cs[1];arriveSpot(i1);S.sub="mg";encResult(false);ok(S.sub==="spot"&&!S.dex[s1.z]&&S.items.net===1&&s1.done&&S.msg.includes("また あえる"),"まけると にげる：あみ は へらない");
