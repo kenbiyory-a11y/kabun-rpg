@@ -52,6 +52,7 @@ window.addEventListener("DOMContentLoaded",()=>{
   }
   else if(q==="exit"){setLv(6,58);S.view="battle";S.sub="exit";S.line=2;delete S.flags.outIntro}
   else if(q==="trial"){setLv(6,58);S.view="battle";delete S.flags.outIntro;S.foe=Object.assign(mkFoe(10),{ch:6,trial:true,turn:0,shift:false});S.hp=maxHp();S.sub="fight";S.msg="ちょうろう クガーンの しけん！"}
+  else if(q==="dexall"){setLv(11,130);S.flags.outIntro=true;ZUKAN.forEach(z=>S.dex[z.id]={d:ymd(),n:1});URA.forEach(u=>S.dex[u.id]={d:ymd(),n:1});AREAS.forEach(a=>S.flags["comp_"+a.id]=true);S.view="diary";S.sub="dex"}
   else if(q==="kanban2"){setLv(11,130);S.view="battle";S.sub="menu";S.flags.outIntro=true;UI.world2=true}
   else if(q.startsWith("map:")){const a=areaOf(q.slice(4));const chOf={grass:6,river:7,sky:8,sea:9,forest:10,dino:11,deep:11,space:11}[a.id];setLv(chOf,[58,68,78,88,98,130,130,130][AREAS.indexOf(a)]);
     S.explore={area:a.id,d:ymd(),spots:genSpots(a),pos:{x:8,y:a.ground[1]-2},n:0};S.daily.explore=a.id;S.view="battle";S.sub="map";S.flags.outIntro=true}

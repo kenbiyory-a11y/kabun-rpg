@@ -9,6 +9,7 @@ CC0 / Public domain は表示不要、CC BY は作者名の表示、CC BY-SA は
 | forest_donguri.jpg | [Acorn-1030819.jpg](https://commons.wikimedia.org/wiki/File:Acorn-1030819.jpg) | Aaron Burden | CC0 |
 | forest_hebi.jpg | [Elaphe climacophora 192738774.jpg](https://commons.wikimedia.org/wiki/File:Elaphe_climacophora_192738774.jpg) | Kosuke Onoda 小野田 幸介 | CC0 |
 | forest_imomushi.jpg | [Papilio xuthus Larva 2011-07-01 (cropped).jpg](https://commons.wikimedia.org/wiki/File:Papilio_xuthus_Larva_2011-07-01_(cropped).jpg) | Alpsdake | CC BY-SA 3.0 |
+| forest_inoshishi.jpg | [Wildschwein + Frischlinge.jpg](https://commons.wikimedia.org/wiki/File:Wildschwein_%2B_Frischlinge.jpg) | Tetzemann | CC0 |
 | forest_kamikirimushi.jpg | [Anoplophora chinensis pinned lateral 1.jpg](https://commons.wikimedia.org/wiki/File:Anoplophora_chinensis_pinned_lateral_1.jpg) | 0959kedi | CC BY 4.0 |
 | forest_kanabun.jpg | [Protaetic cuprea ignicollis 2023-03-22 IZE-066.jpg](https://commons.wikimedia.org/wiki/File:Protaetic_cuprea_ignicollis_2023-03-22_IZE-066.jpg) | Dr. Zachi Evenor צחי אבנור | CC BY-SA 4.0 |
 | forest_kiji.jpg | [Faisan en mars 2025 B.jpg](https://commons.wikimedia.org/wiki/File:Faisan_en_mars_2025_B.jpg) | Renhour48 | CC0 |
@@ -51,6 +52,7 @@ CC0 / Public domain は表示不要、CC BY は作者名の表示、CC BY-SA は
 | river_kame.jpg | [Mauremys japonica 114185400 (cropped).jpg](https://commons.wikimedia.org/wiki/File:Mauremys_japonica_114185400_(cropped).jpg) | heikindai_87 | CC0 |
 | river_kamo.jpg | [KDM180715i Spot-billed Duck.jpg](https://commons.wikimedia.org/wiki/File:KDM180715i_Spot-billed_Duck.jpg) | Emelliodora | CC0 |
 | river_kawasemi.jpg | [Eisvogel kingfisher.jpg](https://commons.wikimedia.org/wiki/File:Eisvogel_kingfisher.jpg) | Frank-2.0 | CC0 |
+| river_kawauso.jpg | [Lutra lutra Zoo Salzburg 20140330 03.jpg](https://commons.wikimedia.org/wiki/File:Lutra_lutra_Zoo_Salzburg_20140330_03.jpg) | User:MatthiasKabel | CC BY-SA 3.0 |
 | river_kingyo.jpg | [Aquarium tropical de Pierrefitte-Nestalas 03082018 Carassius auratus Lionhead goldfish 2.jpg](https://commons.wikimedia.org/wiki/File:Aquarium_tropical_de_Pierrefitte-Nestalas_03082018_Carassius_auratus_Lionhead_goldfish_2.jpg) | Vassil | CC0 |
 | river_koi.jpg | [Ritsurin Koi 4.jpg](https://commons.wikimedia.org/wiki/File:Ritsurin_Koi_4.jpg) | Photos of Japan | CC0 |
 | river_medaka.jpg | [Kitano Medaka female by Hino, Tokyo.jpg](https://commons.wikimedia.org/wiki/File:Kitano_Medaka_female_by_Hino,_Tokyo.jpg) | 根川孝太郎 (Kotaro Negawa) | CC BY-SA 4.0 |
@@ -85,11 +87,14 @@ CC0 / Public domain は表示不要、CC BY は作者名の表示、CC BY-SA は
 | sea_yadokari.jpg | [Pagurus ikedai (Takeshima aquarium).jpg](https://commons.wikimedia.org/wiki/File:Pagurus_ikedai_(Takeshima_aquarium).jpg) | 雪野滾滾 | CC0 |
 | sky_hato.jpg | [Columba livia Luc Viatour.jpg](https://commons.wikimedia.org/wiki/File:Columba_livia_Luc_Viatour.jpg) | Luc Viatour | CC BY-SA 3.0 |
 | sky_hayabusa.jpg | [Museo del centro caprense Ignazio Cerio, Falco Pellegrino.jpg](https://commons.wikimedia.org/wiki/File:Museo_del_centro_caprense_Ignazio_Cerio,_Falco_Pellegrino.jpg) | Spazio Cerio (Capri, Italy) | CC0 |
+| sky_hibari.jpg | [Skylark (Alauda arvensis) by Neil Smith.jpg](https://commons.wikimedia.org/wiki/File:Skylark_(Alauda_arvensis)_by_Neil_Smith.jpg) | Neil Smith | CC BY-SA 2.0 |
 | sky_hoshinoko.jpg | [Subaru logoga.jpg](https://commons.wikimedia.org/wiki/File:Subaru_logoga.jpg) | Taavi Niittee | CC0 |
 | sky_karasu.jpg | [Corvus macrorhynchos in Gwangjin gi (3).jpg](https://commons.wikimedia.org/wiki/File:Corvus_macrorhynchos_in_Gwangjin_gi_(3).jpg) | Drcbrothephotographer | CC0 |
+| sky_kotori.jpg | [Parus Major Oulu 20110320.jpg](https://commons.wikimedia.org/wiki/File:Parus_Major_Oulu_20110320.jpg) | Estormiz | CC0 |
 | sky_koumori.jpg | [Pipistrelle de Madère (Pipistrellus maderensis).jpg](https://commons.wikimedia.org/wiki/File:Pipistrelle_de_Mad%C3%A8re_(Pipistrellus_maderensis).jpg) | Museos de Tenerife et University of Cape Verde | CC0 |
 | sky_mejiro.jpg | [JAPANESE WHITE-EYE (5-9-2018) hale koa hotel, honolulu, oahu co, hawaii -01 (28193842288).jpg](https://commons.wikimedia.org/wiki/File:JAPANESE_WHITE-EYE_(5-9-2018)_hale_koa_hotel,_honolulu,_oahu_co,_hawaii_-01_(28193842288).jpg) | ALAN SCHMIERER from southeast AZ, USA | CC0 |
 | sky_musasabi.jpg | [Petaurista leucogenys 60369499.jpg](https://commons.wikimedia.org/wiki/File:Petaurista_leucogenys_60369499.jpg) | Julia Wittmann | CC BY 4.0 |
+| sky_nagareboshi.jpg | [Meteor showers, First Place (ann21047j).jpg](https://commons.wikimedia.org/wiki/File:Meteor_showers,_First_Place_(ann21047j).jpg) | Dai Jianfeng/IAU OAE | CC BY 4.0 |
 | sky_niji.jpg | [Rainbow over Musgrave Park South Brisbane P1060100.jpg](https://commons.wikimedia.org/wiki/File:Rainbow_over_Musgrave_Park_South_Brisbane_P1060100.jpg) | John Robert McPherson | CC0 |
 | sky_nyuudougumo.jpg | [Cumulonimbus cloud with visible precipitation shaft.jpg](https://commons.wikimedia.org/wiki/File:Cumulonimbus_cloud_with_visible_precipitation_shaft.jpg) | OkEj1000 | CC0 |
 | sky_suzume.jpg | [Passer montanus Jaroměř 2013 2.jpg](https://commons.wikimedia.org/wiki/File:Passer_montanus_Jarom%C4%9B%C5%99_2013_2.jpg) | Karelj | CC0 |
