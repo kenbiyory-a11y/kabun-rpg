@@ -44,22 +44,22 @@ const MINIGAMES=[
  // 3) かくれんぼ タッチ：6つの くさ の どれかから かげ が かおを だす。でている あいだに 3かい タッチ（9かい でて くる）
  {id:"whack",n:"かくれんぼ タッチ",how:"かおを だしたら すぐ タッチ！",w:1.2,ok:()=>true,
   start(c){const grid=el("div","mggrid c3");c.box.append(grid);let hits=0,pops=0,cur=-1,last=-1,over=false,token=0;const NEED=3,MAX=9;
-    const show=()=>{c.foot.textContent=`🥅 ${hits} / ${NEED}　のこり ${"●".repeat(MAX-pops)}`};show();
+    const show=()=>{c.foot.textContent=`✋ ${hits} / ${NEED}　のこり ${"●".repeat(MAX-pops)}`};show();
     const holes=[0,1,2,3,4,5].map(i=>{const b=el("button","mghole",`<span class="peek">${zSilHtml(c.z)}</span><span class="bush">🌿</span>`);grid.append(b);
       b.onclick=()=>{if(over||cur!==i)return;hits++;sfx("tap");b.classList.remove("on");b.classList.add("hit");delete b.dataset.ok;cur=-1;token++;show();
         if(hits>=NEED){over=true;c.done(true);return}c.later(()=>{b.classList.remove("hit");pop()},450)};return b});
     const pop=()=>{if(over)return;if(pops>=MAX){over=true;c.done(false);return}pops++;let i=Math.floor(Math.random()*5);if(i>=last)i++;last=cur=i;const my=++token;holes[i].classList.add("on");holes[i].dataset.ok="1";show();
       if(!UI.instantWalk)c.later(()=>{if(over||token!==my)return;holes[i].classList.remove("on");delete holes[i].dataset.ok;cur=-1;c.later(pop,500)},1400)};
     c.later(pop,700)}},
- // 4) あみで タッチ：にげまわる かげを 3かい タッチ（12びょう）
- {id:"tap",n:"あみで タッチ",how:"にげる かげを 3かい タッチ！",w:1,ok:()=>true,
-  start(c){c.box.classList.add("free");const bar=el("div","mgbar",'<i></i>');const cnt=el("span","","🥅 0 / 3");c.foot.append(cnt,bar);
+ // 4) おいかけ タッチ：にげまわる かげを 3かい タッチ（12びょう）
+ {id:"tap",n:"おいかけ タッチ",how:"にげる かげを 3かい タッチ！",w:1,ok:()=>true,
+  start(c){c.box.classList.add("free");const bar=el("div","mgbar",'<i></i>');const cnt=el("span","","✋ 0 / 3");c.foot.append(cnt,bar);
     const t=el("button","mgtarget",zSilHtml(c.z));t.dataset.ok="1";c.box.append(t);
     let hit=0,over=false;const move=()=>{t.style.left=(14+Math.random()*72)+"%";t.style.top=(14+Math.random()*72)+"%"};move();
     const iv=setInterval(move,1100);const T=12000;const t0=Date.now();
     const tick=setInterval(()=>{const r=Math.max(0,1-(Date.now()-t0)/T);bar.firstChild.style.width=(r*100)+"%";if(r<=0)end(false)},100);
     const end=w=>{if(over)return;over=true;clearInterval(iv);clearInterval(tick);t.disabled=true;c.done(w)};
-    t.onclick=()=>{if(over)return;hit++;cnt.textContent=`🥅 ${hit} / 3`;sfx("tap");t.classList.remove("pop");void t.offsetWidth;t.classList.add("pop");if(hit>=3)end(true);else move()};
+    t.onclick=()=>{if(over)return;hit++;cnt.textContent=`✋ ${hit} / 3`;sfx("tap");t.classList.remove("pop");void t.offsetWidth;t.classList.add("pop");if(hit>=3)end(true);else move()};
     return ()=>{over=true;clearInterval(iv);clearInterval(tick)}}},
  // 5) かげあわせ：かげ と おなじ かたちの しゃしんを えらぶ（しゃしん と きりぬき が ある いきもの だけ）
  {id:"kage",n:"かげあわせ",how:"かげと おなじ かたちは どれ？",w:1,

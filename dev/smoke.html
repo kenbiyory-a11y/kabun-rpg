@@ -132,20 +132,24 @@ try{
   const spotEl=i=>document.querySelector(`#field .spot[data-i="${i}"]`);
   const playWin=()=>{let g=0;while(S.sub==="mg"&&g++<12){const b=document.querySelector('#mgfull [data-ok="1"]');if(!b)break;b.click()}};
   const [s0,i0]=cs[0];spotEl(i0).click();
-  chk(S.sub==="enc"&&!!document.querySelector("#msgbox .zsil")&&!!btn("あみで つかまえる")&&S.explore.pos.x===s0.x&&!S.dex[s0.z],"スポットへ歩くと かげ が出る");
-  UI.mgForce="count";btn("あみで つかまえる").click();chk(S.sub==="mg"&&!!document.getElementById("mgfull")&&document.querySelectorAll("#mgbox .mgitem").length>=2&&document.querySelectorAll("#mgfull button.mgnum").length===3,"ミニゲーム：画面いっぱいの まど で いくつ かな");
-  playWin();chk(S.sub==="caught"&&!!S.dex[s0.z]&&S.items.net===8&&txt().includes("つかまえた")&&!!document.querySelector("#msgbox .zcard")&&!document.getElementById("mgfull"),"かつと つかまえる（しゃしん カード、あみ -1、まど は 閉じる）");
+  chk(S.sub==="enc"&&!!document.querySelector("#msgbox .zsil")&&!!btn("つかまえる！")&&S.explore.pos.x===s0.x&&!S.dex[s0.z],"スポットへ歩くと かげ が出る");
+  UI.mgForce="count";btn("つかまえる！").click();chk(S.sub==="mg"&&!!document.getElementById("mgfull")&&document.querySelectorAll("#mgbox .mgitem").length>=2&&document.querySelectorAll("#mgfull button.mgnum").length===3,"ミニゲーム：画面いっぱいの まど で いくつ かな");
+  playWin();chk(S.sub==="caught"&&!!S.dex[s0.z]&&S.items.net===9&&txt().includes("つかまえた")&&!!document.querySelector("#msgbox .zcard")&&!document.getElementById("mgfull"),"かつと つかまえる（しゃしん カード、みつ は へらない、まど は 閉じる）");
   btn("つぎへ").click();chk(S.sub==="map"&&spotEl(i0).classList.contains("done"),"つぎへ → 地図に戻り、しらべた印");
   const [s1,i1]=cs[1];
   for(const gid of ["memory","shell","whack","tap","order","odd","kage"]){const z=zLeft(AREAS[0]).find(z=>z.id!==cs[2][0].z&&(gid!=="kage"||(z.cut&&z.img)));s1.z=z.id;s1.done=false;s1.flee=false;S.sub="map";render();UI.mgForce=gid;
-    spotEl(i1).click();btn("あみで つかまえる").click();const before=S.items.net;const shown=UI.enc&&UI.enc.game;playWin();
-    chk(shown===gid&&S.sub==="caught"&&!!S.dex[z.id]&&S.items.net===before-1,`ミニゲーム ${gid} に かって つかまえた`);btn("つぎへ").click()}
-  {const z=zLeft(AREAS[0]).find(z=>z.id!==cs[2][0].z);s1.z=z.id;s1.done=false;S.sub="map";render();UI.mgForce="odd";spotEl(i1).click();btn("あみで つかまえる").click();const before=S.items.net;
-   Array.from(document.querySelectorAll("#mgbox button")).find(b=>!b.dataset.ok).click();chk(!document.getElementById("mgfull"),"まけても まど は 閉じる");chk(S.sub==="spot"&&!S.dex[z.id]&&S.items.net===before&&txt().includes("にげちゃった")&&S.seen[z.id]===true,"まけると にげる（あみ は へらない、であった しるし は のこる）");btn("つぎへ").click()}
-  {const [s2,i2]=cs[2];s2.flee=true;render();spotEl(i2).click();chk(S.sub==="spot"&&txt().includes("にげていった")&&s2.done,"にげる スポット：かげ も出ない");btn("つぎへ").click();
-   s2.done=false;s2.flee=false;S.items.net=0;render();spotEl(i2).click();chk(S.sub==="spot"&&txt().includes("あみが ない")&&!s2.done,"あみ が 0 だと あそべない（スポットは のこる）");btn("つぎへ").click();
-   S.items.net=3;render();spotEl(i2).click();chk(S.sub==="enc","あみ を もらって もどると かげ が出る");btn("そっと しておく").click();chk(S.sub==="map"&&!s2.done&&UI.enc===null,"そっと しておく → 地図へ（スポットは のこる）");
-   UI.mgForce="memory";spotEl(i2).click();btn("あみで つかまえる").click();document.querySelector("#mgfull .mgquit").click();chk(S.sub==="map"&&!s2.done&&!document.getElementById("mgfull")&&UI.enc===null,"ミニゲームを「やめる」→ 地図へ（スポットは のこる）")}
+    spotEl(i1).click();btn("つかまえる！").click();const before=S.items.net;const shown=UI.enc&&UI.enc.game;playWin();
+    chk(shown===gid&&S.sub==="caught"&&!!S.dex[z.id]&&S.items.net===before,`ミニゲーム ${gid} に かって つかまえた`);btn("つぎへ").click()}
+  {const z=zLeft(AREAS[0]).find(z=>z.id!==cs[2][0].z);s1.z=z.id;s1.done=false;S.sub="map";render();UI.mgForce="odd";spotEl(i1).click();btn("つかまえる！").click();const before=S.items.net;
+   Array.from(document.querySelectorAll("#mgbox button")).find(b=>!b.dataset.ok).click();chk(!document.getElementById("mgfull"),"まけても まど は 閉じる");
+   chk(S.sub==="fled"&&!S.dex[z.id]&&S.items.net===before&&txt().includes("にげちゃった")&&!!btn("よびもどす")&&S.seen[z.id]===true&&!s1.done,"まけると にげる → みつ で よびもどせる");
+   btn("よびもどす").click();chk(S.sub==="enc"&&S.items.net===before-1&&txt().includes("もどってきた"),"みつ を 1こ つかうと もどってくる");
+   btn("つかまえる！").click();playWin();chk(S.sub==="caught"&&!!S.dex[z.id],"もういちど ちょうせん して つかまえた");btn("つぎへ").click()}
+  {const [s2,i2]=cs[2];s2.flee=true;S.items.net=0;render();spotEl(i2).click();chk(S.sub==="fled"&&txt().includes("にげていった")&&!btn("よびもどす")&&txt().includes("とっくん"),"にげる スポット：みつ が 0 なら つぎへ だけ");
+   btn("つぎへ").click();chk(S.sub==="map"&&s2.done,"つぎへ → スポットは おしまい");
+   s2.done=false;S.items.net=2;render();spotEl(i2).click();chk(S.sub==="fled"&&!!btn("よびもどす"),"にげた スポットに もどっても にげた まま");btn("そのまま すすむ").click();chk(S.sub==="map"&&s2.done&&S.items.net===2,"そのまま すすむ（みつ は へらない）");
+   s2.done=false;s2.gone=null;s2.flee=false;S.items.net=0;render();spotEl(i2).click();chk(S.sub==="enc","みつ が 0 でも かげ が出れば つかまえに いける");btn("そっと しておく").click();chk(S.sub==="map"&&!s2.done&&UI.enc===null,"そっと しておく → 地図へ（スポットは のこる）");
+   UI.mgForce="memory";spotEl(i2).click();btn("つかまえる！").click();document.querySelector("#mgfull .mgquit").click();chk(S.sub==="map"&&!s2.done&&!document.getElementById("mgfull")&&UI.enc===null,"ミニゲームを「やめる」→ 地図へ（スポットは のこる）")}
   UI.mgForce=null;
   const bi=S.explore.spots.findIndex(s=>s.k==="boss");document.querySelector(`#field .spot[data-i="${bi}"]`).click();chk(S.sub==="fight"&&S.foe&&S.foe.name==="ガキーン","🪧 で ガキーンと バトル");
   S.foe.hp=1;document.querySelector("#msgbox button.mv.star").click();if(typer)typeNode.click();chk(S.sub==="turn"&&S.foe.hp<=0,"ガキーンを倒した");btn("つぎへ").click();if(typer)typeNode.click();chk(S.sub==="win","勝ち画面");
@@ -154,7 +158,7 @@ try{
   S.view="growth";render();S.view="battle";render();chk(S.sub==="menu"&&!document.querySelector("#field .spot"),"タブを離れると 地図は消える");
   S.daily.d="2000-01-01";S.explore.d="2000-01-01";dayRoll();render();chk(S.daily.explore===null&&!btn("かわ").disabled,"翌日は かわ に いける");
   btn("かわ").click();chk(S.sub==="map"&&S.explore.area==="river"&&document.querySelectorAll("#field .spot").length===5&&$("field").classList.contains("river"),"かわ の たんけん：ケローンは Lv35 まで出ない");
-  S.view="diary";S.sub="menu";render();chk(!!btn("ずかん"),"きろく に ずかん ボタン");btn("ずかん").click();chk(S.sub==="dex"&&txt().includes("つかまえた 8 / 40")&&txt().includes("ぬし　1 / 10")&&document.querySelectorAll("#msgbox .dexgrid .dz.on").length===9&&document.querySelectorAll("#msgbox .dexgrid .dz.seen").length>=1,"ずかん：8 / 40、ぬし 1 / 10、であった だけの かげ");
+  S.view="diary";S.sub="menu";render();chk(!!btn("ずかん"),"きろく に ずかん ボタン");btn("ずかん").click();chk(S.sub==="dex"&&txt().includes("つかまえた 9 / 40")&&txt().includes("ぬし　1 / 10")&&document.querySelectorAll("#msgbox .dexgrid .dz.on").length===10&&document.querySelectorAll("#msgbox .dexgrid .dz.seen").length>=1,"ずかん：9 / 40、ぬし 1 / 10、であった だけの かげ");
   document.querySelector("#msgbox .dexgrid .dz.on").click();chk(!!UI.dexId&&!!document.querySelector("#msgbox .zcard")&&!!btn("きいてみる"),"ずかん：タップで くわしく");btn("もどる").click();chk(S.sub==="dex"&&!UI.dexId,"くわしく → 一覧");btn("もどる").click();chk(S.sub==="menu","ずかん → もどる");
   // うらボス：ガキーンを たおした くさむら に でる
   S.view="battle";S.sub="menu";S.daily.explore=null;S.explore=null;render();chk(btn("くさむら").innerText.includes("おおきな かげ"),"かんばん：くさむら に おおきな かげ");

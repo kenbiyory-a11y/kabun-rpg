@@ -80,8 +80,8 @@ function buildSession(cat){
 // 1日の上限：分野ごと S.cap 回（0 は制限なし）。S.daily.bonus で全分野 +1 回
 function canTrain(cat){const cap=typeof S.cap==="number"?S.cap:1;if(cap===0)return true;return (S.daily.done[cat]||0)<cap+(S.daily.bonus?1:0)}
 function boardComplete(){return CATS.every(c=>(S.daily.done[c]||0)>0)&&!!S.daily.diary}
-// きょうの5つ がそろったら あみ +1（1日1回）
-function checkBoard(){if(boardComplete()&&!S.daily.bonusNet){S.daily.bonusNet=true;S.items.net=Math.min(NET_MAX,(S.items.net||0)+1);return "🎉 きょうの 5つが ぜんぶ そろった！ むしとりあみを 1こ もらった！"}return null}
+// きょうの5つ がそろったら みつ +1（1日1回）
+function checkBoard(){if(boardComplete()&&!S.daily.bonusNet){S.daily.bonusNet=true;S.items.net=Math.min(NET_MAX,(S.items.net||0)+1);return `🎉 きょうの 5つが ぜんぶ そろった！ ${ITEM_ICO} ${ITEM_N}を 1こ もらった！`}return null}
 // 上昇の前後を比べて、レベルアップ・技の習得・かべ の出現を知らせる
 function snapshot(){return {lv:level(),ch:chapterReady()?S.ch:-1,moves:STATS.map(k=>moveOf(k).n)}}
 function gainNotes(before){const notes=[];

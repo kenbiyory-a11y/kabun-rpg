@@ -33,7 +33,7 @@ const sBefore=S.str;const r=finishSession();
 ok(r.ok===4&&r.gain===4&&S.str===sBefore+4,"4/5 → ちから +4: "+JSON.stringify({ok:r.ok,gain:r.gain}));
 ok(S.daily.done.num===1&&S.daily.score.num===4,"きょうの分に記録");
 ok(S.rev.num.length===1&&S.rev.num[0].id===sess.items[2].id&&S.rev.num[0].box===1,"間違いが復習箱へ: "+JSON.stringify(S.rev.num));
-ok(S.items.net===1,"あみ +1");
+ok(S.items.net===1,"みつ +1");
 ok(!canTrain("num")&&canTrain("eng"),"num は きょう おしまい、eng は できる");
 S.sess=buildSession("eng");if(S.sess.items.length===5){S.sess.res=[true,true,true,true,true];const r2=finishSession();ok(r2.ok===5&&r2.gain===7&&S.items.net===3,"5/5 → +7、あみ +2")}else console.log("   (eng の問題が無いので満点テストは省略)");
 S.daily.done.num=0;S.rev.num[0].due=ymd();const s3=buildSession("num");
@@ -124,7 +124,7 @@ ok(zukanOf(AREAS[0]).length===20&&zukanOf(AREAS[0]).filter(z=>z.rare).length===3
 ok(AREAS.every(a=>zukanOf(a).length>=5),"どのエリアにも 5匹以上");
 for(let r=0;r<30;r++){const sp=genSpots(AREAS[0]);const cs=sp.filter(s=>s.k==="creature");
  if(!(sp.length===5&&cs.length===3&&sp.filter(s=>s.k==="net").length===1&&sp.filter(s=>s.k==="look").length===1&&new Set(cs.map(s=>s.z)).size===3&&cs.some(s=>!s.flee)&&cs.every(s=>typeof s.flee==="boolean"&&zById(s.z).area==="grass")&&sp.every(s=>s.x>=4&&s.x<=96&&s.y>=58&&s.y<=90))){ok(false,"スポット生成 "+JSON.stringify(sp));break}
- if(r===29)ok(true,"スポットは いきもの3（重複なし・1匹は かならず かげが出る）＋あみ1＋ながめる1")}
+ if(r===29)ok(true,"スポットは いきもの3（重複なし・1匹は かならず かげが出る）＋みつ1＋ながめる1")}
 {const got=zukanOf(AREAS[0]).slice(0,18);got.forEach(z=>S.dex[z.id]={d:ymd(),n:1});const sp=genSpots(AREAS[0]);const cs=sp.filter(s=>s.k==="creature");
  ok(cs.length===2&&cs.every(s=>!S.dex[s.z])&&sp.filter(s=>s.k==="look").length===2,"のこり 2匹なら いきもの は 2つ（つかまえた ものは 出ない）");
  zukanOf(AREAS[0]).forEach(z=>S.dex[z.id]={d:ymd(),n:1});const sp2=genSpots(AREAS[0]);ok(!sp2.some(s=>s.k==="creature")&&sp2.some(s=>s.k==="net"),"ぜんぶ つかまえたら いきもの は 出ない（あみ と ながめる だけ）");S.dex={}}
@@ -139,13 +139,19 @@ UI.instantWalk=true;S.view="battle";S.sub="map";S.items.net=2;
  const g=pickMinigame(zById(s0.z));ok(MINIGAMES.length===8&&!!g&&MINIGAMES.filter(x=>x.ok(zById(s0.z))).length>=7&&new Set(MINIGAMES.map(x=>x.id)).size===8&&MINIGAMES.every(x=>x.n&&x.how&&x.w>0&&typeof x.start==="function"),"ミニゲームは 8種類、しゃしん が無くても 7種類は あそべる");
  {const cnt={};for(let r=0;r<400;r++){const x=pickMinigame(zById(s0.z)).id;cnt[x]=(cnt[x]||0)+1}ok(Object.keys(cnt).length>=7&&cnt.memory>cnt.count&&cnt.shell>cnt.odd,"くじびき：ぜんぶ出る。しんけいすいじゃく などが 多め "+JSON.stringify(cnt))}
  UI.mgForce="count";ok(pickMinigame(zById(s0.z)).id==="count","テスト用に ゲームを 固定できる");UI.mgForce=null;
- S.sub="mg";encResult(true);ok(S.sub==="caught"&&UI.caught===s0.z&&S.dex[s0.z]&&S.items.net===1&&s0.done&&UI.enc===null,"かつと つかまえる：ずかん に のり、あみ -1");
- S.sub="map";const [s1,i1]=cs[1];arriveSpot(i1);S.sub="mg";encResult(false);ok(S.sub==="spot"&&!S.dex[s1.z]&&S.items.net===1&&s1.done&&S.msg.includes("また あえる"),"まけると にげる：あみ は へらない");
+ S.sub="mg";encResult(true);ok(S.sub==="caught"&&UI.caught===s0.z&&S.dex[s0.z]&&S.items.net===2&&s0.done&&UI.enc===null,"かつと つかまえる：ずかん に のる。みつ は つかわない");
+ S.sub="map";const [s1,i1]=cs[1];arriveSpot(i1);S.sub="mg";encResult(false);ok(S.sub==="fled"&&UI.fled&&UI.fled.why==="lose"&&!S.dex[s1.z]&&S.items.net===2&&!s1.done&&s1.gone==="lose","まけると にげる（みつ は まだ へらない）");
  encResult(true);ok(!S.dex[s1.z],"結果は 1回だけ（であい が 終わったあとは 何も起きない）");
- S.sub="map";S.items.net=0;const [s2,i2]=cs[2];arriveSpot(i2);ok(S.sub==="spot"&&!s2.done&&S.msg.includes("あみが ない")&&UI.enc===null,"あみ が 0 だと あそべない（スポットは のこる）");
- S.sub="map";S.items.net=1;s2.flee=true;arriveSpot(i2);ok(S.sub==="spot"&&s2.done&&S.msg.includes("にげていった")&&!S.dex[s2.z]&&S.items.net===1,"にげる スポット：かげ も出ずに にげていく")}
-{S.sub="map";const i=S.explore.spots.findIndex(s=>s.k==="net");const before=S.items.net;arriveSpot(i);ok(S.items.net===before+1,"あみ のスポットで あみ +1");
- S.explore.spots[i].done=false;S.items.net=NET_MAX;S.sub="map";arriveSpot(i);ok(S.items.net===NET_MAX&&S.msg.includes("いっぱい"),"あみ は上限を超えない");
+ fledRetry();ok(S.sub==="enc"&&UI.enc&&UI.enc.z===s1.z&&UI.enc.back&&S.items.net===1&&s1.gone===null&&UI.fled===null,"みつ を 1こ つかうと もどってくる");
+ S.sub="mg";encResult(false);S.sub="map";UI.fled=null;arriveSpot(i1);ok(S.sub==="fled"&&S.items.net===1,"にげた スポットは、はなれて もどっても にげた まま（ただでは やりなおせない）");
+ fledNext();ok(S.sub==="map"&&s1.done&&UI.fled===null&&S.items.net===1,"そのまま すすむ → スポットは おしまい");
+ S.items.net=0;const [s2,i2]=cs[2];s2.flee=true;arriveSpot(i2);ok(S.sub==="fled"&&UI.fled.why==="flee"&&!s2.done&&s2.gone==="flee"&&!S.seen[s2.z],"にげる スポット：かげ も出ずに にげていく");
+ fledRetry();ok(S.sub==="fled"&&S.items.net===0,"みつ が 0 だと よびもどせない");
+ S.items.net=1;fledRetry();ok(S.sub==="enc"&&S.items.net===0&&S.seen[s2.z]===true,"みつ で よびもどすと かげ が出る");
+ S.sub="mg";encResult(true);ok(S.sub==="caught"&&S.dex[s2.z]&&s2.done&&S.items.net===0,"よびもどして つかまえた");
+ S.items.net=0;s2.done=false;s2.gone=null;s2.flee=false;delete S.dex[s2.z];S.sub="map";arriveSpot(i2);ok(S.sub==="enc","みつ が 0 でも つかまえに いける");UI.enc=null;S.sub="map";s2.done=true;S.items.net=1}
+{S.sub="map";const i=S.explore.spots.findIndex(s=>s.k==="net");const before=S.items.net;arriveSpot(i);ok(S.items.net===before+1&&S.msg.includes("みつ"),"✨ のスポットで みつ +1");
+ S.explore.spots[i].done=false;S.items.net=NET_MAX;S.sub="map";arriveSpot(i);ok(S.items.net===NET_MAX&&S.msg.includes("いっぱい"),"みつ は上限を超えない");
  S.explore.spots[i].done=false;S.view="growth";S.sub="menu";arriveSpot(i);ok(!S.explore.spots[i].done&&S.sub==="menu","地図にいないときは 到着しても何も起きない")}
 // コンプリート
 {S.view="battle";S.sub="map";S.items.net=3;zukanOf(AREAS[0]).forEach(z=>S.dex[z.id]={d:ymd(),n:1});const last=zukanOf(AREAS[0])[19];delete S.dex[last.id];

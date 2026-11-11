@@ -110,9 +110,9 @@ function mgAsync(){try{
   const begin=(k,g)=>{const [s,i]=zs[k];UI.enc={i,z:s.z,over:false,stop:null,game:g};S.sub="mg";render();return s};
   const s0=begin(0,"tap");const t=document.querySelector("#mgbox .mgtarget");t.click();t.click();t.click();
   chk(S.sub==="mg"&&UI.enc&&UI.enc.over===true&&!S.dex[s0.z],"3かい タッチ：結果は すこし まってから");
-  setTimeout(()=>{chk(S.sub==="caught"&&!!S.dex[s0.z]&&S.items.net===2&&UI.enc===null,"0.8秒後に つかまえた");
+  setTimeout(()=>{chk(S.sub==="caught"&&!!S.dex[s0.z]&&S.items.net===3&&UI.enc===null,"0.8秒後に つかまえた");
     S.sub="map";const s1=begin(1,"tap");
-    setTimeout(()=>{chk(S.sub==="spot"&&!S.dex[s1.z]&&S.items.net===2&&s1.done,"時間ぎれ（12秒）で にげる。あみ は へらない");
+    setTimeout(()=>{chk(S.sub==="fled"&&!S.dex[s1.z]&&S.items.net===3&&!s1.done&&s1.gone==="lose","時間ぎれ（12秒）で にげる（みつ で よびもどせる）");
       S.sub="map";const s2=begin(2,"tap");S.view="growth";S.sub="menu";render();
       setTimeout(()=>{chk(S.view==="growth"&&S.sub==="menu"&&!s2.done&&!S.dex[s2.z]&&UI.enc&&UI.enc.stop===null,"とちゅうで タブを 移ると ゲームは 止まり、何も起きない");finish()},13500)},13500)},1000);
 }catch(e){log("EXC",e&&e.stack||e);fails++;finish()}}

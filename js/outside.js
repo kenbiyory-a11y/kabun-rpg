@@ -3,8 +3,9 @@
 // 画面：S.view="battle" のまま、S.sub が "menu"→かんばん、"map"→たんけん、"spot"→できごと、"enc"→かげが でた、"mg"→ミニゲーム、"caught"→つかまえた。ぬし・うらボス は "fight" 以降（render.js の renderBattle）。
 // エリアの解放：くさむら は最初から、あとは ひとつ前の エリアの ぬし を倒すと（data.js の areaOpen）。
 // スポット（2026-11-11〜）：いきもの 3（まだ つかまえていない ものだけ。ダブりなし）＋ むしとりあみ 1 ＋ ながめる 1。
-//   いきもの の スポットは 半分（FLEE_RATE）が「にげていった」。のこりは かげ が出て、むしとりあみ を つかって ミニゲーム（minigame.js）。かつと つかまえて しゃしんと せつめい、ずかんへ。
-//   まけても あみ は へらない（かったときだけ 1こ つかう）。あみ が 0 なら あそべない（とっくんで もらえる）。ぜんぶ つかまえた エリアは 🏅 コンプリート。
+//   いきもの の スポットは 半分（FLEE_RATE）が「にげていった」。のこりは かげ が出て ミニゲーム（minigame.js、画面いっぱい）。かつと つかまえて しゃしんと せつめい、ずかんへ。
+//   にげられたとき（スポットで にげた／ミニゲームに まけた）は 🍯 みつ（S.items.net。とっくん で もらえる）を 1こ つかうと もどってきて もういちど ちょうせん できる（S.sub="fled"）。
+//   つかまえるのに みつ は いらない。にげた スポットは spots[i].gone に しるし（みつ を つかうまで にげた まま）。ぜんぶ つかまえた エリアは 🏅 コンプリート。
 // うらボス：その エリアの ぬし を たおしたあと、地図の 右はしに でる（data.js の URA）。バトルして かつと ずかんの「ぬし」に のる。1かい きり。
 // 歩く演出は CSS transition。UI.instantWalk=true なら 即到着・ミニゲームの結果も すぐ反映（テスト用）。
 
@@ -85,10 +86,9 @@ function arriveSpot(i){if(!(S.view==="battle"&&S.sub==="map"))return;const ex=S.
   let t="";
   if(s.k==="creature"){const z=zById(s.z);
     if(!z||S.dex[z.id]){s.done=true;t=a.look;sfx("tap")}
-    else if(s.flee){s.done=true;ex.n=(ex.n||0)+1;t="がさがさ……！\nなにかが とびだして、にげていった！";sfx("tap");say("がさがさ。なにかが にげていった！")}
-    else if((S.items.net||0)<=0){t="がさがさ…… なにかの かげが みえる！\nでも むしとりあみが ない……。\nとっくんを すると あみが もらえるよ";sfx("tap");say("かげが みえる！ でも むしとりあみが ない。とっくんを すると あみが もらえるよ")} // スポットは のこす（あみを もらって もどれる）
-    else{UI.enc={i,z:z.id,over:false,stop:null,game:null};S.seen[z.id]=true;S.sub="enc";S.msg=null;sfx("ok");say("がさがさ。なにか いる！ あみで つかまえよう");save();render();return}}
-  else if(s.k==="net"){s.done=true;ex.n=(ex.n||0)+1;const full=(S.items.net||0)>=NET_MAX;if(!full)S.items.net=(S.items.net||0)+1;t=full?"✨ むしとりあみを みつけた！ でも もう いっぱい（"+NET_MAX+"こ）。また こんど":`✨ むしとりあみを みつけた！\nいま ${S.items.net}こ。かげを みつけたら つかおう`;sfx("ok");say("むしとりあみを みつけた！")}
+    else if(s.gone||s.flee){s.gone=s.gone||"flee";UI.fled={i,z:z.id,why:s.gone};S.sub="fled";S.msg=null;sfx("tap");say("がさがさ。なにかが にげていった！"+((S.items.net||0)>0?` ${ITEM_N}を おくと もどってくるよ`:""));save();render();return} // にげた スポットは みつ を つかうまで にげた まま
+    else{UI.enc={i,z:z.id,over:false,stop:null,game:null};S.seen[z.id]=true;S.sub="enc";S.msg=null;sfx("ok");say("がさがさ。なにか いる！ つかまえよう");save();render();return}}
+  else if(s.k==="net"){s.done=true;ex.n=(ex.n||0)+1;const full=(S.items.net||0)>=NET_MAX;if(!full)S.items.net=(S.items.net||0)+1;t=full?`✨ ${ITEM_ICO} ${ITEM_N}を みつけた！ でも もう いっぱい（${NET_MAX}こ）。また こんど`:`✨ ${ITEM_ICO} ${ITEM_N}を みつけた！\nいま ${S.items.net}こ。にげられたとき、おくと もどってくるよ`;sfx("ok");say(`${ITEM_N}を みつけた！`)}
   else{s.done=true;ex.n=(ex.n||0)+1;t=a.look;sfx("tap");say(String(a.look).replace(/^\S+\s/,""))}
   S.msg=t;S.sub="spot";save();render();
 }
@@ -107,16 +107,20 @@ function mgOpen(g,z){const old=$("mgfull");if(old)old.remove();
   return ()=>{st.dead=true;st.timers.forEach(clearTimeout);if(typeof stop2==="function"){try{stop2()}catch(e){}}}}
 // ミニゲームの 結果。すこし まってから 反映（○× の 見た目を 見せる）
 function encResult(win){const e=UI.enc;if(!e||e.over)return;e.over=true;e.win=!!win;sfx(win?"ok":"ng");
-  const mo=$("mgfull");const w=mo&&mo.querySelector(".mgwin");if(w)w.append(el("div","mgresult "+(win?"win":"lose"),win?"🥅 やったー！":"💨 にげちゃった"));
+  const mo=$("mgfull");const w=mo&&mo.querySelector(".mgwin");if(w)w.append(el("div","mgresult "+(win?"win":"lose"),win?"🎉 やったー！":"💨 にげちゃった"));
   if(UI.instantWalk)return applyEnc();setTimeout(()=>{if(UI.enc===e)applyEnc()},800)}
 function applyEnc(){const e=UI.enc;if(!e)return;mgCleanup();UI.enc=null;const ex=S.explore;const s=ex&&ex.spots[e.i];const z=zById(e.z);
   if(!s||!z||!(S.view==="battle")){S.sub="map";return render()}
-  s.done=true;ex.n=(ex.n||0)+1;const a=areaOf(ex.area);
-  if(e.win){S.items.net=Math.max(0,(S.items.net||0)-1);S.dex[z.id]={d:ymd(),n:1};s.ico=z.ico;
+  const a=areaOf(ex.area);
+  if(e.win){s.done=true;s.gone=null;ex.n=(ex.n||0)+1;S.dex[z.id]={d:ymd(),n:1};s.ico=z.ico;
     if(a&&!zLeft(a).length)S.flags["comp_"+a.id]=true;
     UI.caught=z.id;UI.caughtSaid=false;S.sub="caught";sfx("gain")}
-  else{S.msg="あっ、にげちゃった！\nでも だいじょうぶ。また あえるよ";S.sub="spot";say("にげちゃった。でも だいじょうぶ。また あえるよ")}
+  else{s.gone="lose";UI.fled={i:e.i,z:z.id,why:"lose"};S.sub="fled";S.msg=null;say("あっ、にげちゃった！"+((S.items.net||0)>0?` ${ITEM_N}を おくと もどってくるよ`:" でも だいじょうぶ。また あえるよ"))}
   save();render()}
+// にげられた あと：みつ を 1こ つかって よびもどす／そのまま すすむ
+function fledRetry(){const f=UI.fled;const s=f&&S.explore&&S.explore.spots[f.i];if(!s||(S.items.net||0)<=0)return render();
+  S.items.net--;s.gone=null;s.flee=false;UI.fled=null;UI.enc={i:f.i,z:f.z,over:false,stop:null,game:null,back:true};S.seen[f.z]=true;S.sub="enc";S.msg=null;sfx("ok");say(`${ITEM_N}の においに さそわれて もどってきた！ つかまえよう`);save();render()}
+function fledNext(){const f=UI.fled;const s=f&&S.explore&&S.explore.spots[f.i];if(s&&!s.done){s.done=true;S.explore.n=(S.explore.n||0)+1}UI.fled=null;S.sub="map";S.msg=null;save();render()}
 // ---- うらボス ----
 function startUra(id){const u=uraOf(id);if(!u)return render();
   if(S.foe&&!S.foe.ura&&!S.foe.trial&&S.foe.ch===S.ch)S.foeKeep=S.foe; // ぬし と たたかいかけ なら のこしておく
@@ -133,17 +137,23 @@ function renderOut(msg,menu,tapBtn){
   if(!S.flags.outIntro){if(S.sub!=="exit"){S.sub="exit";S.line=0}return renderExit(msg,menu,tapBtn)} // はじめて そとに出た よる の演出（一度だけ）
   if(S.foe&&S.foe.ura)uraLeave(); // ここに来るのは たたかっていない とき
   if(S.sub!=="enc"&&S.sub!=="mg")UI.enc=null; // であい の のこりかす を 消す（タブを 移ったあと など）
+  if(S.sub!=="fled")UI.fled=null;else if(!UI.fled)S.sub="map";
   if(S.sub==="caught")return renderCaught(msg,menu,tapBtn);
   if((S.sub==="enc"||S.sub==="mg")&&!UI.enc)S.sub="map"; // 読み込みなおし などで であい が消えたら 地図へ（スポットは のこる）
-  if(["map","spot","enc","mg"].includes(S.sub)){
+  if(["map","spot","enc","mg","fled"].includes(S.sub)){
     const a=S.explore&&areaOf(S.explore.area);
     if(!a||S.explore.d!==ymd()){S.explore=null;UI.enc=null;S.sub="menu";return renderOut(msg,menu,tapBtn)}
     syncBoss(a);fieldMap(a);
     const sps=S.explore.spots.filter(s=>s.k!=="boss"&&s.k!=="ura");const total=sps.length,done=sps.filter(s=>s.done).length;
     if(S.sub==="spot"){msg.append(el("span","tx big2",rich(S.msg||"")),el("span","cur","▼"));tapBtn("▶ つぎへ",()=>{S.sub="map";S.msg=null;save();render()});return}
+    if(S.sub==="fled"){const n=S.items.net||0;const lose=UI.fled.why==="lose";
+      msg.innerHTML=`<span class="big">💨</span><div class="ctr big2">${lose?"あっ、にげちゃった！":"がさがさ……！ なにかが にげていった！"}</div>`+(n>0?`<div class="ctr note">${ITEM_ICO} ${ITEM_N}を おくと、においに さそわれて もどってくるよ（のこり ${n}こ）</div>`:`<div class="ctr note">でも だいじょうぶ。また あえるよ。とっくんを すると ${ITEM_ICO} ${ITEM_N}が もらえるよ</div>`);
+      if(n>0){menu.className="menu one";const r=el("button","tap",`${ITEM_ICO} ${ITEM_N}で よびもどす！`);r.onclick=fledRetry;const nx=el("button","wide","そのまま すすむ");nx.onclick=()=>{sfx("tap");fledNext()};menu.append(r,nx)}
+      else tapBtn("▶ つぎへ",fledNext);
+      return}
     if(S.sub==="enc"){const z=zById(UI.enc.z);
-      msg.innerHTML=`<div class="encsil">${zSilHtml(z)}</div><div class="ctr big2">がさがさ…… なにか いる！</div><div class="ctr note">🥅 むしとりあみ ${S.items.net||0}こ。ミニゲームに かつと つかまえられる</div>`;
-      menu.className="menu one";const go=el("button","tap","🥅 あみで つかまえる！");
+      msg.innerHTML=`<div class="encsil">${zSilHtml(z)}</div><div class="ctr big2">${UI.enc.back?`${ITEM_ICO} においに さそわれて もどってきた！`:"がさがさ…… なにか いる！"}</div><div class="ctr note">ミニゲームに かつと つかまえられる</div>`;
+      menu.className="menu one";const go=el("button","tap","✋ つかまえる！");
       go.onclick=()=>{UI.enc.game=pickMinigame(z).id;UI.enc.over=false;S.sub="mg";sfx("tap");render()};
       const no=el("button","wide","そっと しておく");no.onclick=()=>{UI.enc=null;S.sub="map";sfx("tap");render()};
       menu.append(go,no);return}
@@ -154,7 +164,7 @@ function renderOut(msg,menu,tapBtn){
       return}
     const boss=S.explore.spots.find(s=>s.k==="boss");const ura=S.explore.spots.find(s=>s.k==="ura");const c=CHAPTERS[S.ch];
     const all=zukanOf(a).length,got=all-zLeft(a).length;
-    let h=`<b>${a.ico} ${esc(a.n)}</b>　つかまえた ${got} / ${all}${S.flags["comp_"+a.id]?" 🏅":""}　🥅 ${S.items.net||0}`;
+    let h=`<b>${a.ico} ${esc(a.n)}</b>　つかまえた ${got} / ${all}${S.flags["comp_"+a.id]?" 🏅":""}　${ITEM_ICO} ${S.items.net||0}`;
     if(boss&&c)h+=`<div class="note2">${c.foe.ico} ${esc(c.foe.name)}が まっている！ ${esc(c.foe.name)}の ところまで あるいて いこう</div>`;
     if(ura)h+=`<div class="note2">❗ みたことの ない おおきな かげが いる……！ ちかづいてみよう</div>`;
     h+=done<total?`<div class="note">きになる ところを タップしてみよう（しらべた ${done} / ${total}）</div>`:`<div class="note2">きょうの たんけんは おしまい！ また あした</div>`;
@@ -219,7 +229,7 @@ function renderDex(msg,menu){
     const x=beat?el("button","dz on",spriteHtml(c.foe.id,c.foe.ico)):el("span","dz","❓");if(beat)x.onclick=()=>{say(c.foe.name);sfx("tap")};bg.append(x);
     if(u){const y=S.dex[u.id]?el("button","dz on gold",spriteHtml(u.id,u.ico)):el("span","dz",beat?"❗":"❓");if(S.dex[u.id])y.onclick=()=>{say(u.name);sfx("tap")};bg.append(y)}});
   msg.append(bg);
-  if(!got.length)msg.append(el("div","note",stageIdx()>=3?"そとを たんけんして、かげを みつけたら あみで つかまえよう":"せいちゅうに なったら そとで いきものを さがせるよ"));
+  if(!got.length)msg.append(el("div","note",stageIdx()>=3?"そとを たんけんして、かげを みつけたら ミニゲームで つかまえよう":"せいちゅうに なったら そとで いきものを さがせるよ"));
   menu.className="menu one";const b=el("button","wide","もどる");b.onclick=()=>{S.sub="menu";save();render()};menu.append(b);
 }
 

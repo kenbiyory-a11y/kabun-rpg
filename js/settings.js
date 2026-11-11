@@ -128,7 +128,7 @@ function renderSettings(msg,menu){
     mk("🪲 レベル 20 ぶんに する",()=>{const b=snapshot();STATS.forEach(k=>S[k]=Math.max(S[k],38));S.msg=["レベル 20 ぶんに しました（かべ は順に倒す必要があります）",...gainNotes(b)].join("\n")});
     mk("👑 レベル 50 ぶんに する",()=>{const b=snapshot();STATS.forEach(k=>S[k]=Math.max(S[k],98));S.msg=["レベル 50 ぶんに しました",...gainNotes(b)].join("\n")});
     mk("💥 いまの かべを HP 1 にする",()=>{if(chapterReady()){if(!S.foe||S.foe.ch!==S.ch)S.foe=mkFoe(S.ch);S.foe.hp=1;S.msg="かべの HP を 1 にしました"}else S.msg="いまは かべが いません"});
-    mk("🥅 あみ +5",()=>{S.items.net=Math.min(NET_MAX,S.items.net+5);S.msg=`あみ ${S.items.net}`});
+    mk(`${ITEM_ICO} ${ITEM_N} +5`,()=>{S.items.net=Math.min(NET_MAX,S.items.net+5);S.msg=`${ITEM_N} ${S.items.net}`});
     back();return;
   }
   if(S.sub==="pcheck"){parentCheck(msg,menu,UI.pnext||"backup");return}

@@ -41,10 +41,11 @@ window.addEventListener("DOMContentLoaded",()=>{
   else if(q.startsWith("q:")){const id=q.slice(2);const qq=poolOf("flag").concat(poolOf("num"),poolOf("eng"),poolOf("animal")).find(x=>x.id===id);if(!qq)document.title="NOQ";
     const it=Object.assign({},qq,{opts:[qq.a,...qq.d]});S.sess={cat:id.split("_")[0],d:ymd(),i:0,items:[it,it,it,it,it],res:[],lv:1};S.sub="quiz";S.view="growth";UI.lockUntil=0}
   else if(q==="kanban"){setLv(7,68);S.view="battle";S.sub="menu";S.flags.outIntro=true}
-  else if(q.startsWith("enc:")||q.startsWith("mg:")||q.startsWith("caught:")||q==="dex"||q.startsWith("dexz:")||q==="uramap"){ // enc:<zid> / mg:<game>:<zid> / caught:<zid> / dex / dexz:<zid> / uramap
+  else if(q.startsWith("enc:")||q.startsWith("mg:")||q.startsWith("caught:")||q.startsWith("fled:")||q==="dex"||q.startsWith("dexz:")||q==="uramap"){ // enc:<zid> / mg:<game>:<zid> / caught:<zid> / dex / dexz:<zid> / uramap
     const a=AREAS[0];setLv(7,68);S.flags.outIntro=true;S.items.net=3;S.explore={area:a.id,d:ymd(),spots:genSpots(a),pos:{x:30,y:80},n:0};S.daily.explore=a.id;S.view="battle";S.sub="map";
     const parts=q.split(":");const zid=parts[parts.length-1];
     if(q.startsWith("enc:")){UI.enc={i:0,z:zid,over:false};S.sub="enc"}
+    else if(q.startsWith("fled:")){S.items.net=+parts[1];UI.fled={i:0,z:zid,why:parts[2]};S.sub="fled"} // fled:<みつの数>:<flee|lose>:<zid>
     else if(q.startsWith("mg:")){UI.enc={i:0,z:zid,over:false,game:parts[1]};S.sub="mg"}
     else if(q.startsWith("caught:")){if(zById(zid))S.dex[zid]={d:ymd(),n:1};UI.caught=zid;S.sub="caught"}
     else if(q==="dex"||q.startsWith("dexz:")){zukanOf(a).slice(0,9).forEach(z=>S.dex[z.id]={d:ymd(),n:1});zukanOf(a).slice(9,13).forEach(z=>S.seen[z.id]=true);S.dex.ura_grass={d:ymd(),n:1};S.view="diary";S.sub="dex";if(q.startsWith("dexz:"))UI.dexId=zid}

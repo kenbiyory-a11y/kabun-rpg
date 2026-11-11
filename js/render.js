@@ -125,7 +125,7 @@ function renderGrowth(msg,menu,tapBtn){
   if(S.sub==="quiz")return quizScreen(msg,menu,idx,tapBtn);
   if(S.sub==="result")return resultScreen(msg,menu,idx);
   fieldGrowth(idx,false);
-  msg.innerHTML=`<div class="gh"><span><b>${esc(S.name)}の カブーン</b>　${STAGES[idx].name}</span><small>🥅 あみ ${S.items.net}</small></div>${levelBar()}${board()}${statRows()}`;
+  msg.innerHTML=`<div class="gh"><span><b>${esc(S.name)}の カブーン</b>　${STAGES[idx].name}</span><small>${ITEM_ICO} ${ITEM_N} ${S.items.net}</small></div>${levelBar()}${board()}${statRows()}`;
   if(S.msg)msg.append(el("div","note2",esc(S.msg)));
   if(UI.saveErr)msg.append(el("div","note","⚠️ ほぞんが できませんでした。おうちのひとに つたえてね"));
   const allDone=!S.sess&&CATS.every(c=>!canTrain(c));
