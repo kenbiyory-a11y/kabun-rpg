@@ -22,6 +22,7 @@
 <script src="../js/voice.js" defer></script>
 <script src="../js/chars.js" defer></script>
 <script src="../js/render.js" defer></script>
+<script src="../js/minigame.js" defer></script>
 <script src="../js/outside.js" defer></script>
 <script src="../js/diary.js" defer></script>
 <script src="../js/settings.js" defer></script>
@@ -126,9 +127,25 @@ try{
   chk(stageIdx()===3&&document.querySelector('.nav .nb[data-tab="battle"]').innerText.includes("そと"),"せいちゅうは バトルタブが「そと」");
   S.view="battle";S.sub="menu";render();chk(txt().includes("どこへ いく")&&btn("くさむら")&&!btn("くさむら").disabled&&btn("かわ").disabled&&btn("かわ").innerText.includes("ガキーン"),"かんばん：くさむら だけ ひらき、かわ は ガキーン待ち");
   btn("くさむら").click();chk(S.sub==="map"&&S.explore&&S.explore.area==="grass"&&S.daily.explore==="grass"&&document.querySelectorAll("#field .spot").length===6&&!!document.getElementById("spWalk"),"たんけん開始：スポット5＋🪧、カブーンが立つ");
-  const ci=S.explore.spots.findIndex(s=>s.k==="creature");document.querySelector(`#field .spot[data-i="${ci}"]`).click();
-  chk(S.sub==="spot"&&S.explore.spots[ci].done&&Object.keys(S.dex).length===1&&txt().includes("みつけた")&&S.explore.pos.x===S.explore.spots[ci].x,"スポットへ歩いて いきものを みつけた");
-  btn("つぎへ").click();chk(S.sub==="map"&&document.querySelector(`#field .spot[data-i="${ci}"]`).classList.contains("done"),"つぎへ → 地図に戻り、しらべた印");
+  // かげ → ミニゲーム（5種類）→ つかまえる
+  S.items.net=6;const cs=S.explore.spots.map((s,i)=>[s,i]).filter(([s])=>s.k==="creature");cs.forEach(([s])=>s.flee=false);
+  const spotEl=i=>document.querySelector(`#field .spot[data-i="${i}"]`);
+  const playWin=()=>{let g=0;while(S.sub==="mg"&&g++<8){const b=document.querySelector('#mgbox [data-ok="1"]');if(!b)break;b.click()}};
+  const [s0,i0]=cs[0];spotEl(i0).click();
+  chk(S.sub==="enc"&&!!document.querySelector("#msgbox .zsil")&&!!btn("あみで つかまえる")&&S.explore.pos.x===s0.x&&!S.dex[s0.z],"スポットへ歩くと かげ が出る");
+  UI.mgForce="count";btn("あみで つかまえる").click();chk(S.sub==="mg"&&document.querySelectorAll("#mgbox .mgitem").length>=2&&document.querySelectorAll("#mgbox button.mgnum").length===3,"ミニゲーム：いくつ かな");
+  playWin();chk(S.sub==="caught"&&!!S.dex[s0.z]&&S.items.net===5&&txt().includes("つかまえた")&&!!document.querySelector("#msgbox .zcard"),"かつと つかまえる（しゃしん カード、あみ -1）");
+  btn("つぎへ").click();chk(S.sub==="map"&&spotEl(i0).classList.contains("done"),"つぎへ → 地図に戻り、しらべた印");
+  const [s1,i1]=cs[1];
+  for(const gid of ["tap","order","odd","kage"]){const z=zLeft(AREAS[0]).find(z=>gid!=="kage"||(z.cut&&z.img));s1.z=z.id;s1.done=false;s1.flee=false;S.sub="map";render();UI.mgForce=gid;
+    spotEl(i1).click();btn("あみで つかまえる").click();const before=S.items.net;const shown=UI.enc&&UI.enc.game;playWin();
+    chk(shown===gid&&S.sub==="caught"&&!!S.dex[z.id]&&S.items.net===before-1,`ミニゲーム ${gid} に かって つかまえた`);btn("つぎへ").click()}
+  {const z=zLeft(AREAS[0])[0];s1.z=z.id;s1.done=false;S.sub="map";render();UI.mgForce="odd";spotEl(i1).click();btn("あみで つかまえる").click();const before=S.items.net;
+   Array.from(document.querySelectorAll("#mgbox button")).find(b=>!b.dataset.ok).click();chk(S.sub==="spot"&&!S.dex[z.id]&&S.items.net===before&&txt().includes("にげちゃった")&&S.seen[z.id]===true,"まけると にげる（あみ は へらない、であった しるし は のこる）");btn("つぎへ").click()}
+  {const [s2,i2]=cs[2];s2.flee=true;render();spotEl(i2).click();chk(S.sub==="spot"&&txt().includes("にげていった")&&s2.done,"にげる スポット：かげ も出ない");btn("つぎへ").click();
+   s2.done=false;s2.flee=false;S.items.net=0;render();spotEl(i2).click();chk(S.sub==="spot"&&txt().includes("あみが ない")&&!s2.done,"あみ が 0 だと あそべない（スポットは のこる）");btn("つぎへ").click();
+   S.items.net=3;render();spotEl(i2).click();chk(S.sub==="enc","あみ を もらって もどると かげ が出る");btn("そっと しておく").click();chk(S.sub==="map"&&!s2.done&&UI.enc===null,"そっと しておく → 地図へ（スポットは のこる）")}
+  UI.mgForce=null;
   const bi=S.explore.spots.findIndex(s=>s.k==="boss");document.querySelector(`#field .spot[data-i="${bi}"]`).click();chk(S.sub==="fight"&&S.foe&&S.foe.name==="ガキーン","🪧 で ガキーンと バトル");
   S.foe.hp=1;document.querySelector("#msgbox button.mv.star").click();if(typer)typeNode.click();chk(S.sub==="turn"&&S.foe.hp<=0,"ガキーンを倒した");btn("つぎへ").click();if(typer)typeNode.click();chk(S.sub==="win","勝ち画面");
   btn("つぎへ").click();if(typer)typeNode.click();btn("つぎへ").click();chk(S.ch===7&&S.sub==="menu"&&txt().includes("どこへ いく"),"勝つと かんばんに戻る");
@@ -136,7 +153,16 @@ try{
   S.view="growth";render();S.view="battle";render();chk(S.sub==="menu"&&!document.querySelector("#field .spot"),"タブを離れると 地図は消える");
   S.daily.d="2000-01-01";S.explore.d="2000-01-01";dayRoll();render();chk(S.daily.explore===null&&!btn("かわ").disabled,"翌日は かわ に いける");
   btn("かわ").click();chk(S.sub==="map"&&S.explore.area==="river"&&document.querySelectorAll("#field .spot").length===5&&$("field").classList.contains("river"),"かわ の たんけん：ケローンは Lv35 まで出ない");
-  S.view="diary";S.sub="menu";render();chk(!!btn("ずかん"),"きろく に ずかん ボタン");btn("ずかん").click();chk(S.sub==="dex"&&txt().includes("1 / 25"),"ずかん：1 / 25");btn("もどる").click();chk(S.sub==="menu","ずかん → もどる");
+  S.view="diary";S.sub="menu";render();chk(!!btn("ずかん"),"きろく に ずかん ボタン");btn("ずかん").click();chk(S.sub==="dex"&&txt().includes("つかまえた 5 / 40")&&txt().includes("ぬし　1 / 10")&&document.querySelectorAll("#msgbox .dexgrid .dz.on").length===6&&document.querySelectorAll("#msgbox .dexgrid .dz.seen").length>=1,"ずかん：5 / 40、ぬし 1 / 10、であった だけの かげ");
+  document.querySelector("#msgbox .dexgrid .dz.on").click();chk(!!UI.dexId&&!!document.querySelector("#msgbox .zcard")&&!!btn("きいてみる"),"ずかん：タップで くわしく");btn("もどる").click();chk(S.sub==="dex"&&!UI.dexId,"くわしく → 一覧");btn("もどる").click();chk(S.sub==="menu","ずかん → もどる");
+  // うらボス：ガキーンを たおした くさむら に でる
+  S.view="battle";S.sub="menu";S.daily.explore=null;S.explore=null;render();chk(btn("くさむら").innerText.includes("おおきな かげ"),"かんばん：くさむら に おおきな かげ");
+  btn("くさむら").click();const ui=S.explore.spots.findIndex(s=>s.k==="ura");chk(ui>=0&&!!document.querySelector("#field .spot.ura")&&txt().includes("おおきな かげ"),"うらボス が 地図の 右はしに いる");
+  document.querySelector("#field .spot.ura").click();chk(S.sub==="fight"&&S.foe&&S.foe.ura==="ura_grass"&&$("field").classList.contains("day"),"うらボス と バトル");
+  S.foe.hp=1;document.querySelector("#msgbox button.mv.star").click();if(typer)typeNode.click();btn("つぎへ").click();if(typer)typeNode.click();chk(S.sub==="win"&&txt().includes("のりこえた"),"うらボス に かった");
+  btn("つぎへ").click();if(typer)typeNode.click();btn("つぎへ").click();chk(S.sub==="caught"&&!!S.dex.ura_grass&&txt().includes("かった")&&S.foe===null&&S.ch===7,"ずかんの ぬし に のる（章は すすまない）");
+  btn("つぎへ").click();chk(S.sub==="map"&&!document.querySelector("#field .spot.ura"),"かったあとは 地図から 消える");
+  S.view="growth";S.sub="menu";render();
 }catch(e){log("EXC",e&&e.stack||e)}
 $("log").textContent=L.join("\n");document.title="DONE "+(L.some(l=>l.startsWith("FAIL")||l.startsWith("JSERROR")||l.startsWith("EXC"))?"NG":"OK");
 });

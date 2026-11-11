@@ -30,8 +30,9 @@ function board(){
 function kabunHtml(idx){const st=STAGES[idx];return spriteHtml(st.id,st.ico)}
 function fieldBattle(showFoe){
   const f=$("field");f.innerHTML="";f.onclick=null;delete f.dataset.map;const c=CHAPTERS[Math.min(S.ch,CHAPTERS.length-1)];
-  const inRoom=S.ch<CHAPTERS.length&&c.place==="へや"; // 第1〜6話は虫かごの中で起きる
-  f.className="field "+(S.foe&&S.foe.trial?"night":S.ch>=CHAPTERS.length?"day":inRoom?"cage "+c.bg:c.bg);
+  const ua=S.foe&&S.foe.ura&&uraOf(S.foe.ura)?areaOf(uraOf(S.foe.ura).area):null; // うらボス は その エリアの 背景で
+  const inRoom=!ua&&S.ch<CHAPTERS.length&&c.place==="へや"; // 第1〜6話は虫かごの中で起きる
+  f.className="field "+(ua?ua.bg:S.foe&&S.foe.trial?"night":S.ch>=CHAPTERS.length?"day":inRoom?"cage "+c.bg:c.bg);
   if(inRoom)cageDeco(f);
   const me=el("div","sprite me",kabunHtml(stageIdx()));me.id="spMe";f.append(me);
   f.append(hud("me","カブーン","Lv"+level(),S.hp,maxHp()));
@@ -60,6 +61,7 @@ function renderNav(){
 // ---------- がめん ----------
 function render(){renderMain();try{bgmSync()}catch(e){}}
 function renderMain(){
+  if(typeof mgCleanup==="function")mgCleanup(); // うごいている ミニゲームの タイマーを 止める（描きなおすと 箱ごと 消えるため）
   if(typer){clearInterval(typer);typer=null;typeDoneCb=null} // 前の画面のタイプ演出が残っていると、次の画面の最初のタップを食ってしまう
   dayRoll();renderNav();UI.tapFn=null;
   const box=$("msgbox");box.innerHTML="";
@@ -235,12 +237,13 @@ function renderBattle(msg,menu,tapBtn){
     if(S.foe.trial)return renderTrialEnd(msg,menu,tapBtn);
     fieldBattle(true);const t=`カブーンは めが まわった……。\nきょうは ここまで。でも ${S.foe.name}の きずは そのまま！\nまた ちょうせん しよう`;
     typeText(msg,t,()=>{msg.append(el("span","cur","▼"))});say(t.replace(/\n/g," "));
-    tapBtn("▶ もどる",()=>{S.hp=maxHp();S.sub="menu";S.msg=null;save();render()});return;
+    tapBtn("▶ もどる",()=>{S.hp=maxHp();if(S.foe.ura){uraLeave();backToMap()}else{S.sub="menu";S.msg=null}save();render()});return;
   }
   if(S.sub==="win"){
-    fieldBattle(false);const lines=[`${S.foe.name} を のりこえた！`,c.win];const last=S.line>=lines.length-1;const line=lines[Math.min(S.line,lines.length-1)];
+    const ud=S.foe.ura?uraOf(S.foe.ura):null;const ev=ud?null:c.evolve;
+    fieldBattle(false);const lines=[`${S.foe.name} を のりこえた！`,ud?ud.win:c.win];const last=S.line>=lines.length-1;const line=lines[Math.min(S.line,lines.length-1)];
     typeText(msg,line,()=>{msg.append(el("span","cur","▼"))});say(line);
-    tapBtn(last?(c.evolve!=null?"▶ ？？？":"▶ つぎへ"):"▶ つぎへ",()=>{if(!last)S.line++;else if(c.evolve!=null){S.line=0;S.sub="evolve"}else clearChapter();save();render()});return;
+    tapBtn(last?(ev!=null?"▶ ？？？":"▶ つぎへ"):"▶ つぎへ",()=>{if(!last)S.line++;else if(ud)uraWin();else if(ev!=null){S.line=0;S.sub="evolve"}else clearChapter();save();render()});return;
   }
   if(S.sub==="evolve"){
     const from=stageIdx(),to=c.evolve;
@@ -256,10 +259,10 @@ function renderBattle(msg,menu,tapBtn){
 }
 function clearChapter(){S.ch++;S.foe=null;S.line=0;S.sub="menu";S.hp=maxHp();S.msg=null}
 // いまの章の ぬし と戦い始める（へや の「ちょうせん」ボタンと、そと の 🪧 から）
-function startFight(){if(!chapterReady())return render();if(!S.foe||S.foe.ch!==S.ch)S.foe=mkFoe(S.ch);S.hp=maxHp();S.msg=`${S.foe.name} が あらわれた！\n★の ボタンを おしてみよう`;S.sub="fight";S.line=0;sfx("tap");say(`${S.foe.name}が あらわれた！ ほしの ボタンを おしてみよう`);save();render()}
+function startFight(){if(!chapterReady())return render();if(S.foe&&S.foe.ura)uraLeave();if(!S.foe||S.foe.ch!==S.ch||S.foe.trial)S.foe=mkFoe(S.ch);S.hp=maxHp();S.msg=`${S.foe.name} が あらわれた！\n★の ボタンを おしてみよう`;S.sub="fight";S.line=0;sfx("tap");say(`${S.foe.name}が あらわれた！ ほしの ボタンを おしてみよう`);save();render()}
 function attack(k){const f=S.foe;if(!f)return render();if(f.trial)return trialAttack(k);const m=moveOf(k);const mult=multOf(k,f);const dmg=Math.max(1,Math.floor(power(k)*mult));
   f.hp=Math.max(0,f.hp-dmg);let t=`カブーンの ${m.n}！`;
-  if(mult>1){t+=`\n★ ばつぐん！！ ${f.name}に ${dmg}の ダメージ！`;const c=CHAPTERS[f.ch];if(c&&c.why&&!f.whySaid&&!f.shift){f.whySaid=true;t+=`\n${c.why}`}}
+  if(mult>1){t+=`\n★ ばつぐん！！ ${f.name}に ${dmg}の ダメージ！`;const c=f.ura?uraOf(f.ura):CHAPTERS[f.ch];if(c&&c.why&&!f.whySaid&&!f.shift){f.whySaid=true;t+=`\n${c.why}`}}
   else if(mult<1)t+=`\n🛡️ まもられた！ ${f.name}に ${dmg}の ダメージ`;
   else t+=`\n${f.name}に ${dmg}の ダメージ！`;
   if(f.hp>0&&f.shift&&mult>1){const order=STATS.filter(s=>s!==f.guard);const i=order.indexOf(f.weak);f.weak=order[(i+1)%order.length];t+=`\n★が ${STAT_ICO[f.weak]}に うごいた！`}

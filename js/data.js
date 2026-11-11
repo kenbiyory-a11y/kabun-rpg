@@ -51,7 +51,7 @@ const STAGES=[{ico:"🥚",name:"たまご",id:"kabun_egg"},{ico:"🐛",name:"よ
 // キャラの絵：img/chars/<id>.png（背景が透明の正方形 PNG）を置くと、その絵文字の代わりに表示される。無ければ絵文字のまま
 // 例：img/chars/kabun_egg.png、img/chars/kugaan.png。kid1 / kid2 は ⚙️ で登録した なまえ の順
 const CHARS={kabun_egg:"🥚",kabun_larva:"🐛",kabun_pupa:"🫘",kabun_adult:"🪲",kabun_king:"👑",
-  shell:"🪨",fly:"🪰",soil:"🧱",wind:"❄️",dirt:"🌀",skin:"🥥",gakeen:"🐜",keroon:"🐸",hourin:"🦉",sameen:"🦈",kugaan:"🐉",
+  shell:"🪨",fly:"🪰",soil:"🧱",wind:"❄️",dirt:"🌀",skin:"🥥",gakeen:"🐜",keroon:"🐸",hourin:"🦉",sameen:"🦈",kugaan:"🐉",ura_grass:"🕷️",ura_river:"🐊",ura_sky:"🦅",ura_sea:"🐙",ura_forest:"🐻",
   papa:"👨",mama:"👩",kid1:"🧒",kid2:"🧒",kid3:"🧒"};
 const STAGE_CHEER=["ぷるぷる！","もぐもぐ！","ぴくっ！","やったー！","さすが おうさま！"];
 
@@ -80,6 +80,16 @@ const AREAS=[
  {id:"sky",   n:"そら",    ico:"🌙",bg:"night", ground:[60,90],look:"⭐ ほしが いっぱい。おおきな つきが でている"},
  {id:"sea",   n:"うみ",    ico:"🌊",bg:"sea",   ground:[76,92],look:"🐚 なみの おとが ざざーん。かいがらが おちている"},
  {id:"forest",n:"もり",    ico:"🌳",bg:"forest",ground:[62,90],look:"🍄 おおきな きの したに きのこが はえている"}
+];
+// うらボス：その エリアの ぬし を たおしたあと、地図の 右はしに でる。かつと ずかんの「ぬし」に のる（1かい きり）。まけても そんは なく、きずは のこる。
+// 【仮】なまえ・え・にがて は 仮おき。差し替えるときは この表を なおし、絵は img/chars/<id>.png に置く（id は 変えない。S.dex / S.uraHp に のこるため）
+// つよさ：その エリアの ぬし の HP ×1.2、こうげき +1。★連打で 6ターンほど
+const URA=[
+ {id:"ura_grass", area:"grass", ico:"🕷️",name:"クモーン",hp:670, dmg:13,weak:"world",guard:"heart",why:"くもの すは すばやく うごけば つかまらない",win:"クモーン「みごとだ…… くさむらは きみに まかせた」",fact:"くさむらの おくに すむ おおきな くも"},
+ {id:"ura_river", area:"river", ico:"🐊",name:"ワニーン",hp:780, dmg:14,weak:"wise", guard:"str",  why:"かたい うろこは つのを はじく。ひかりで めを くらませよう",win:"ワニーン「まぶしい……！ まいった」",fact:"かわの そこで ねむる おおきな わに"},
+ {id:"ura_sky",   area:"sky",   ico:"🦅",name:"ワシーン",hp:900, dmg:15,weak:"str",  guard:"world",why:"かぜは つばさで うけながす。つので まっすぐ ぶつかれ",win:"ワシーン「つよい つのだ…… そらを ゆずろう」",fact:"よぞらを とびまわる おおきな わし"},
+ {id:"ura_sea",   area:"sea",   ico:"🐙",name:"タコーン",hp:1000,dmg:15,weak:"heart",guard:"str",  why:"やわらかい からだは つのが きかない。うたで おどらせよう",win:"タコーン「たのしい うただ…… おどりつかれた」",fact:"うみの そこに すむ おおきな たこ"},
+ {id:"ura_forest",area:"forest",ico:"🐻",name:"クマーン",hp:1100,dmg:16,weak:"world",guard:"str",  why:"おおきな からだは うごきが おそい。はやさで かきまわせ",win:"クマーン「めが まわった…… もりの はちみつを あげよう」",fact:"もりの おくで はちみつを まもる くま"}
 ];
 function areaOf(id){return AREAS.find(a=>a.id===id)||null}
 function areaBossIdx(a){return CHAPTERS.findIndex(c=>c.area===a.id)}

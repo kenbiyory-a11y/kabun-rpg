@@ -22,12 +22,14 @@
 <script src="../js/voice.js" defer></script>
 <script src="../js/chars.js" defer></script>
 <script src="../js/render.js" defer></script>
+<script src="../js/minigame.js" defer></script>
 <script src="../js/outside.js" defer></script>
 <script src="../js/diary.js" defer></script>
 <script src="../js/settings.js" defer></script>
 <script defer>
 window.addEventListener("DOMContentLoaded",()=>{
   const q=new URLSearchParams(location.search).get("s")||"egg";
+  IMG_BASE="../img/";
   const _rich=rich;rich=s=>_rich(s).replace(/src="\.\/img\//g,'src="../img/'); // dev/ から見た画像の場所に直す
   spriteHtml=(id,fallback)=>{const emoji=fallback!=null?fallback:(CHARS[id]||"");return id&&CHAR_OK[id]?`<img class="spimg" src="../img/chars/${id}.png" alt="">`:emoji}; // dev/ から見た画像の場所に直す
   localStorage.clear();S=FRESH();migrate();dayRoll();S.flags.intro=true;S.name="カブーン";S.se=false;S.bgmOn=false;S.voice=false;
@@ -39,6 +41,14 @@ window.addEventListener("DOMContentLoaded",()=>{
   else if(q.startsWith("q:")){const id=q.slice(2);const qq=poolOf("flag").concat(poolOf("num"),poolOf("eng"),poolOf("animal")).find(x=>x.id===id);if(!qq)document.title="NOQ";
     const it=Object.assign({},qq,{opts:[qq.a,...qq.d]});S.sess={cat:id.split("_")[0],d:ymd(),i:0,items:[it,it,it,it,it],res:[],lv:1};S.sub="quiz";S.view="growth";UI.lockUntil=0}
   else if(q==="kanban"){setLv(7,68);S.view="battle";S.sub="menu";S.flags.outIntro=true}
+  else if(q.startsWith("enc:")||q.startsWith("mg:")||q.startsWith("caught:")||q==="dex"||q.startsWith("dexz:")||q==="uramap"){ // enc:<zid> / mg:<game>:<zid> / caught:<zid> / dex / dexz:<zid> / uramap
+    const a=AREAS[0];setLv(7,68);S.flags.outIntro=true;S.items.net=3;S.explore={area:a.id,d:ymd(),spots:genSpots(a),pos:{x:30,y:80},n:0};S.daily.explore=a.id;S.view="battle";S.sub="map";
+    const parts=q.split(":");const zid=parts[parts.length-1];
+    if(q.startsWith("enc:")){UI.enc={i:0,z:zid,over:false};S.sub="enc"}
+    else if(q.startsWith("mg:")){UI.enc={i:0,z:zid,over:false,game:parts[1]};S.sub="mg"}
+    else if(q.startsWith("caught:")){if(zById(zid))S.dex[zid]={d:ymd(),n:1};UI.caught=zid;S.sub="caught"}
+    else if(q==="dex"||q.startsWith("dexz:")){zukanOf(a).slice(0,9).forEach(z=>S.dex[z.id]={d:ymd(),n:1});zukanOf(a).slice(9,13).forEach(z=>S.seen[z.id]=true);S.dex.ura_grass={d:ymd(),n:1};S.view="diary";S.sub="dex";if(q.startsWith("dexz:"))UI.dexId=zid}
+  }
   else if(q==="exit"){setLv(6,58);S.view="battle";S.sub="exit";S.line=2;delete S.flags.outIntro}
   else if(q==="trial"){setLv(6,58);S.view="battle";delete S.flags.outIntro;S.foe=Object.assign(mkFoe(10),{ch:6,trial:true,turn:0,shift:false});S.hp=maxHp();S.sub="fight";S.msg="ちょうろう クガーンの しけん！"}
   else if(q.startsWith("map:")){const a=areaOf(q.slice(4));const chOf={grass:6,river:7,sky:8,sea:9,forest:10}[a.id];setLv(chOf,[58,68,78,88,98][AREAS.indexOf(a)]);

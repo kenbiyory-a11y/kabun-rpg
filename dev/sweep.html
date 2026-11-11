@@ -33,6 +33,7 @@
 <script src="../js/voice.js" defer></script>
 <script src="../js/chars.js" defer></script>
 <script src="../js/render.js" defer></script>
+<script src="../js/minigame.js" defer></script>
 <script src="../js/outside.js" defer></script>
 <script src="../js/diary.js" defer></script>
 <script src="../js/settings.js" defer></script>
@@ -99,8 +100,22 @@ try{
   Array.from(document.querySelectorAll("#msgbox button")).find(b=>b.innerText.includes("もどる")).click();chk(S.sub==="sound","もどる で おと に戻る");
   S.view="growth";S.sub="menu";
   S.daily.done.num=0;S.sess=buildSession("num");S.sub="quiz";UI.lockUntil=Date.now()+150;render();
-  setTimeout(()=>{chk(document.querySelectorAll("#msgbox button.opt:disabled").length===0,"ロックが解けると押せる");finish()},400);
+  setTimeout(()=>{chk(document.querySelectorAll("#msgbox button.opt:disabled").length===0,"ロックが解けると押せる");mgAsync()},400);
 }catch(e){log("EXC",e&&e.stack||e);fails++;finish()}
+// ミニゲームの 時間が からむ 経路（テスト用の 即反映 を 使わない）：かって 0.8秒後に つかまえた／時間ぎれで にげる／とちゅうで タブを 移ると 止まる
+function mgAsync(){try{
+  S.sess=null;S.ch=7;S.str=S.wise=S.world=S.heart=68;S.flags.outIntro=true;S.items.net=3;S.dex={};S.view="battle";S.sub="menu";UI.instantWalk=false;
+  const a=AREAS[0];S.explore={area:a.id,d:ymd(),spots:genSpots(a),pos:{x:8,y:88},n:0};S.daily.explore=a.id;S.explore.spots.forEach(s=>{if(s.k==="creature")s.flee=false});
+  const zs=S.explore.spots.map((s,i)=>[s,i]).filter(([s])=>s.k==="creature");
+  const begin=(k,g)=>{const [s,i]=zs[k];UI.enc={i,z:s.z,over:false,stop:null,game:g};S.sub="mg";render();return s};
+  const s0=begin(0,"tap");const t=document.querySelector("#mgbox .mgtarget");t.click();t.click();t.click();
+  chk(S.sub==="mg"&&UI.enc&&UI.enc.over===true&&!S.dex[s0.z],"3かい タッチ：結果は すこし まってから");
+  setTimeout(()=>{chk(S.sub==="caught"&&!!S.dex[s0.z]&&S.items.net===2&&UI.enc===null,"0.8秒後に つかまえた");
+    S.sub="map";const s1=begin(1,"tap");
+    setTimeout(()=>{chk(S.sub==="spot"&&!S.dex[s1.z]&&S.items.net===2&&s1.done,"時間ぎれ（12秒）で にげる。あみ は へらない");
+      S.sub="map";const s2=begin(2,"tap");S.view="growth";S.sub="menu";render();
+      setTimeout(()=>{chk(S.view==="growth"&&S.sub==="menu"&&!s2.done&&!S.dex[s2.z]&&UI.enc&&UI.enc.stop===null,"とちゅうで タブを 移ると ゲームは 止まり、何も起きない");finish()},13500)},13500)},1000);
+}catch(e){log("EXC",e&&e.stack||e);fails++;finish()}}
 function finish(){$("log").textContent=L.join("\n");document.title="DONE "+(fails?"NG":"OK")}
 });
 </script>

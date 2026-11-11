@@ -47,5 +47,19 @@ for(const c of COUNTRIES){
   for(const l of c.like||[])if(!COUNTRIES.some(x=>x.c===l))warn(`${c.c} の like に無い国: ${l}`);
 }
 console.log(`国：${COUNTRIES.length}か国（lv1 ${COUNTRIES.filter(c=>c.lv===1).length} / lv2 ${COUNTRIES.filter(c=>c.lv===2).length} / lv3 ${COUNTRIES.filter(c=>c.lv===3).length}）`);
+// ずかん：id の重複、エリア、まめちしき の長さ、img / cut の印と ファイル
+vm.runInContext(fs.readFileSync(path.join(ROOT,"js/zukan.js"),"utf8"),ctx,{filename:"zukan.js"});
+const ZUKAN=vm.runInContext("ZUKAN",ctx);const zids=new Set();const perArea={};
+for(const z of ZUKAN){
+  if(zids.has(z.id))warn(`zukan: id 重複 ${z.id}`);zids.add(z.id);perArea[z.area]=(perArea[z.area]||0)+1;
+  if(!z.id.startsWith(z.area+"_"))warn(`zukan: id と area が合わない ${z.id}`);
+  if(Array.from(String(z.fact)).length>20)warn(`zukan: まめちしき が長い ${z.id}`);
+  if(/[一-龥]/.test(z.n+z.fact+z.say))warn(`zukan: 漢字が入っている ${z.id}`);
+  const jp=path.join(ROOT,`img/zukan/${z.id}.jpg`),cp=path.join(ROOT,`img/zukan/${z.id}_cut.png`);
+  if(z.img&&!fs.existsSync(jp))warn(`zukan: img:true なのに 写真が無い ${z.id}`);if(!z.img&&fs.existsSync(jp))warn(`zukan: 写真があるのに img:true が無い ${z.id}`);
+  if(z.cut&&!fs.existsSync(cp))warn(`zukan: cut:true なのに かげ が無い ${z.id}`);if(!z.cut&&fs.existsSync(cp))warn(`zukan: かげ があるのに cut:true が無い ${z.id}`);
+  if(z.img&&!fs.readFileSync(path.join(ROOT,"img/zukan/CREDITS.md"),"utf8").includes(`| ${z.id}.jpg |`))warn(`zukan: 出典が CREDITS.md に無い ${z.id}`);
+}
+console.log("ずかん："+Object.entries(perArea).map(([a,n])=>`${a} ${n}`).join(" / ")+`　写真 ${ZUKAN.filter(z=>z.img).length}　かげ ${ZUKAN.filter(z=>z.cut).length}`);
 console.log((info?`（写真待ち ${info} 件）\n`:"")+(bad?`${bad} 件の問題あり`:"OK"));
 process.exit(bad?1:0);

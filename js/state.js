@@ -5,13 +5,14 @@ const BROKEN_KEY="kabun5-broken"; // 読めなかったセーブの退避（⚙�
 // 絵文字（国旗の地域表示記号を含む）の判定。render.js / voice.js で共用
 const EMOJI_RE=/[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}]/u;
 // 画像トークン [img:pref/32.svg] / [img:photo/x.jpg|🏰]（| の後ろは画像が無いときの絵文字）。q や選択肢に書くと rich() が <img> にする
+var IMG_BASE="./img/"; // 画像の置き場所（dev/ のページは "../img/" に差し替える）
 const PIC_RE=/\[img:([\w\/.-]+)(?:\|([^\]]*))?\]/g;
 function isPic(s){return EMOJI_RE.test(String(s))||/\[img:/.test(String(s))}
 function stripPic(s){return String(s).replace(PIC_RE,"")}
 function picFail(im){try{im.replaceWith(document.createTextNode(im.dataset.fb||"🖼️"))}catch(e){}}
 const H=()=>({n:0,best:0,miss:{},last:[]});
 const FRESH=()=>({name:"",kids:[],intro:0,ch:0,str:0,wise:0,world:0,heart:0,view:"growth",sub:"menu",line:0,hp:50,foe:null,sess:null,
-  daily:{d:"",done:{},score:{},diary:false,bonus:false,bonusNet:false,explore:null},cap:1,explore:null,
+  daily:{d:"",done:{},score:{},diary:false,bonus:false,bonusNet:false,explore:null},cap:1,explore:null,seen:{},uraHp:{},foeKeep:null,
   lv:{num:1,eng:1,flag:1,animal:1},rev:{num:[],eng:[],flag:[],animal:[]},hist:{num:H(),eng:H(),flag:H(),animal:H()},
   used:{},items:{net:0},dex:{},flags:{},custom:[],chips:null,voice:true,se:true,
   msg:null,diary:[],emo:"🌟",chip:null,memories:[],memo:"📸",part:"daily",pidx:-1,bgm:"gen1",bgmOn:true});
@@ -20,7 +21,10 @@ function migrate(){
   const fresh=FRESH();
   for(const k of STATS)S[k]=Math.max(0,Math.floor(Number(S[k])||0));
   if(typeof S.ch!=="number"||!isFinite(S.ch))S.ch=0;S.ch=Math.max(0,Math.floor(S.ch));
-  for(const key of ["daily","lv","rev","hist","used","items","dex","flags"])if(!S[key]||typeof S[key]!=="object"||Array.isArray(S[key]))S[key]=fresh[key];
+  for(const key of ["daily","lv","rev","hist","used","items","dex","flags","seen","uraHp"])if(!S[key]||typeof S[key]!=="object"||Array.isArray(S[key]))S[key]=fresh[key];
+  // うらボス と たたかっている途中で 閉じたとき：のこり HP を おぼえて（たおしていたら ずかんへ）、ぬし との たたかいかけ を もどす
+  if(S.foe&&typeof S.foe==="object"&&S.foe.ura){if(typeof S.foe.hp==="number"&&S.foe.hp<=0)S.dex[S.foe.ura]=S.dex[S.foe.ura]||{d:ymd(),n:1};else if(typeof S.foe.hp==="number")S.uraHp[S.foe.ura]=S.foe.hp;S.foe=(S.foeKeep&&typeof S.foeKeep==="object")?S.foeKeep:null}
+  S.foeKeep=null;
   if(!S.daily.done||typeof S.daily.done!=="object")S.daily.done={};if(!S.daily.score||typeof S.daily.score!=="object")S.daily.score={};
   for(const c of CATS){
     if(typeof S.lv[c]!=="number")S.lv[c]=1;if(!Array.isArray(S.rev[c]))S.rev[c]=[];
@@ -59,7 +63,7 @@ function migrate(){
   S.line=0;S.msg=null;
 }
 let S=FRESH();
-const UI={busy:false,busyText:"",exportText:null,pendingImport:null,confirm:false,draft:"",quota:"",lockUntil:0,pinBuf:"",pinNew:"",unlockUntil:0,pinFail:0,pinLockUntil:0,saveErr:false,replay:false,introSaid:false,sayPrefix:null,active:false,loadWarn:false,tapFn:null,doneSaid:"",pcheckUntil:0,pnext:null};
+const UI={busy:false,busyText:"",exportText:null,pendingImport:null,confirm:false,draft:"",quota:"",lockUntil:0,pinBuf:"",pinNew:"",unlockUntil:0,pinFail:0,pinLockUntil:0,saveErr:false,replay:false,introSaid:false,sayPrefix:null,active:false,loadWarn:false,tapFn:null,doneSaid:"",pcheckUntil:0,pnext:null,enc:null,caught:null,caughtSaid:false,dexId:null,mgForce:null,mgLast:null,mgSaid:null};
 // kabun5 → kabun4 の順に読む。kabun5 があるのに読めないときは BROKEN_KEY に退避してから古い方を読む（上書きで失わないように）
 function load(){for(const key of [SAVE_KEY,...OLD_KEYS]){let v=null;try{v=localStorage.getItem(key)}catch(e){}if(!v)continue;
     try{const o=JSON.parse(v);if(valid(o)){S=Object.assign(FRESH(),o);return key}}catch(e){}

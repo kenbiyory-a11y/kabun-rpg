@@ -118,21 +118,55 @@ S=FRESH();S.ch=8;migrate();migrate();ok(S.ch===9,"移行は一度だけ");
 S=FRESH();S.ch=7;S.str=S.wise=S.world=S.heart=98;S.foe=Object.assign(mkFoe(8),{ch:7,hp:100});delete S.flags.ch11;migrate();ok(S.ch===7&&S.foe===null,"旧 第8話（ホウリン）と戦いかけのセーブ：章は 7 のまま、ぬし が ケローンに変わるので戦いかけは捨てる");
 S=FRESH();S.ch=7;S.str=S.wise=S.world=S.heart=98;S.foe=Object.assign(mkFoe(7),{hp:100});migrate();ok(S.foe&&S.foe.id==="keroon"&&S.foe.hp===100,"いまの章の ぬし なら 戦いかけは残る");
 S=FRESH();migrate();S.explore={area:"grass",d:ymd(),spots:[]};migrate();ok(S.explore===null,"pos の無い たんけん データは捨てる");
-// たんけん：スポット生成と ずかん
+// たんけん：スポット生成（ダブりなし・にげる は 先に決める）
 S=FRESH();migrate();dayRoll();S.ch=6;S.str=S.wise=S.world=S.heart=58;
-{const sp=genSpots(AREAS[0]);const ks=sp.map(s=>s.k).sort().join(",");
- ok(sp.length===5&&ks==="creature,creature,creature,look,net"&&sp.every(s=>s.x>=4&&s.x<=96&&s.y>=58&&s.y<=90)&&new Set(sp.filter(s=>s.z).map(s=>s.z)).size===3,"スポットは いきもの3＋あみ1＋ながめる1、地面の帯の中、いきもの は重複なし: "+ks);
- ok(sp.filter(s=>s.z).every(s=>ZUKAN.find(z=>z.id===s.z&&z.area==="grass")),"いきもの は そのエリアの ずかん から")}
-ok(ZUKAN.length===25&&AREAS.every(a=>zukanOf(a).length===5&&zukanOf(a).filter(z=>z.rare).length===1),"ずかん は 5エリア × 5匹（✨ 1匹ずつ）");
+ok(zukanOf(AREAS[0]).length===20&&zukanOf(AREAS[0]).filter(z=>z.rare).length===3&&new Set(ZUKAN.map(z=>z.id)).size===ZUKAN.length&&ZUKAN.every(z=>Array.from(z.fact).length<=20),"ずかん：くさむら 20匹（✨ 3匹）、id の重複なし、まめちしき は 20文字以内");
+ok(AREAS.every(a=>zukanOf(a).length>=5),"どのエリアにも 5匹以上");
+for(let r=0;r<30;r++){const sp=genSpots(AREAS[0]);const cs=sp.filter(s=>s.k==="creature");
+ if(!(sp.length===5&&cs.length===3&&sp.filter(s=>s.k==="net").length===1&&sp.filter(s=>s.k==="look").length===1&&new Set(cs.map(s=>s.z)).size===3&&cs.some(s=>!s.flee)&&cs.every(s=>typeof s.flee==="boolean"&&zById(s.z).area==="grass")&&sp.every(s=>s.x>=4&&s.x<=96&&s.y>=58&&s.y<=90))){ok(false,"スポット生成 "+JSON.stringify(sp));break}
+ if(r===29)ok(true,"スポットは いきもの3（重複なし・1匹は かならず かげが出る）＋あみ1＋ながめる1")}
+{const got=zukanOf(AREAS[0]).slice(0,18);got.forEach(z=>S.dex[z.id]={d:ymd(),n:1});const sp=genSpots(AREAS[0]);const cs=sp.filter(s=>s.k==="creature");
+ ok(cs.length===2&&cs.every(s=>!S.dex[s.z])&&sp.filter(s=>s.k==="look").length===2,"のこり 2匹なら いきもの は 2つ（つかまえた ものは 出ない）");
+ zukanOf(AREAS[0]).forEach(z=>S.dex[z.id]={d:ymd(),n:1});const sp2=genSpots(AREAS[0]);ok(!sp2.some(s=>s.k==="creature")&&sp2.some(s=>s.k==="net"),"ぜんぶ つかまえたら いきもの は 出ない（あみ と ながめる だけ）");S.dex={}}
 S.explore={area:"grass",d:ymd(),spots:genSpots(AREAS[0]),pos:{x:8,y:88},n:0};syncBoss(AREAS[0]);
-ok(S.explore.spots.some(s=>s.k==="boss"&&s.id==="gakeen"),"ぬし が出ていれば 🪧 が足される");
-S.ch=7;syncBoss(AREAS[0]);ok(!S.explore.spots.some(s=>s.k==="boss"),"倒したら 🪧 は消える");
-S.view="battle";S.sub="map";{const i=S.explore.spots.findIndex(s=>s.k==="creature");const z=S.explore.spots[i].z;UI.instantWalk=true;arriveSpot(i);
- ok(S.explore.spots[i].done&&S.dex[z]&&S.dex[z].n===1&&S.sub==="spot"&&S.msg.includes("ずかんに のった"),"いきもの を みつけると ずかん に のる");
- S.explore.spots[i].done=false;S.sub="map";arriveSpot(i);ok(S.dex[z].n===2&&!S.msg.includes("ずかんに のった"),"2回目は かずだけ 増える")}
-{const i=S.explore.spots.findIndex(s=>s.k==="net");const before=S.items.net;S.view="battle";S.sub="map";arriveSpot(i);ok(S.items.net===before+1,"あみ のスポットで あみ +1");
- S.explore.spots[i].done=false;S.items.net=NET_MAX;S.view="battle";S.sub="map";arriveSpot(i);ok(S.items.net===NET_MAX&&S.msg.includes("いっぱい"),"あみ は上限を超えない");
+ok(S.explore.spots.some(s=>s.k==="boss"&&s.id==="gakeen")&&!S.explore.spots.some(s=>s.k==="ura"),"ぬし が出ていれば 右はしに ぬし（うらボス は まだ）");
+S.ch=7;syncBoss(AREAS[0]);ok(!S.explore.spots.some(s=>s.k==="boss")&&S.explore.spots.filter(s=>s.k==="ura").length===1&&S.explore.spots.find(s=>s.k==="ura").id==="ura_grass","ぬし を たおすと うらボス が出る");
+syncBoss(AREAS[0]);ok(S.explore.spots.filter(s=>s.k==="ura").length===1,"うらボス は 1つだけ（そろえ直しても増えない）");
+// かげ → ミニゲーム → つかまえる
+UI.instantWalk=true;S.view="battle";S.sub="map";S.items.net=2;
+{const cs=S.explore.spots.map((s,i)=>[s,i]).filter(([s])=>s.k==="creature");cs.forEach(([s])=>s.flee=false);
+ const [s0,i0]=cs[0];arriveSpot(i0);ok(S.sub==="enc"&&UI.enc&&UI.enc.z===s0.z&&!s0.done&&S.seen[s0.z]===true&&!S.dex[s0.z],"かげ が出る（まだ ずかん には のらない。であった しるし だけ）");
+ const g=pickMinigame(zById(s0.z));ok(MINIGAMES.length===5&&!!g&&MINIGAMES.filter(x=>x.ok(zById(s0.z))).length>=4,"ミニゲームは 5種類、しゃしん が無くても 4種類は あそべる");
+ UI.mgForce="count";ok(pickMinigame(zById(s0.z)).id==="count","テスト用に ゲームを 固定できる");UI.mgForce=null;
+ S.sub="mg";encResult(true);ok(S.sub==="caught"&&UI.caught===s0.z&&S.dex[s0.z]&&S.items.net===1&&s0.done&&UI.enc===null,"かつと つかまえる：ずかん に のり、あみ -1");
+ S.sub="map";const [s1,i1]=cs[1];arriveSpot(i1);S.sub="mg";encResult(false);ok(S.sub==="spot"&&!S.dex[s1.z]&&S.items.net===1&&s1.done&&S.msg.includes("また あえる"),"まけると にげる：あみ は へらない");
+ encResult(true);ok(!S.dex[s1.z],"結果は 1回だけ（であい が 終わったあとは 何も起きない）");
+ S.sub="map";S.items.net=0;const [s2,i2]=cs[2];arriveSpot(i2);ok(S.sub==="spot"&&!s2.done&&S.msg.includes("あみが ない")&&UI.enc===null,"あみ が 0 だと あそべない（スポットは のこる）");
+ S.sub="map";S.items.net=1;s2.flee=true;arriveSpot(i2);ok(S.sub==="spot"&&s2.done&&S.msg.includes("にげていった")&&!S.dex[s2.z]&&S.items.net===1,"にげる スポット：かげ も出ずに にげていく")}
+{S.sub="map";const i=S.explore.spots.findIndex(s=>s.k==="net");const before=S.items.net;arriveSpot(i);ok(S.items.net===before+1,"あみ のスポットで あみ +1");
+ S.explore.spots[i].done=false;S.items.net=NET_MAX;S.sub="map";arriveSpot(i);ok(S.items.net===NET_MAX&&S.msg.includes("いっぱい"),"あみ は上限を超えない");
  S.explore.spots[i].done=false;S.view="growth";S.sub="menu";arriveSpot(i);ok(!S.explore.spots[i].done&&S.sub==="menu","地図にいないときは 到着しても何も起きない")}
+// コンプリート
+{S.view="battle";S.sub="map";S.items.net=3;zukanOf(AREAS[0]).forEach(z=>S.dex[z.id]={d:ymd(),n:1});const last=zukanOf(AREAS[0])[19];delete S.dex[last.id];
+ S.explore.spots.push({k:"creature",x:50,y:70,z:last.id,flee:false,done:false,cover:"🌿"});const i=S.explore.spots.length-1;arriveSpot(i);S.sub="mg";encResult(true);
+ ok(S.flags.comp_grass===true&&zLeft(AREAS[0]).length===0,"20匹 ぜんぶ つかまえると コンプリート");S.explore.spots.splice(i,1)}
+// うらボス：バトル → かつと ずかんの ぬし に。ぬし との たたかいかけ は のこる
+{S.view="battle";S.sub="map";S.ch=7;S.str=S.wise=S.world=S.heart=68;S.foe=Object.assign(mkFoe(7),{hp:123});syncBoss(AREAS[0]);
+ ok(bossHere(AREAS[1])&&uraHere(AREAS[0])&&!uraHere(AREAS[1]),"かわ に ケローン、くさむら に うらボス");
+ const iu=S.explore.spots.findIndex(s=>s.k==="ura");arriveSpot(iu);
+ ok(S.sub==="fight"&&S.foe.ura==="ura_grass"&&S.foe.name==="クモーン"&&S.foe.ch===S.ch&&S.foeKeep&&S.foeKeep.id==="keroon"&&S.foeKeep.hp===123,"うらボス と バトル。ケローン との たたかいかけ は とっておく");
+ const u=uraOf("ura_grass");const st=Math.floor(power(u.weak)*multOf(u.weak,S.foe)),nm=Math.floor(power("wise")*multOf("wise",S.foe));
+ ok(u.hp>CHAPTERS[6].foe.hp&&Math.ceil(u.hp/st)<=6&&Math.ceil(u.hp/nm)>=7&&multOf(u.guard,S.foe)===0.5&&Math.ceil(maxHp()/u.dmg)>=8,`クモーン HP${u.hp}：★${Math.ceil(u.hp/st)}ターン、ふつう${Math.ceil(u.hp/nm)}ターン、反撃 ${Math.ceil(maxHp()/u.dmg)}ターン`);
+ S.foe.hp=300;uraLeave();ok(S.uraHp.ura_grass===300&&S.foe&&S.foe.id==="keroon"&&S.foe.hp===123&&S.foeKeep===null,"はなれると うらボス の きず を おぼえ、ケローン が もどる");
+ S.sub="map";arriveSpot(iu);ok(S.foe.ura==="ura_grass"&&S.foe.hp===300,"もういちど いくと きず は そのまま");
+ S.foe.hp=0;uraWin();ok(S.dex.ura_grass&&S.sub==="caught"&&UI.caught==="ura_grass"&&S.foe&&S.foe.id==="keroon"&&S.uraHp.ura_grass===undefined&&!uraHere(AREAS[0]),"かつと ずかんの ぬし に のり、もう 出ない。ケローン は のこる");
+ syncBoss(AREAS[0]);ok(!S.explore.spots.some(s=>s.k==="ura"),"かったあとは 地図から 消える");
+ ok(URA.length===5&&AREAS.every(a=>uraOfArea(a)&&uraOfArea(a).weak!==uraOfArea(a).guard&&CHARS[uraOfArea(a).id]),"うらボス は 5エリアに 1体ずつ（★ と 🛡️ は 別）")}
+// 読み込みなおし：うらボス と たたかっている途中
+S=FRESH();migrate();S.ch=7;S.str=S.wise=S.world=S.heart=68;S.foeKeep=Object.assign(mkFoe(7),{hp:99});S.foe={ch:7,id:"ura_grass",ura:"ura_grass",name:"クモーン",hp:250,max:670,dmg:13};migrate();
+ok(S.foe&&S.foe.id==="keroon"&&S.foe.hp===99&&S.uraHp.ura_grass===250&&S.foeKeep===null,"うらボス戦の途中で閉じても、きず を おぼえて ケローン戦 に もどる");
+S=FRESH();migrate();S.ch=7;S.foe={ch:7,id:"ura_grass",ura:"ura_grass",name:"クモーン",hp:0,max:670,dmg:13};migrate();ok(S.dex.ura_grass&&S.foe===null,"たおした直後に閉じても ずかん に のる");
+S=FRESH();migrate();dayRoll();S.explore={area:"grass",d:ymd(),spots:[],pos:{x:8,y:88},n:0};
 S.daily.explore="grass";S.daily.d="2000-01-01";S.explore.d="2000-01-01";dayRoll();ok(S.daily.explore===null&&S.explore===null,"日付が変わると たんけん は消える（翌日また 1回）");
 // クガーンの しけん：ダメージは 1、5ターン目に ふきとばされる
 S=FRESH();migrate();S.ch=6;S.str=S.wise=S.world=S.heart=58;S.view="battle";startTrial();

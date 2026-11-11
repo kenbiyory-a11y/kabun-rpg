@@ -26,7 +26,7 @@ function renderDiary(msg,menu){
   inp.addEventListener("keydown",e=>{if(e.key==="Enter")add.click()});
   const story=el("button","wide","📖 はじまりの おはなしを みる");story.onclick=()=>{UI.replay=true;S.intro=0;UI.introSaid=false;sfx("tap");render()};
   const all=(typeof ZUKAN==="undefined"?[]:ZUKAN).filter(z=>!z.hidden);const got=all.filter(z=>S.dex&&S.dex[z.id]).length;
-  const dex=el("button","wide",`📗 ずかん<small>みつけた いきもの ${got} / ${all.length}</small>`);dex.onclick=()=>{S.sub="dex";S.msg=null;sfx("tap");save();render()};
+  const dex=el("button","wide",`📗 ずかん<small>つかまえた いきもの ${got} / ${all.length}</small>`);dex.onclick=()=>{S.sub="dex";UI.dexId=null;S.msg=null;sfx("tap");save();render()};
   menu.append(emo,chips,inp,add,dex,story);
 }
 function renderDailyEntry(msg,menu){
