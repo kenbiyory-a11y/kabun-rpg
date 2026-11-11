@@ -27,6 +27,13 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-
 .field.a-sky{background:#274a35 url("../img/bg/sky.svg") center bottom/cover no-repeat}
 .field.a-sea{background:#e9cf8a url("../img/bg/sea.svg") center bottom/cover no-repeat}
 .field.a-forest{background:#553b20 url("../img/bg/forest.svg") center bottom/cover no-repeat}
+.field.a-dino{background:#7a6a3a url("../img/bg/dino.svg") center bottom/cover no-repeat}
+.field.a-deep{background:#06122e url("../img/bg/deep.svg") center bottom/cover no-repeat}
+.field.a-space{background:#0b0b26 url("../img/bg/space.svg") center bottom/cover no-repeat}
+.field.world.w2{background:#1b1440 url("../img/bg/world2.svg") center/100% 100% no-repeat}
+.field.world.w2 .wpath line{stroke:#d9c8ff}
+.wnode.door{width:104px;border-radius:12px;background:#fff3c9}
+.wnode.door.locked{background:#dcd9c8}
 .wpath{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .wpath line{stroke:#f6ebc4;stroke-width:7;stroke-linecap:round;stroke-dasharray:2 12;vector-effect:non-scaling-stroke}
 .whome{position:absolute;transform:translate(-50%,-50%);font-size:2.2rem;line-height:1;filter:drop-shadow(0 3px 0 rgba(0,0,0,.25))}

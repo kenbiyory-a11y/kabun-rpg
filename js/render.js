@@ -250,7 +250,7 @@ function renderBattle(msg,menu,tapBtn){
     const from=stageIdx(),to=c.evolve;
     if(S.line===0){fieldGrowth(from,true);sfx("evolve");const t="おや……？ カブーンの ようすが……！";typeText(msg,t,()=>{msg.append(el("span","cur","▼"))});say(t);tapBtn("▶ つぎへ",()=>{S.line=1;save();render()})}
     else{fieldGrowth(to,true);const mv=STATS.map(k=>`${STAT_ICO[k]} ${esc(moveAt(k,to,S[k]).n)}`).join("　");
-      let extra="";if(to===3)extra='<div class="note2">🌳 そとへ でられるように なった！ 「そと」の タブで くさむらを たんけんしよう</div>';if(to===4)extra='<div class="note2">👑 おうかんには とき と うみ と そら を こえる ちからが ある……（とびらは じゅんびちゅう）</div>';
+      let extra="";if(to===3)extra='<div class="note2">🌳 そとへ でられるように なった！ 「そと」の タブで くさむらを たんけんしよう</div>';if(to===4)extra='<div class="note2">👑 おうかんには とき と うみ と そら を こえる ちからが ある…… そとの ちずの 🚪 ふしぎな とびらが ひらいた！</div>';
       msg.innerHTML=`🎉 おめでとう！<br>カブーンは「<b>${STAGES[to].name}</b>」に せいちょうした！<div class="note2">✨ あたらしい わざ 4つ！<br>${mv}</div>${extra}`;
       if(S.line===1){S.line=2;say(`おめでとう！ カブーンは ${STAGES[to].name}に せいちょうした！ あたらしい わざが 4つ！`)}
       menu.className="menu one";const b=el("button","wide","▶ すすむ");b.onclick=()=>{clearChapter();save();render()};menu.append(b)}

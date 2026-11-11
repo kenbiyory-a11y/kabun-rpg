@@ -100,12 +100,14 @@ voiceSet("");VOICE.list=[];VOICE.ja=false;
 
 console.log("== 4f. そと（エリア・ぬし・たんけん） ==");
 ok(CHAPTERS.length===11&&CHAPTERS[7].foe.name==="ケローン"&&CHAPTERS[7].lv===35&&CHAPTERS[9].foe.name==="サメーン"&&CHAPTERS[9].lv===45&&CHAPTERS[10].evolve===4,"11章：Lv35 ケローン、Lv45 サメーン、最終話は クガーン");
-ok(AREAS.map(a=>a.id).join(",")==="grass,river,sky,sea,forest"&&AREAS.every(a=>areaBossIdx(a)>=6),"5エリアに ぬし が1体ずつ");
+ok(AREAS.filter(a=>!a.king).map(a=>a.id).join(",")==="grass,river,sky,sea,forest"&&AREAS.filter(a=>!a.king).every(a=>areaBossIdx(a)>=6)&&AREAS.filter(a=>a.king).map(a=>a.id).join(",")==="dino,deep,space","5エリアに ぬし が1体ずつ。キングの 3エリア（きょうりゅう・しんかい・うちゅう）");
 S=FRESH();migrate();S.ch=6;S.str=S.wise=S.world=S.heart=58;
 ok(stageIdx()===3&&areaOpen(AREAS[0])&&!areaOpen(AREAS[1])&&bossHere(AREAS[0])&&!bossHere(AREAS[1]),"せいちゅう Lv30：くさむら だけ ひらき、ガキーン が出ている");
 S.ch=7;ok(areaOpen(AREAS[1])&&!areaOpen(AREAS[2])&&!bossHere(AREAS[1]),"ガキーンを倒すと かわ が ひらく（ケローンは Lv35 まで出ない）");
 S.str=S.wise=S.world=S.heart=68;ok(level()===35&&bossHere(AREAS[1])&&!bossHere(AREAS[0]),"Lv35 で かわ に ケローン");
-S.ch=11;ok(stageIdx()===4&&AREAS.every(areaOpen)&&chapterReady()===null,"全部倒すと キングで どこでも ひらく");
+S.ch=10;ok(stageIdx()===3&&AREAS.filter(a=>a.king).every(a=>!areaOpen(a)),"キング に なるまで ふしぎな せかい は ひらかない");
+S.ch=11;ok(stageIdx()===4&&AREAS.every(areaOpen)&&chapterReady()===null&&AREAS.filter(a=>a.king).every(a=>!bossHere(a)&&!uraHere(a)),"全部倒すと キングで どこでも ひらく（ふしぎな せかい も。ぬし は いない）");
+{const sp=genSpots(areaOf("dino"));ok(sp.filter(s=>s.k==="creature").length===3&&sp.every(s=>s.y>=64&&s.y<=90)&&sp.filter(s=>s.z).every(s=>s.z.startsWith("dino_")),"きょうりゅうじだい の スポット")}
 S.ch=1;ok(!areaOpen(AREAS[0]),"ようちゅう は そとに 出られない");
 // ケローン／サメーン の強さ：★連打 5ターン、ふつう 8ターン、反撃は 8ターン以上もつ
 S.ch=7;S.str=S.wise=S.world=S.heart=68;{const f=mkFoe(7);const st=Math.floor(power("world")*multOf("world",f)),nm=Math.floor(power("str")*multOf("str",f)),gd=Math.floor(power("heart")*multOf("heart",f));
@@ -121,7 +123,7 @@ S=FRESH();migrate();S.explore={area:"grass",d:ymd(),spots:[]};migrate();ok(S.exp
 // たんけん：スポット生成（ダブりなし・にげる は 先に決める）
 S=FRESH();migrate();dayRoll();S.ch=6;S.str=S.wise=S.world=S.heart=58;
 ok(zukanOf(AREAS[0]).length===20&&zukanOf(AREAS[0]).filter(z=>z.rare).length===3&&new Set(ZUKAN.map(z=>z.id)).size===ZUKAN.length&&ZUKAN.every(z=>Array.from(z.fact).length<=20),"ずかん：くさむら 20匹（✨ 3匹）、id の重複なし、まめちしき は 20文字以内");
-ok(AREAS.every(a=>zukanOf(a).length>=5),"どのエリアにも 5匹以上");
+ok(ZUKAN.length===160&&AREAS.length===8&&AREAS.every(a=>zukanOf(a).length===20&&zukanOf(a).filter(z=>z.rare).length===3),"ずかん は 8エリア × 20（✨ 3つずつ）＝ 160");
 for(let r=0;r<30;r++){const sp=genSpots(AREAS[0]);const cs=sp.filter(s=>s.k==="creature");
  if(!(sp.length===5&&cs.length===3&&sp.filter(s=>s.k==="net").length===1&&sp.filter(s=>s.k==="look").length===1&&new Set(cs.map(s=>s.z)).size===3&&cs.some(s=>!s.flee)&&cs.every(s=>typeof s.flee==="boolean"&&zById(s.z).area==="grass")&&sp.every(s=>s.x>=4&&s.x<=96&&s.y>=58&&s.y<=90))){ok(false,"スポット生成 "+JSON.stringify(sp));break}
  if(r===29)ok(true,"スポットは いきもの3（重複なし・1匹は かならず かげが出る）＋みつ1＋ながめる1")}
@@ -168,7 +170,7 @@ UI.instantWalk=true;S.view="battle";S.sub="map";S.items.net=2;
  S.sub="map";arriveSpot(iu);ok(S.foe.ura==="ura_grass"&&S.foe.hp===300,"もういちど いくと きず は そのまま");
  S.foe.hp=0;uraWin();ok(S.dex.ura_grass&&S.sub==="caught"&&UI.caught==="ura_grass"&&S.foe&&S.foe.id==="keroon"&&S.uraHp.ura_grass===undefined&&!uraHere(AREAS[0]),"かつと ずかんの ぬし に のり、もう 出ない。ケローン は のこる");
  syncBoss(AREAS[0]);ok(!S.explore.spots.some(s=>s.k==="ura"),"かったあとは 地図から 消える");
- ok(URA.length===5&&AREAS.every(a=>uraOfArea(a)&&uraOfArea(a).weak!==uraOfArea(a).guard&&CHARS[uraOfArea(a).id]),"うらボス は 5エリアに 1体ずつ（★ と 🛡️ は 別）")}
+ ok(URA.length===5&&AREAS.filter(a=>!a.king).every(a=>uraOfArea(a)&&uraOfArea(a).weak!==uraOfArea(a).guard&&CHARS[uraOfArea(a).id]),"うらボス は 5エリアに 1体ずつ（★ と 🛡️ は 別）")}
 // 読み込みなおし：うらボス と たたかっている途中
 S=FRESH();migrate();S.ch=7;S.str=S.wise=S.world=S.heart=68;S.foeKeep=Object.assign(mkFoe(7),{hp:99});S.foe={ch:7,id:"ura_grass",ura:"ura_grass",name:"クモーン",hp:250,max:670,dmg:13};migrate();
 ok(S.foe&&S.foe.id==="keroon"&&S.foe.hp===99&&S.uraHp.ura_grass===250&&S.foeKeep===null,"うらボス戦の途中で閉じても、きず を おぼえて ケローン戦 に もどる");

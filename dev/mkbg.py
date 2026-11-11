@@ -1,4 +1,4 @@
-# そと の 背景イラスト（SVG）を作る：grass / river / sky / sea / forest（500x250）と world（500x340）。乱数は 種を固定して 毎回 同じ絵にする
+# そと の 背景イラスト（SVG）を作る：grass / river / sky / sea / forest / dino / deep / space（500x250）と world / world2（500x340）。乱数は 種を固定して 毎回 同じ絵にする
 import os, random, math, sys
 OUT = sys.argv[1]; os.makedirs(OUT, exist_ok=True)
 def svg(w, h, body): return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" preserveAspectRatio="xMidYMid slice">{body}</svg>'
@@ -132,4 +132,86 @@ for _ in range(28):
 for x, y in [(168, 250), (332, 240), (250, 300), (200, 130), (300, 128)]: b += flower(x, y, R.choice(["#fff", "#ffd94a", "#ff8fb1"]), .7)
 b += tree(150, 312, .5) + tree(352, 316, .45) + tree(232, 120, .4, "#4f9f4a", "#6ab55c")
 open(os.path.join(OUT, "world.svg"), "w", encoding="utf-8").write(svg(W, H, b).replace('preserveAspectRatio="xMidYMid slice"', 'preserveAspectRatio="none"'))
+# ================= キングの 3エリア と ふしぎな せかい の ちず =================
+def fern(x, y, s=1, c="#2f7a3a"):
+    out = ""
+    for a in (-60, -30, 0, 30, 60):
+        r = math.radians(a - 90); ex, ey = x + 22 * s * math.cos(r), y + 22 * s * math.sin(r)
+        out += f'<path d="M{x},{y} Q{(x+ex)/2+4*s*math.cos(r+1.5):.1f},{(y+ey)/2+4*s*math.sin(r+1.5):.1f} {ex:.1f},{ey:.1f}" stroke="{c}" stroke-width="{3.2*s:.1f}" fill="none" stroke-linecap="round"/>'
+    return out
+def cycad(x, y, s=1):
+    out = f'<path d="M{x-5*s:.0f},{y} q{-2*s:.0f},{-26*s:.0f} {3*s:.0f},{-46*s:.0f} h{6*s:.0f} q{3*s:.0f},{22*s:.0f} {2*s:.0f},{46*s:.0f}Z" fill="#7a5a36"/>'
+    for a in (-70, -40, -12, 12, 40, 70):
+        r = math.radians(a - 90); ex, ey = x + 34 * s * math.cos(r), y - 46 * s + 30 * s * math.sin(r) + 12 * s
+        out += f'<path d="M{x},{y-46*s:.0f} Q{(x+ex)/2:.0f},{y-70*s:.0f} {ex:.0f},{ey:.0f}" stroke="#2f8a3a" stroke-width="{5*s:.1f}" fill="none" stroke-linecap="round"/>'
+    return out
+
+# ---------- きょうりゅうじだい（地面は y=152 から）----------
+R = random.Random(77); b = defs(lg("s", [(0, "#ffb36b"), (.55, "#ffd9a0"), (1, "#fff0c9")]), lg("g", [(0, "#9aa85a"), (1, "#6f7f3c")]))
+b += '<rect width="500" height="250" fill="url(#s)"/><circle cx="96" cy="56" r="30" fill="#fff1b8" opacity=".8"/><circle cx="96" cy="56" r="20" fill="#ffe680"/>'
+b += cloud(300, 40, 1.0, "#fff6e0", .8) + cloud(190, 70, .7, "#fff6e0", .7)
+b += '<path d="M330,150 L392,58 L410,58 L470,150Z" fill="#7b5d4a"/><path d="M392,58 L401,44 L410,58Z" fill="#5d4638"/><path d="M394,58 q7,-10 14,0 q-2,18 6,34 q-10,-6 -14,-22 q-6,10 -12,12 q8,-10 6,-24Z" fill="#ff6a3c"/>'
+b += '<g fill="#b9a9a0" opacity=".85"><circle cx="404" cy="30" r="12"/><circle cx="418" cy="18" r="9"/><circle cx="392" cy="16" r="8"/></g>'
+b += hill("0,140 Q80,104 170,134 T330,120 T500,138", "#b8b86a") + hill("0,150 Q130,128 260,146 T500,140", "#a3ad5c")
+b += '<path d="M218,70 l10,-6 12,5 -9,3 -4,7 -3,-7Z" fill="#6b5a52"/><path d="M150,96 l8,-5 10,4 -8,2 -3,6 -2,-6Z" fill="#6b5a52"/>'
+b += '<path d="M0,152 Q125,142 250,152 T500,149 V250 H0Z" fill="url(#g)"/>'
+b += cycad(44, 170, 1.0) + cycad(462, 166, 1.1) + cycad(250, 150, .55)
+for _ in range(12): b += fern(R.uniform(10, 490), R.uniform(170, 246), R.uniform(.6, 1.0), R.choice(["#2f7a3a", "#3f8f3a", "#2a6a33"]))
+for _ in range(8): b += rock(R.uniform(20, 480), R.uniform(176, 244), R.uniform(.5, .9))
+b += '<path d="M176,238 q8,-12 16,0 q8,12 16,0" stroke="#e9dfc4" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="174" cy="238" r="4" fill="#e9dfc4"/><circle cx="210" cy="238" r="4" fill="#e9dfc4"/>'
+b += '<ellipse cx="330" cy="226" rx="9" ry="12" fill="#f3ead8"/><path d="M324,220 l4,4 4,-4 4,4" stroke="#c9b98f" stroke-width="1.5" fill="none"/>'
+open(os.path.join(OUT, "dino.svg"), "w", encoding="utf-8").write(svg(500, 250, b))
+
+# ---------- しんかい（うみの そこ は y=162 から）----------
+R = random.Random(88); b = defs(lg("s", [(0, "#0c3a6b"), (.5, "#082650"), (1, "#040f2a")]), lg("g", [(0, "#26355a"), (1, "#141d3a")]))
+b += '<rect width="500" height="250" fill="url(#s)"/><path d="M210,0 l-70,170 h60 l60,-170Z" fill="#9fd8ff" opacity=".07"/><path d="M330,0 l-30,150 h36 l40,-150Z" fill="#9fd8ff" opacity=".05"/>'
+for _ in range(40): b += f'<circle cx="{R.uniform(0,500):.0f}" cy="{R.uniform(0,160):.0f}" r="{R.uniform(.8,2):.1f}" fill="#bfe8ff" opacity="{R.uniform(.15,.5):.2f}"/>'
+for x in (70, 96, 410, 250):
+    for k in range(5): b += f'<circle cx="{x+R.uniform(-6,6):.0f}" cy="{150-k*26+R.uniform(-6,6):.0f}" r="{2+k*.7:.1f}" fill="none" stroke="#bfe8ff" stroke-width="1.4" opacity="{.6-k*.08:.2f}"/>'
+b += '<path d="M0,150 L40,110 L70,140 L110,96 L150,150Z" fill="#101c3c"/><path d="M360,150 L400,104 L430,132 L470,90 L500,120 V150Z" fill="#101c3c"/>'
+b += '<path d="M0,162 Q125,152 250,162 T500,159 V250 H0Z" fill="url(#g)"/>'
+for x, h, c in [(40, 46, "#ff7aa8"), (58, 34, "#ff9ac0"), (446, 50, "#7ad9c8"), (466, 36, "#9be6d6"), (300, 30, "#ffb36b")]:
+    b += f'<path d="M{x},176 q-6,-{h/2:.0f} 0,-{h} M{x},{176-h/2:.0f} q8,-6 10,-16 M{x},{176-h/3:.0f} q-8,-4 -10,-14" stroke="{c}" stroke-width="4" fill="none" stroke-linecap="round"/>'
+for x in (150, 380):
+    for k in (-1, 0, 1): b += f'<path d="M{x+k*9},200 q{k*4},-20 {k*2},-42" stroke="#f6e7b6" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="{x+k*11}" cy="158" r="5" fill="#ff5a5a"/>'
+for _ in range(9): b += rock(R.uniform(20, 480), R.uniform(190, 246), R.uniform(.5, 1.0)).replace("#9aa0a6", "#3a4a72").replace("#c9ced3", "#5a6a96")
+for _ in range(14):
+    x, y = R.uniform(10, 490), R.uniform(40, 240); c = R.choice(["#7df9ff", "#b6ff8a", "#ffe66b"]); b += f'<circle cx="{x:.0f}" cy="{y:.0f}" r="6" fill="{c}" opacity=".14"/><circle cx="{x:.0f}" cy="{y:.0f}" r="1.8" fill="{c}"/>'
+open(os.path.join(OUT, "deep.svg"), "w", encoding="utf-8").write(svg(500, 250, b))
+
+# ---------- うちゅう（つきの じめん は y=156 から）----------
+R = random.Random(99); b = defs(lg("s", [(0, "#05051c"), (1, "#191445")]), lg("g", [(0, "#b9bcc8"), (1, "#868a9a")]))
+b += '<rect width="500" height="250" fill="url(#s)"/>'
+b += '<ellipse cx="250" cy="70" rx="260" ry="40" fill="#6b5bd6" opacity=".12" transform="rotate(-14 250 70)"/><ellipse cx="250" cy="70" rx="220" ry="16" fill="#c9b8ff" opacity=".10" transform="rotate(-14 250 70)"/>'
+for _ in range(110): b += star(R.uniform(0, 500), R.uniform(0, 160), R.uniform(.6, 2.0), R.choice(["#fff", "#fff8c9", "#cfe3ff", "#ffd6f0"]), R.uniform(.5, 1))
+b += '<circle cx="92" cy="58" r="30" fill="#2f7fd6"/><path d="M70,48 q12,-10 24,-2 q-4,10 -14,10 q-8,6 -10,-8Z M96,66 q10,-4 18,4 q-8,10 -18,6Z" fill="#4fb84f"/><path d="M66,44 q20,-8 44,2" stroke="#fff" stroke-width="3" fill="none" opacity=".6"/><circle cx="92" cy="58" r="30" fill="none" stroke="#9fd8ff" stroke-width="3" opacity=".5"/>'
+b += '<ellipse cx="392" cy="56" rx="46" ry="10" fill="none" stroke="#e9cf8a" stroke-width="5" transform="rotate(-18 392 56)"/><circle cx="392" cy="56" r="22" fill="#e0b060"/><path d="M372,50 h40 M371,60 h42" stroke="#c8943f" stroke-width="3"/><path d="M349,70 a46,10 -18 0 0 86,-28" fill="none" stroke="#f3dfa6" stroke-width="5"/>'
+b += '<path d="M230,30 l40,22" stroke="#fff" stroke-width="2" opacity=".7" stroke-linecap="round"/><circle cx="230" cy="30" r="2.6" fill="#fff"/><circle cx="300" cy="112" r="9" fill="#d8644a"/><circle cx="182" cy="118" r="5" fill="#c9c9d6"/>'
+b += '<path d="M0,156 Q125,142 250,156 T500,152 V250 H0Z" fill="url(#g)"/>'
+for x, y, r in [(70, 190, 22), (190, 226, 16), (300, 182, 13), (400, 214, 24), (470, 176, 10), (128, 172, 8), (350, 238, 10)]:
+    b += f'<ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*.42:.0f}" fill="#7b7f90"/><ellipse cx="{x}" cy="{y+r*.1:.0f}" rx="{r*.8:.0f}" ry="{r*.28:.0f}" fill="#9a9eae"/>'
+for _ in range(16): b += f'<circle cx="{R.uniform(4,496):.0f}" cy="{R.uniform(166,247):.0f}" r="{R.uniform(1,2.4):.1f}" fill="#6f7384"/>'
+b += '<path d="M244,206 v-34" stroke="#e8e8ee" stroke-width="2.5"/><path d="M244,172 h20 l-4,6 4,6 h-20Z" fill="#ff5a5a"/>'
+open(os.path.join(OUT, "space.svg"), "w", encoding="utf-8").write(svg(500, 250, b))
+
+# ---------- ふしぎな せかい の ちず（500x340。ふだ：きょうりゅう 17,60／しんかい 50,17／うちゅう 83,60、まんなか 50,58、とびら 50,90）----------
+R = random.Random(101); W, H = 500, 340
+b = defs(lg("g", [(0, "#2a1f5c"), (1, "#3d2f7a")]))
+b += f'<rect width="{W}" height="{H}" fill="url(#g)"/>'
+for _ in range(60): b += star(R.uniform(0, 500), R.uniform(0, 340), R.uniform(.6, 1.8), R.choice(["#fff", "#ffe9a8", "#d9c8ff"]), R.uniform(.3, .8))
+# きょうりゅうじだい（左）：かざん と ジャングル
+b += '<path d="M0,96 Q90,90 150,150 T170,290 Q90,330 0,320Z" fill="#b8b86a"/><path d="M14,196 L60,120 L74,120 L118,196Z" fill="#7b5d4a"/><path d="M60,120 q7,-10 14,0 q-1,14 5,26 q-9,-5 -12,-18 q-5,8 -10,10 q6,-9 3,-18Z" fill="#ff6a3c"/>'
+b += '<g fill="#cfc2bb" opacity=".8"><circle cx="68" cy="98" r="9"/><circle cx="80" cy="88" r="7"/></g>' + cycad(132, 250, .5) + cycad(30, 280, .55) + fern(100, 300, .7) + fern(60, 240, .6)
+# しんかい（上）：ふかい うみ
+b += '<path d="M130,0 H370 V80 Q250,128 130,80Z" fill="#072a5c"/><path d="M130,80 Q250,128 370,80" stroke="#3f7fd0" stroke-width="5" fill="none"/>'
+for _ in range(14): b += f'<circle cx="{R.uniform(140,360):.0f}" cy="{R.uniform(8,84):.0f}" r="{R.uniform(1.4,3.4):.1f}" fill="none" stroke="#bfe8ff" stroke-width="1.3" opacity=".6"/>'
+b += '<path d="M176,74 q-5,-14 0,-28 M176,60 q7,-5 8,-13" stroke="#ff7aa8" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M322,78 q-5,-12 0,-24 M322,66 q-7,-4 -8,-12" stroke="#7ad9c8" stroke-width="3.5" fill="none" stroke-linecap="round"/><circle cx="214" cy="36" r="2" fill="#7df9ff"/><circle cx="292" cy="30" r="2" fill="#b6ff8a"/>'
+# うちゅう（右）：ほし と わくせい
+b += '<path d="M500,96 Q410,90 350,150 T330,290 Q410,330 500,320Z" fill="#0b0b26"/>'
+for _ in range(34): b += star(R.uniform(350, 498), R.uniform(104, 316), R.uniform(.7, 1.9), R.choice(["#fff", "#fff8c9", "#cfe3ff"]), R.uniform(.6, 1))
+b += '<ellipse cx="452" cy="150" rx="30" ry="7" fill="none" stroke="#e9cf8a" stroke-width="4" transform="rotate(-18 452 150)"/><circle cx="452" cy="150" r="14" fill="#e0b060"/><circle cx="388" cy="262" r="12" fill="#2f7fd6"/><path d="M380,258 q8,-6 14,0 q-4,6 -10,5Z" fill="#4fb84f"/><circle cx="470" cy="282" r="7" fill="#d8644a"/>'
+# まんなか：ふしぎな ひかり
+b += '<circle cx="250" cy="200" r="70" fill="#fff3a0" opacity=".06"/><circle cx="250" cy="200" r="44" fill="#fff3a0" opacity=".07"/>'
+for _ in range(10): b += f'<path d="M{R.uniform(190,310):.0f},{R.uniform(150,300):.0f} l2,5 5,2 -5,2 -2,5 -2,-5 -5,-2 5,-2Z" fill="#ffe9a8" opacity=".7"/>'
+open(os.path.join(OUT, "world2.svg"), "w", encoding="utf-8").write(svg(W, H, b).replace('preserveAspectRatio="xMidYMid slice"', 'preserveAspectRatio="none"'))
 for f in sorted(os.listdir(OUT)): print(f, os.path.getsize(os.path.join(OUT, f)))

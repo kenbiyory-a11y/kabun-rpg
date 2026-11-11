@@ -81,7 +81,11 @@ const AREAS=[
  {id:"river", n:"かわ",    ico:"🏞️",bg:"river", ground:[74,92],look:"💧 みずに カブーンが うつってる。りっぱな つの！"},
  {id:"sky",   n:"そら",    ico:"🌙",bg:"night", ground:[60,90],look:"⭐ ほしが いっぱい。おおきな つきが でている"},
  {id:"sea",   n:"うみ",    ico:"🌊",bg:"sea",   ground:[76,92],look:"🐚 なみの おとが ざざーん。かいがらが おちている"},
- {id:"forest",n:"もり",    ico:"🌳",bg:"forest",ground:[62,90],look:"🍄 おおきな きの したに きのこが はえている"}
+ {id:"forest",n:"もり",    ico:"🌳",bg:"forest",ground:[62,90],look:"🍄 おおきな きの したに きのこが はえている"},
+ // ---- キング カブーン に なると ひらく「ふしぎな せかい」（king:true。せかいちず の 🚪 ふしぎな とびら から）。ぬし は まだ いない ----
+ {id:"dino",  n:"きょうりゅうじだい",ico:"🦕",bg:"dino", ground:[64,90],look:"🌋 とおくで かざんが どーん！ じめんが ゆれた",king:true},
+ {id:"deep",  n:"しんかい",        ico:"🌑",bg:"deep", ground:[68,92],look:"💧 あわが ぷくぷく。まっくらで しずかだ",king:true},
+ {id:"space", n:"うちゅう",        ico:"🚀",bg:"space",ground:[66,90],look:"🌍 とおくに あおい ちきゅうが みえる",king:true}
 ];
 // うらボス：その エリアの ぬし を たおしたあと、地図の 右はしに でる。かつと ずかんの「ぬし」に のる（1かい きり）。まけても そんは なく、きずは のこる。
 // 【仮】なまえ・え・にがて は 仮おき。差し替えるときは この表を なおし、絵は img/chars/<id>.png に置く（id は 変えない。S.dex / S.uraHp に のこるため）
@@ -96,7 +100,7 @@ const URA=[
 function areaOf(id){return AREAS.find(a=>a.id===id)||null}
 function areaBossIdx(a){return CHAPTERS.findIndex(c=>c.area===a.id)}
 // ひらいているか：せいちゅう以降で、最初のエリアか、ひとつ前のエリアの ぬし を倒している
-function areaOpen(a){const i=AREAS.indexOf(a);if(i<0||stageIdx()<3)return false;if(i===0)return true;return S.ch>areaBossIdx(AREAS[i-1])}
+function areaOpen(a){const i=AREAS.indexOf(a);if(i<0||stageIdx()<3)return false;if(a.king)return stageIdx()>=4;if(i===0)return true;return S.ch>areaBossIdx(AREAS[i-1])}
 // このエリアに いま ぬし が出ているか（レベル到達ずみで、まだ倒していない）
 function bossHere(a){const c=chapterReady();return !!(c&&c.area===a.id)}
 function maxHp(){return Math.min(120,50+2*level())}

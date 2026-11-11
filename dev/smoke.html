@@ -126,7 +126,7 @@ try{
   S.view="growth";S.sub="menu";S.ch=6;S.str=S.wise=S.world=S.heart=58;S.foe=null;S.daily.explore=null;S.explore=null;S.flags.outIntro=true;UI.instantWalk=true;UI.unlockUntil=0;save();render();
   chk(stageIdx()===3&&document.querySelector('.nav .nb[data-tab="battle"]').innerText.includes("そと"),"せいちゅうは バトルタブが「そと」");
   const wn=id=>document.querySelector(`#field .wnode[data-area="${id}"]`);
-  S.view="battle";S.sub="menu";render();chk(txt().includes("どこへ いく")&&$("field").classList.contains("world")&&document.querySelectorAll("#field .wnode").length===5&&!!document.getElementById("spWorld")&&wn("grass").classList.contains("go")&&wn("river").classList.contains("locked"),"せかいちず：カブーンが まんなか、5つの エリア。くさむら だけ ひらいている");
+  S.view="battle";S.sub="menu";render();chk(txt().includes("どこへ いく")&&$("field").classList.contains("world")&&document.querySelectorAll("#field .wnode").length===6&&wn("door").classList.contains("locked")&&!!document.getElementById("spWorld")&&wn("grass").classList.contains("go")&&wn("river").classList.contains("locked"),"せかいちず：カブーンが まんなか、5つの エリアと 🔒 の とびら。くさむら だけ ひらいている");
   wn("river").click();chk(S.sub==="menu"&&txt().includes("ガキーンに かったら ひらく"),"🔒 の エリアを タップすると りゆう が出る");
   wn("grass").click();chk(S.sub==="map"&&S.explore&&S.explore.area==="grass"&&S.daily.explore==="grass"&&document.querySelectorAll("#field .spot").length===6&&!!document.getElementById("spWalk"),"たんけん開始：スポット5＋🪧、カブーンが立つ");
   // かげ → ミニゲーム（5種類）→ つかまえる
@@ -161,7 +161,7 @@ try{
   S.view="growth";render();S.view="battle";render();chk(S.sub==="menu"&&!document.querySelector("#field .spot"),"タブを離れると 地図は消える");
   S.daily.d="2000-01-01";S.explore.d="2000-01-01";dayRoll();render();chk(S.daily.explore===null&&wn("river").classList.contains("go"),"翌日は かわ に いける");
   wn("river").click();chk(S.sub==="map"&&S.explore.area==="river"&&document.querySelectorAll("#field .spot").length===5&&$("field").classList.contains("river"),"かわ の たんけん：ケローンは Lv35 まで出ない");
-  S.view="diary";S.sub="menu";render();chk(!!btn("ずかん"),"きろく に ずかん ボタン");btn("ずかん").click();chk(S.sub==="dex"&&txt().includes("つかまえた 9 / 40")&&txt().includes("ぬし　1 / 10")&&document.querySelectorAll("#msgbox .dexgrid .dz.on").length===10&&document.querySelectorAll("#msgbox .dexgrid .dz.seen").length>=1,"ずかん：9 / 40、ぬし 1 / 10、であった だけの かげ");
+  S.view="diary";S.sub="menu";render();chk(!!btn("ずかん"),"きろく に ずかん ボタン");btn("ずかん").click();chk(S.sub==="dex"&&txt().includes("つかまえた 9 / 160")&&txt().includes("ぬし　1 / 10")&&document.querySelectorAll("#msgbox .dexgrid .dz.on").length===10&&document.querySelectorAll("#msgbox .dexgrid .dz.seen").length>=1,"ずかん：9 / 160、ぬし 1 / 10、であった だけの かげ");
   document.querySelector("#msgbox .dexgrid .dz.on").click();chk(!!UI.dexId&&!!document.querySelector("#msgbox .zcard")&&!!btn("きいてみる"),"ずかん：タップで くわしく");btn("もどる").click();chk(S.sub==="dex"&&!UI.dexId,"くわしく → 一覧");btn("もどる").click();chk(S.sub==="menu","ずかん → もどる");
   // うらボス：ガキーンを たおした くさむら に でる
   S.view="battle";S.sub="menu";S.daily.explore=null;S.explore=null;render();chk(!!wn("grass").querySelector(".bang.ura")&&wn("grass").innerText.includes("/ 20"),"せかいちず：くさむら に ❗（うらボス）と つかまえた かず");
@@ -170,6 +170,16 @@ try{
   S.foe.hp=1;document.querySelector("#msgbox button.mv.star").click();if(typer)typeNode.click();btn("つぎへ").click();if(typer)typeNode.click();chk(S.sub==="win"&&txt().includes("のりこえた"),"うらボス に かった");
   btn("つぎへ").click();if(typer)typeNode.click();btn("つぎへ").click();chk(S.sub==="caught"&&!!S.dex.ura_grass&&txt().includes("かった")&&S.foe===null&&S.ch===7,"ずかんの ぬし に のる（章は すすまない）");
   btn("つぎへ").click();chk(S.sub==="map"&&!document.querySelector("#field .spot.ura"),"かったあとは 地図から 消える");
+  // --- キング：🚪 ふしぎな とびら → きょうりゅうじだい・しんかい・うちゅう ---
+  S.view="battle";S.sub="menu";render();wn("door").click();chk(txt().includes("キング カブーンに なったら ひらく")&&!UI.world2,"とびら は キング に なるまで 🔒");
+  S.ch=11;S.str=S.wise=S.world=S.heart=130;S.foe=null;S.daily.explore=null;S.explore=null;S.msg=null;render();chk(stageIdx()===4&&wn("door").classList.contains("go"),"キング に なると とびら が ひらく");
+  wn("door").click();chk(UI.world2===true&&$("field").classList.contains("w2")&&!!wn("dino")&&!!wn("deep")&&!!wn("space")&&!wn("grass")&&wn("dino").classList.contains("go")&&txt().includes("ふしぎな せかい"),"とびら の むこう：きょうりゅうじだい・しんかい・うちゅう");
+  wn("dino").click();chk(S.sub==="map"&&S.explore.area==="dino"&&$("field").classList.contains("a-dino")&&document.querySelectorAll("#field .spot").length===5&&S.explore.spots.filter(s=>s.z).every(s=>s.z.startsWith("dino_")),"きょうりゅうじだい を たんけん（ぬし は いない）");
+  {const cs=S.explore.spots.map((s,i)=>[s,i]).filter(([s])=>s.k==="creature");cs[0][0].flee=false;UI.mgForce="order";document.querySelector(`#field .spot[data-i="${cs[0][1]}"]`).click();btn("つかまえる！").click();let g=0;while(S.sub==="mg"&&g++<12){const b=document.querySelector('#mgfull [data-ok="1"]');if(!b)break;b.click()}
+   chk(S.sub==="caught"&&!!S.dex[cs[0][0].z]&&txt().includes("つかまえた"),"きょうりゅう を つかまえた");btn("つぎへ").click();UI.mgForce=null}
+  S.sub="menu";render();chk(UI.world2===true&&wn("dino").classList.contains("today")&&wn("deep").classList.contains("busy"),"もどっても ふしぎな せかい の ちず。きょうは ほかは また あした");
+  wn("door").click();chk(UI.world2===false&&!!wn("grass")&&wn("grass").classList.contains("busy"),"とびら で もとの せかい へ");
+  S.view="diary";S.sub="dex";UI.dexId=null;render();chk(txt().includes("きょうりゅうじだい")&&txt().includes("うちゅう")&&txt().includes("ぬし　6 / 10"),"ずかん に キングの 3エリア（ぬし の かず は 10 の まま）");
   S.view="growth";S.sub="menu";render();
 }catch(e){log("EXC",e&&e.stack||e)}
 $("log").textContent=L.join("\n");document.title="DONE "+(L.some(l=>l.startsWith("FAIL")||l.startsWith("JSERROR")||l.startsWith("EXC"))?"NG":"OK");

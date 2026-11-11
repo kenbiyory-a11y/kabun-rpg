@@ -9,7 +9,7 @@
 // うらボス：その エリアの ぬし を たおしたあと、地図の 右はしに でる（data.js の URA）。バトルして かつと ずかんの「ぬし」に のる。1かい きり。
 // 歩く演出は CSS transition。UI.instantWalk=true なら 即到着・ミニゲームの結果も すぐ反映（テスト用）。
 
-const AREA_COVER={grass:"🌿",river:"🪨",sky:"☁️",sea:"🌊",forest:"🍂"};
+const AREA_COVER={grass:"🌿",river:"🪨",sky:"☁️",sea:"🌊",forest:"🍂",dino:"🌴",deep:"🐚",space:"🔭"};
 const FLEE_RATE=0.5,BUG_SPOTS=3,RARE_WEIGHT=0.3;
 function zukanAll(){return (typeof ZUKAN==="undefined"?[]:ZUKAN).filter(z=>!z.hidden)}
 function zukanOf(a){return zukanAll().filter(z=>z.area===a.id)}
@@ -22,7 +22,7 @@ function zFail(im,cls){try{im.replaceWith(el("span",cls,im.dataset.fb||"❓"))}c
 function uraOf(id){return (typeof URA==="undefined"?[]:URA).find(u=>u.id===id)||null}
 function uraOfArea(a){return (typeof URA==="undefined"?[]:URA).find(u=>u.area===a.id)||null}
 // うらボス が いま この エリアに いるか：ぬし を たおしていて、まだ うらボス に かっていない
-function uraHere(a){const u=uraOfArea(a);return !!(u&&S.ch>areaBossIdx(a)&&!S.dex[u.id])}
+function uraHere(a){const u=uraOfArea(a);return !!(u&&!a.king&&S.ch>areaBossIdx(a)&&!S.dex[u.id])}
 
 function genSpots(a){
   // まだ つかまえていない いきもの から、かさならないように えらぶ（✨レアは でにくい）
@@ -175,29 +175,36 @@ function renderOut(msg,menu,tapBtn){
   // 🗺️ せかいちず（どこへ いく？）：カブーンが まんなか、まわりに 5つの エリア。タップすると あるいて いく
   fieldWorld();
   const today=S.daily.explore||null;const king=S.ch>=CHAPTERS.length;
-  msg.innerHTML=`<div class="ctr big2">🗺️ どこへ いく？</div><div class="ctr note">ちずの ばしょを タップしてね。`+(today?`きょうは ${esc(areaOf(today)?areaOf(today).n:"")} を たんけんちゅう`:"1にち 1かい、すきな ところを たんけんできる")+`</div>`+(king?`<div class="ctr note">👑 ぜんぶの ぬしを のりこえた！</div>`:"")+(S.msg?`<div class="note2">${esc(S.msg)}</div>`:"");
+  msg.innerHTML=`<div class="ctr big2">${UI.world2?"🚪 ふしぎな せかい":"🗺️ どこへ いく？"}</div><div class="ctr note">ちずの ばしょを タップしてね。`+(today?`きょうは ${esc(areaOf(today)?areaOf(today).n:"")} を たんけんちゅう`:"1にち 1かい、すきな ところを たんけんできる")+`</div>`+(king?`<div class="ctr note">👑 ぜんぶの ぬしを のりこえた！</div>`:"")+(S.msg?`<div class="note2">${esc(S.msg)}</div>`:"");
   menu.className="menu one";
 }
 // ---- せかいちず ----
-const WORLD_POS={grass:[19,78],river:[15,36],sky:[50,15],sea:[85,36],forest:[81,78]};const WORLD_HOME=[50,58];
+const WORLD_POS={grass:[19,78],river:[15,36],sky:[50,15],sea:[85,36],forest:[81,78],dino:[17,60],deep:[50,17],space:[83,60]};const WORLD_HOME=[50,58];const WORLD_DOOR=[50,90];
+// せかいちず は 2まい：ふつうの せかい（5エリア）と、🚪 ふしぎな とびら の むこう（キングの 3エリア。UI.world2）
+function worldAreas(){return AREAS.filter(a=>!!a.king===!!UI.world2)}
 function areaState(a){const open=areaOpen(a);const today=S.daily.explore||null;const busy=!!today&&today!==a.id;const boss=open&&bossHere(a);return {open,busy,boss,ura:open&&uraHere(a),today:today===a.id}}
 function fieldWorld(){
-  const f=$("field");
-  if(f.dataset.map!=="world"||!$("spWorld")){
-    f.innerHTML="";f.onclick=null;f.className="field world";f.dataset.map="world";
-    f.insertAdjacentHTML("beforeend",`<svg class="wpath" viewBox="0 0 100 100" preserveAspectRatio="none">${AREAS.map(a=>{const [x,y]=WORLD_POS[a.id];return `<line x1="${WORLD_HOME[0]}" y1="${WORLD_HOME[1]}" x2="${x}" y2="${y}"/>`}).join("")}</svg>`);
+  const f=$("field");if(UI.world2&&stageIdx()<4)UI.world2=false;const wk=UI.world2?"world2":"world";
+  if(f.dataset.map!==wk||!$("spWorld")){
+    f.innerHTML="";f.onclick=null;f.className="field world"+(UI.world2?" w2":"");f.dataset.map=wk;
+    f.insertAdjacentHTML("beforeend",`<svg class="wpath" viewBox="0 0 100 100" preserveAspectRatio="none">${worldAreas().map(a=>{const [x,y]=WORLD_POS[a.id];return `<line x1="${WORLD_HOME[0]}" y1="${WORLD_HOME[1]}" x2="${x}" y2="${y}"/>`}).join("")}</svg>`);
     const home=el("div","whome","🏠");home.style.left=WORLD_HOME[0]+"%";home.style.top=(WORLD_HOME[1]-13)+"%";f.append(home);
     const sp=el("div","sprite walker",kabunHtml(stageIdx()));sp.id="spWorld";sp.style.left=WORLD_HOME[0]+"%";sp.style.top=(WORLD_HOME[1]+8)+"%";f.append(sp);
   }
   if(!UI.walking){const sp=$("spWorld");const h=kabunHtml(stageIdx());if(sp.dataset.h!==h){sp.dataset.h=h;sp.innerHTML=h}} // 絵が あとから 読みこまれたら 差し替える
   f.querySelectorAll(".wnode").forEach(e=>e.remove());
-  AREAS.forEach(a=>{const st=areaState(a);const [x,y]=WORLD_POS[a.id];const all=zukanOf(a).length,got=all-zLeft(a).length;
+  // 🚪 ふしぎな とびら：キング に なると ひらく（それまでは 🔒 で 見せておく）
+  {const king=stageIdx()>=4;const d=el("button","wnode door"+(king?" go":" locked"),`<span class="wico">${king?"🚪":"🔒"}</span><span class="wname">${UI.world2?"もとの せかい":"ふしぎな とびら"}</span>`);
+   d.dataset.area="door";d.style.left=WORLD_DOOR[0]+"%";d.style.top=WORLD_DOOR[1]+"%";
+   d.onclick=ev=>{ev.stopPropagation();if(UI.walking)return;sfx("tap");if(!king){S.msg="🔒 ふしぎな とびら。キング カブーンに なったら ひらくよ";say("ふしぎな とびら。キング カブーンに なったら ひらくよ");save();render();return}
+     UI.world2=!UI.world2;S.msg=null;say(UI.world2?"ふしぎな とびらが ひらいた！ とおい せかいへ いけるよ":"もとの せかいに もどった");render()};f.append(d)}
+  worldAreas().forEach(a=>{const st=areaState(a);const [x,y]=WORLD_POS[a.id];const all=zukanOf(a).length,got=all-zLeft(a).length;
     const b=el("button","wnode "+a.id+(st.open?"":" locked")+(st.busy&&!st.boss?" busy":"")+(st.today?" today":"")+(st.open&&(!st.busy||st.boss)?" go":""),
       `<span class="wico">${st.open?a.ico:"🔒"}</span><span class="wname">${esc(a.n)}</span>`+(st.open?`<span class="wsub">${got} / ${all}${S.flags["comp_"+a.id]?" 🏅":""}</span>`:"")+(st.boss?'<span class="bang">！</span>':st.ura?'<span class="bang ura">❗</span>':""));
     b.dataset.area=a.id;b.style.left=x+"%";b.style.top=y+"%";b.setAttribute("aria-label",a.n);b.onclick=ev=>{ev.stopPropagation();worldTap(a)};f.append(b)});
 }
 function worldTap(a){if(UI.walking||!(S.view==="battle"&&S.sub==="menu"))return;const st=areaState(a);const i=AREAS.indexOf(a);
-  if(!st.open){const prev=AREAS[i-1];const bc=prev&&CHAPTERS[areaBossIdx(prev)];S.msg=bc?`🔒 ${a.n}は まだ いけない。${bc.foe.name}に かったら ひらくよ`:`🔒 ${a.n}は まだ いけない`;sfx("tap");say(S.msg.replace("🔒 ",""));save();render();return}
+  if(!st.open){const prev=a.king?null:AREAS[i-1];const bc=prev&&CHAPTERS[areaBossIdx(prev)];S.msg=bc?`🔒 ${a.n}は まだ いけない。${bc.foe.name}に かったら ひらくよ`:`🔒 ${a.n}は まだ いけない`;sfx("tap");say(S.msg.replace("🔒 ",""));save();render();return}
   if(st.busy&&!st.boss){S.msg=`${a.n}は また あした。きょうは ${areaOf(S.daily.explore).n}を たんけんちゅう`;sfx("tap");say(S.msg);save();render();return}
   S.msg=null;sfx("tap");worldWalk(a,()=>{if(st.busy&&st.boss)startFight();else enterArea(a)})}
 // まんなか から その エリアへ あるく（着いたら cb）。UI.instantWalk のときは すぐ
@@ -240,10 +247,10 @@ function renderDex(msg,menu){
       grid.append(c)});
     msg.append(grid)}
   // ぬし：エリアの ぬし（たおすと のる）と うらボス（かつと のる）
-  const bossN=AREAS.filter(a=>S.ch>areaBossIdx(a)).length+(typeof URA==="undefined"?0:URA.filter(u=>S.dex[u.id]).length);
-  msg.append(el("div","dexa",`👑 ぬし　${bossN} / ${AREAS.length+(typeof URA==="undefined"?0:URA.length)}`));
+  const BA=AREAS.filter(a=>!a.king);const bossN=BA.filter(a=>S.ch>areaBossIdx(a)).length+(typeof URA==="undefined"?0:URA.filter(u=>S.dex[u.id]).length);
+  msg.append(el("div","dexa",`👑 ぬし　${bossN} / ${BA.length+(typeof URA==="undefined"?0:URA.length)}`));
   const bg=el("div","dexgrid boss");
-  AREAS.forEach(a=>{const c=CHAPTERS[areaBossIdx(a)];const beat=S.ch>areaBossIdx(a);const u=uraOfArea(a);
+  BA.forEach(a=>{const c=CHAPTERS[areaBossIdx(a)];const beat=S.ch>areaBossIdx(a);const u=uraOfArea(a);
     const x=beat?el("button","dz on",spriteHtml(c.foe.id,c.foe.ico)):el("span","dz","❓");if(beat)x.onclick=()=>{say(c.foe.name);sfx("tap")};bg.append(x);
     if(u){const y=S.dex[u.id]?el("button","dz on gold",spriteHtml(u.id,u.ico)):el("span","dz",beat?"❗":"❓");if(S.dex[u.id])y.onclick=()=>{say(u.name);sfx("tap")};bg.append(y)}});
   msg.append(bg);
