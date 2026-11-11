@@ -5,6 +5,23 @@ CC0 / Public domain は表示不要、CC BY は作者名の表示、CC BY-SA は
 
 | ファイル | もとのファイル（Commons） | 作者 | ライセンス |
 |---|---|---|---|
+| dino_allosaurus.jpg | [202009 Allosaurus fragilis.png](https://commons.wikimedia.org/wiki/File:202009_Allosaurus_fragilis.png) | DataBase Center for Life Science (DBCLS) | CC BY 4.0 |
+| dino_ankylosaurus.jpg | [Ankylosaurus 2026.jpg](https://commons.wikimedia.org/wiki/File:Ankylosaurus_2026.jpg) | Plegadis | CC0 |
+| dino_archaeopteryx.jpg | [202010 Archaeopteryx lithographica.png](https://commons.wikimedia.org/wiki/File:202010_Archaeopteryx_lithographica.png) | DataBase Center for Life Science (DBCLS) | CC BY 4.0 |
+| dino_brachiosaurus.jpg | [Giraffatitan TD.png](https://commons.wikimedia.org/wiki/File:Giraffatitan_TD.png) | TotalDino | CC BY 4.0 |
+| dino_carnotaurus.jpg | [Carnotaurus sastrei FW 1.png](https://commons.wikimedia.org/wiki/File:Carnotaurus_sastrei_FW_1.png) | Fred Wierum | CC BY 4.0 |
+| dino_diplodocus.jpg | [Diplodocus longus(2).jpg](https://commons.wikimedia.org/wiki/File:Diplodocus_longus(2).jpg) | Creator:Dmitry Bogdanov | CC BY 3.0 |
+| dino_fukuiraptor.jpg | [ティラノミムスを狩るフクイラプトル.jpg](https://commons.wikimedia.org/wiki/File:%E3%83%86%E3%82%A3%E3%83%A9%E3%83%8E%E3%83%9F%E3%83%A0%E3%82%B9%E3%82%92%E7%8B%A9%E3%82%8B%E3%83%95%E3%82%AF%E3%82%A4%E3%83%A9%E3%83%97%E3%83%88%E3%83%AB.jpg) | Sino-Pteryx | CC BY 4.0 |
+| dino_giganotosaurus.jpg | [Giganotosaurus carolinii colored pencil drawing.jpg](https://commons.wikimedia.org/wiki/File:Giganotosaurus_carolinii_colored_pencil_drawing.jpg) | チャンネルD - ChDinosaurs | CC BY-SA 4.0 |
+| dino_iguanodon.jpg | [Iguanodon paleoart 2025.png](https://commons.wikimedia.org/wiki/File:Iguanodon_paleoart_2025.png) | Sauroarchive | CC BY 4.0 |
+| dino_maiasaura.jpg | [Maiasaura, DinoPark Košice.jpg](https://commons.wikimedia.org/wiki/File:Maiasaura,_DinoPark_Ko%C5%A1ice.jpg) | DinoTeam | CC BY-SA 4.0 |
+| dino_oviraptor.jpg | [Oviraptor TD.png](https://commons.wikimedia.org/wiki/File:Oviraptor_TD.png) | TotalDino | CC BY 4.0 |
+| dino_pachycephalosaurus.jpg | [202004 Pachycephalosaurus wyomingensis.png](https://commons.wikimedia.org/wiki/File:202004_Pachycephalosaurus_wyomingensis.png) | DataBase Center for Life Science (DBCLS) | CC BY 4.0 |
+| dino_pteranodon.jpg | [Pteranodon TD.png](https://commons.wikimedia.org/wiki/File:Pteranodon_TD.png) | TotalDino | CC BY 4.0 |
+| dino_spinosaurus.jpg | [Spinosaurus life restoration based on fossil reconstruction.png](https://commons.wikimedia.org/wiki/File:Spinosaurus_life_restoration_based_on_fossil_reconstruction.png) | Brondon Bobah | CC BY 4.0 |
+| dino_stegosaurus.jpg | [Stegosaurus 2026.jpg](https://commons.wikimedia.org/wiki/File:Stegosaurus_2026.jpg) | Plegadis | CC0 |
+| dino_therizinosaurus.jpg | [Therizinosaurus Restoration.png](https://commons.wikimedia.org/wiki/File:Therizinosaurus_Restoration.png) | PaleoNeolitic | CC BY 4.0 |
+| dino_triceratops.jpg | [Torosaurus TD.png](https://commons.wikimedia.org/wiki/File:Torosaurus_TD.png) | TotalDino | CC BY 4.0 |
 | forest_anaguma.jpg | [Meles meles anakuma at Inokashira Park Zoo.jpg](https://commons.wikimedia.org/wiki/File:Meles_meles_anakuma_at_Inokashira_Park_Zoo.jpg) | Nzrst1jx | CC BY-SA 3.0 |
 | forest_donguri.jpg | [Acorn-1030819.jpg](https://commons.wikimedia.org/wiki/File:Acorn-1030819.jpg) | Aaron Burden | CC0 |
 | forest_hebi.jpg | [Elaphe climacophora 192738774.jpg](https://commons.wikimedia.org/wiki/File:Elaphe_climacophora_192738774.jpg) | Kosuke Onoda 小野田 幸介 | CC0 |
