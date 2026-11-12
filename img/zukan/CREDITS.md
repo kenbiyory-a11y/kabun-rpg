@@ -8,6 +8,8 @@ CC0 / Public domain は表示不要、CC BY は作者名の表示、CC BY-SA は
 | deep_akagutsu.jpg | [Halieutaea stellata Numazu.jpg](https://commons.wikimedia.org/wiki/File:Halieutaea_stellata_Numazu.jpg) | Totti | CC BY-SA 4.0 |
 | deep_bouengyo.jpg | [Hal - Gigantura chuni - 1.jpg](https://commons.wikimedia.org/wiki/File:Hal_-_Gigantura_chuni_-_1.jpg) | Emőke Dénes | CC BY-SA 4.0 |
 | deep_chouchinankou.jpg | [Hal - Melanocetus johnsonii - 4.jpg](https://commons.wikimedia.org/wiki/File:Hal_-_Melanocetus_johnsonii_-_4.jpg) | Emőke Dénes | CC BY-SA 4.0 |
+| deep_daiougusokumushi.jpg | [Bathynomus giganteus side - MBA.png](https://commons.wikimedia.org/wiki/File:Bathynomus_giganteus_side_-_MBA.png) | Eric Polk | CC BY-SA 4.0 |
+| deep_daiouika.jpg | [Riesenkalmar.jpg](https://commons.wikimedia.org/wiki/File:Riesenkalmar.jpg) | Stefan Kühn | CC BY-SA 3.0 |
 | deep_demenigisu.jpg | [Photo 2025-03-12 심해어 통안어 배럴아이.jpg](https://commons.wikimedia.org/wiki/File:Photo_2025-03-12_%EC%8B%AC%ED%95%B4%EC%96%B4_%ED%86%B5%EC%95%88%EC%96%B4_%EB%B0%B0%EB%9F%B4%EC%95%84%EC%9D%B4.jpg) | 레이저마인드 | CC0 |
 | deep_fukurounagi.jpg | [Eurypharynx.jpg](https://commons.wikimedia.org/wiki/File:Eurypharynx.jpg) | Alexei Orlov | CC BY 3.0 |
 | deep_ginzame.jpg | [Chimere.jpg](https://commons.wikimedia.org/wiki/File:Chimere.jpg) | Citron | CC BY-SA 3.0 |
@@ -15,7 +17,6 @@ CC0 / Public domain は表示不要、CC BY は作者名の表示、CC BY-SA は
 | deep_houraieso.jpg | [Messina Straits Chauliodus sloani.jpg](https://commons.wikimedia.org/wiki/File:Messina_Straits_Chauliodus_sloani.jpg) | Edd48 | CC BY-SA 3.0 |
 | deep_kinmedai.jpg | [Beryx long (Beryx splendens) (Ifremer 00763-87519).jpg](https://commons.wikimedia.org/wiki/File:Beryx_long_(Beryx_splendens)_(Ifremer_00763-87519).jpg) | Hugues Evano (IFREMER, Délégation océan Indien (DOI), Département Ress | CC BY 4.0 |
 | deep_mitsukurizame.jpg | [Goblin shark, Pengo.jpg](https://commons.wikimedia.org/wiki/File:Goblin_shark,_Pengo.jpg) | (不明) | CC BY-SA 3.0 |
-| deep_mizuuo.jpg | [Lancier longnez (Alepisaurus ferox) (Ifremer 00755-86674).jpg](https://commons.wikimedia.org/wiki/File:Lancier_longnez_(Alepisaurus_ferox)_(Ifremer_00755-86674).jpg) | Hugues Evano (IFREMER, Délégation océan Indien (DOI), Département Ress | CC BY 4.0 |
 | deep_muneeso.jpg | [Argyropelecus aculeatus 544343917.jpg](https://commons.wikimedia.org/wiki/File:Argyropelecus_aculeatus_544343917.jpg) | Jan Ebr & Ivana Ebrová | CC BY 4.0 |
 | deep_nutaunagi.jpg | [Hagfish knot.jpg](https://commons.wikimedia.org/wiki/File:Hagfish_knot.jpg) | Justin | CC BY 2.0 |
 | deep_nyuudoukajika.jpg | [Two Psychrolutes marcidus.jpg](https://commons.wikimedia.org/wiki/File:Two_Psychrolutes_marcidus.jpg) | Rachel Caauwe | CC BY-SA 3.0 |
@@ -24,7 +25,6 @@ CC0 / Public domain は表示不要、CC BY は作者名の表示、CC BY-SA は
 | deep_ryuuguunotsukai.jpg | [Regalecus glesne Mexico.jpg](https://commons.wikimedia.org/wiki/File:Regalecus_glesne_Mexico.jpg) | Katia Cao | CC BY 3.0 |
 | deep_sakebikunin.jpg | [Snailfish and cusk eels.jpg](https://commons.wikimedia.org/wiki/File:Snailfish_and_cusk_eels.jpg) | OldMateWA | CC BY-SA 4.0 |
 | deep_shiirakansu.jpg | [Coelacanth model, Devonian - Houston Museum of Natural Science - DSC01709 (white background).png](https://commons.wikimedia.org/wiki/File:Coelacanth_model,_Devonian_-_Houston_Museum_of_Natural_Science_-_DSC01709_(white_background).png) | Daderot | CC0 |
-| deep_sokodara.jpg | [M.E. Blochii ... Systema ichthyologiae iconibus CX illustratum (Plate 26) (6892399934).jpg](https://commons.wikimedia.org/wiki/File:M.E._Blochii_..._Systema_ichthyologiae_iconibus_CX_illustratum_(Plate_26)_(6892399934).jpg) | Bloch, Marcus Elieser; Hennig, J. F.; Schneider, Johann Gottlob | Public domain |
 | dino_allosaurus.jpg | [202009 Allosaurus fragilis.png](https://commons.wikimedia.org/wiki/File:202009_Allosaurus_fragilis.png) | DataBase Center for Life Science (DBCLS) | CC BY 4.0 |
 | dino_ankylosaurus.jpg | [Ankylosaurus 2026.jpg](https://commons.wikimedia.org/wiki/File:Ankylosaurus_2026.jpg) | Plegadis | CC0 |
 | dino_archaeopteryx.jpg | [202010 Archaeopteryx lithographica.png](https://commons.wikimedia.org/wiki/File:202010_Archaeopteryx_lithographica.png) | DataBase Center for Life Science (DBCLS) | CC BY 4.0 |
