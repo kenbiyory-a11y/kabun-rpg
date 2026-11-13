@@ -92,9 +92,10 @@ ok(!!chapterReady(),"（下準備）Lv7 で第1話が出ている");
 
 console.log("== 4e. こえ の選択 ==");
 VOICE.list=[{name:"Microsoft Haruka - Japanese (Japan)",lang:"ja-JP",localService:true},{name:"Microsoft Nanami Online (Natural) - Japanese (Japan)",lang:"ja-JP",localService:false},{name:"Google US English",lang:"en-US",localService:false}];
-voiceSet("");ok(pickVoice("ja").name.startsWith("Microsoft Haruka"),"選んでいなければ端末内の声を先に使う");
+voiceSet("");ok(pickVoice("ja").name.includes("Nanami"),"選んでいなければ 自然な声（Natural など）を先に使う");{const keep=VOICE.list;VOICE.list=keep.filter(v=>!v.name.includes("Nanami")).concat([{name:"Google 日本語",lang:"ja-JP",localService:false}]);ok(pickVoice("ja").name==="Google 日本語","自然な声が無ければ Google の声");VOICE.list=keep.filter(v=>!v.name.includes("Nanami"));ok(pickVoice("ja").name.startsWith("Microsoft Haruka"),"どれも無ければ 端末内の声");VOICE.list=keep}
+ok(speechText("カブーンは　おやすみちゅう")==="カブーンはおやすみちゅう"&&speechText("3 + 4 は いくつ？")==="3 + 4はいくつ？"&&speechText("New York は どこ？")==="New Yorkはどこ？","読み上げ用に 分かち書きの 空白を 詰める（英数字どうしは のこす）");
 voiceSet("Microsoft Nanami Online (Natural) - Japanese (Japan)");ok(pickVoice("ja").name.includes("Nanami")&&__store["kabun-voice-ja"]&&!JSON.stringify(S).includes("Nanami"),"選んだ声を使う（端末の localStorage に入り、セーブには入らない）");
-voiceSet("そんざいしない こえ");ok(pickVoice("ja").name.startsWith("Microsoft Haruka"),"端末に無い声が選ばれていたら自動に戻る");
+voiceSet("そんざいしない こえ");ok(pickVoice("ja").name.includes("Nanami"),"端末に無い声が選ばれていたら自動に戻る");
 ok(voiceLabel(VOICE.list[1])==="Nanami (Natural)"&&voiceLabel(VOICE.list[0])==="Haruka","表示名を短くする: "+voiceLabel(VOICE.list[1]));
 voiceSet("");VOICE.list=[];VOICE.ja=false;
 

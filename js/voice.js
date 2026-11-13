@@ -14,7 +14,13 @@ function voiceSet(name){try{if(name)localStorage.setItem(VOICE_KEY,name);else lo
 function voicesOf(lang){return VOICE.list.filter(v=>String(v.lang||"").replace("_","-").toLowerCase().startsWith(lang))}
 function pickVoice(lang){const c=voicesOf(lang);
   if(lang==="ja"){const want=voiceGet();const hit=want&&c.find(v=>v.name===want);if(hit)return hit}
-  return c.find(v=>v.localService)||c[0]||null}
+  // えらんでいなければ 自然な声を 先に（Natural / Premium / Enhanced / 拡張 → Google → そのほか）。同じなら 端末内蔵
+  let best=null,bs=-1;for(const v of c){const s=voiceRank(v)*2+(v.localService?1:0);if(s>bs){bs=s;best=v}}
+  return best}
+function voiceRank(v){const n=String(v&&v.name||"");
+  if(/natural|neural|premium|プレミアム/i.test(n))return 3;if(/enhanced|拡張|siri/i.test(n))return 2;if(/google/i.test(n))return 1;return 0}
+// 読み上げ用に 分かち書きの 空白を 詰める（空白ごとに 間が 入って ぶつ切りに 聞こえるため）。英数字どうしの 空白（"3 + 4"、"New York"）は のこす
+function speechText(t){return String(t).replace(/[ \u3000]+/g," ").replace(/ (?=[^\x00-\x7F])/g,"").replace(/([^\x00-\x7F]) /g,"$1").trim()}
 // 表示用の短い名前（"Microsoft Nanami Online (Natural)" → "Nanami (Natural)"）
 function voiceLabel(v){return String(v.name||"").replace(/^Microsoft\s+/,"").replace(/\s+Online/,"").replace(/\s+-\s+Japanese.*$/,"").trim()||"(なまえなし)"}
 // parts：文字列（日本語）か [[文, "ja"|"en"], …]。話し始められたら true
@@ -24,7 +30,7 @@ function say(parts){
   const us=[];
   for(const [text,lang] of segs){if(!text)continue;const l=lang==="en"?"en":"ja";
     const v=pickVoice(l)||pickVoice("ja");if(!v)continue; // 英語音声が無ければ日本語の声で読む（カタカナ読みでも聞こえないよりよい）
-    const u=new SpeechSynthesisUtterance(String(text));u.voice=v;u.lang=v.lang||(l==="en"?"en-US":"ja-JP");u.rate=l==="en"?0.85:0.95;u.pitch=1.1;us.push(u)}
+    const u=new SpeechSynthesisUtterance(l==="ja"?speechText(text):String(text));u.voice=v;u.lang=v.lang||(l==="en"?"en-US":"ja-JP");u.rate=l==="en"?0.9:0.95;u.pitch=1;us.push(u)}
   if(!us.length)return false;
   // 読み上げ中は BGM を小さくする（最初の発話で下げ、最後の発話で戻す）
   us[0].onstart=()=>{try{duck(true)}catch(e){}};const last=us[us.length-1];last.onend=last.onerror=()=>{try{duck(false)}catch(e){}};
